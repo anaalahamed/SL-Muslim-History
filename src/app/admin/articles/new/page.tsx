@@ -1,0 +1,69 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import ArticleForm from '@/components/admin/ArticleForm'
+import { saveArticle } from '@/lib/db/articles'
+import { Article } from '@/lib/types'
+
+export default function NewArticlePage() {
+  const router  = useRouter()
+  const [saving, setSaving] = useState(false)
+  const [done,   setDone]   = useState(false)
+
+  async function handleSave(data: Partial<Article>) {
+    setSaving(true)
+    const { data: saved, error } = await saveArticle(data)
+    setSaving(false)
+    if (!error && saved) setDone(true)
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-xs" style={{ color: '#94a3b8' }}>
+        <Link href="/admin" className="hover:text-green-700 transition-colors">Dashboard</Link>
+        <span>/</span>
+        <Link href="/admin/articles" className="hover:text-green-700 transition-colors">Articles</Link>
+        <span>/</span>
+        <span style={{ color: '#1e293b' }}>New Article</span>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-extrabold" style={{ color: '#0f172a' }}>Write New Article</h2>
+      </div>
+
+      {done ? (
+        <div
+          className="rounded-2xl p-12 text-center"
+          style={{ background: 'white', border: '1px solid #e2e8f0' }}
+        >
+          <div className="text-5xl mb-4">🎉</div>
+          <h3 className="text-xl font-extrabold mb-2" style={{ color: '#0f172a' }}>Article Published!</h3>
+          <p className="text-sm mb-6" style={{ color: '#64748b' }}>
+            Your article has been saved successfully.
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Link
+              href="/admin/articles"
+              className="px-6 py-2.5 rounded-xl text-sm font-bold text-white"
+              style={{ background: '#4a9e1f' }}
+            >
+              Back to Articles
+            </Link>
+            <button
+              onClick={() => setDone(false)}
+              className="px-6 py-2.5 rounded-xl text-sm font-bold"
+              style={{ background: '#f1f5f9', color: '#475569' }}
+            >
+              Write Another
+            </button>
+          </div>
+        </div>
+      ) : (
+        <ArticleForm onSave={handleSave} saving={saving} />
+      )}
+    </div>
+  )
+}
