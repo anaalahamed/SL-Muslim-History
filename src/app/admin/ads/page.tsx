@@ -8,8 +8,9 @@ import { Advertisement } from '@/lib/types'
 import { formatDate } from '@/lib/utils'
 
 export default function AdminAdsPage() {
-  const [ads,      setAds]      = useState<Advertisement[]>([])
-  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [ads,        setAds]      = useState<Advertisement[]>([])
+  const [deleteId,   setDeleteId] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => { getAllAds().then(setAds) }, [])
 
@@ -20,13 +21,16 @@ export default function AdminAdsPage() {
 
   async function doDelete() {
     if (!deleteId) return
-    await deleteAd(deleteId)
+    const err = await deleteAd(deleteId)
+    if (err) { setDeleteError(err); return }
     setAds((prev) => prev.filter((a) => a.id !== deleteId))
     setDeleteId(null)
+    setDeleteError(null)
   }
 
-  const sidebar = ads.filter((a) => a.position === 'sidebar')
-  const banner  = ads.filter((a) => a.position === 'banner')
+  const betweenNews = ads.filter((a) => a.position === 'between-news')
+  const sidebar     = ads.filter((a) => a.position === 'sidebar')
+  const banner      = ads.filter((a) => a.position === 'banner')
 
   return (
     <div className="max-w-5xl space-y-6">
@@ -48,18 +52,22 @@ export default function AdminAdsPage() {
 
       {/* Info box */}
       <div className="rounded-2xl p-4 text-sm" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
-        <p className="font-bold mb-1" style={{ color: '#166534' }}>Two ad positions available:</p>
+        <p className="font-bold mb-1" style={{ color: '#166534' }}>Three ad positions available:</p>
         <ul className="text-xs space-y-1" style={{ color: '#15803d' }}>
-          <li><strong>Sidebar</strong> — 300×250 box, appears in the right sidebar on article, news, category, and search pages</li>
-          <li><strong>Banner</strong> — 728×90 leaderboard, appears between sections on the homepage and listing pages</li>
+          <li><strong>Between News</strong> — Sidebar ad between Special News and Latest News sections</li>
+          <li><strong>General Sidebar</strong> — 300×250 box, appears in the right sidebar on article, news, category, and search pages</li>
+          <li><strong>Full Banner</strong> — 728×90 leaderboard, appears between sections on the homepage and listing pages</li>
         </ul>
       </div>
 
+      {/* Between-news ads */}
+      <AdSection title="Between News Ads" ads={betweenNews} onToggle={handleToggle} onDelete={setDeleteId} />
+
       {/* Sidebar ads */}
-      <AdSection title="Sidebar Ads (300×250)" ads={sidebar} onToggle={handleToggle} onDelete={setDeleteId} />
+      <AdSection title="General Sidebar Ads (300×250)" ads={sidebar} onToggle={handleToggle} onDelete={setDeleteId} />
 
       {/* Banner ads */}
-      <AdSection title="Banner Ads (728×90)" ads={banner} onToggle={handleToggle} onDelete={setDeleteId} />
+      <AdSection title="Full Banner Ads (728×90)" ads={banner} onToggle={handleToggle} onDelete={setDeleteId} />
 
       {ads.length === 0 && (
         <div className="text-center py-16 rounded-2xl" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
@@ -78,9 +86,14 @@ export default function AdminAdsPage() {
           <div className="rounded-2xl p-6 w-full max-w-sm space-y-4" style={{ background: 'white' }}>
             <h3 className="font-extrabold text-base" style={{ color: '#0f172a' }}>Delete this ad?</h3>
             <p className="text-sm" style={{ color: '#64748b' }}>This cannot be undone.</p>
+            {deleteError && (
+              <p className="text-xs font-semibold px-3 py-2 rounded-lg" style={{ background: '#fef2f2', color: '#dc2626' }}>
+                {deleteError}
+              </p>
+            )}
             <div className="flex gap-3">
               <button onClick={doDelete} className="flex-1 py-2 rounded-xl text-sm font-bold text-white" style={{ background: '#dc2626' }}>Delete</button>
-              <button onClick={() => setDeleteId(null)} className="flex-1 py-2 rounded-xl text-sm font-bold" style={{ background: '#f1f5f9', color: '#64748b' }}>Cancel</button>
+              <button onClick={() => { setDeleteId(null); setDeleteError(null) }} className="flex-1 py-2 rounded-xl text-sm font-bold" style={{ background: '#f1f5f9', color: '#64748b' }}>Cancel</button>
             </div>
           </div>
         </div>
