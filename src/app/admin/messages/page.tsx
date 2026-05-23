@@ -19,33 +19,34 @@ export default function MessagesPage() {
   const [filter,    setFilter]    = useState<'all' | 'unread'>('all')
   const [deleting,  setDeleting]  = useState<string | null>(null)
 
-  const load = useCallback(() => setMessages(getMessages()), [])
+  const load = useCallback(async () => {
+    const msgs = await getMessages()
+    setMessages(msgs)
+  }, [])
   useEffect(() => { load() }, [load])
 
   const unreadCount = messages.filter((m) => !m.read).length
 
   const visible = filter === 'unread' ? messages.filter((m) => !m.read) : messages
 
-  function openMessage(msg: ContactMessage) {
+  async function openMessage(msg: ContactMessage) {
     setSelected(msg)
     if (!msg.read) {
-      markRead(msg.id)
+      await markRead(msg.id)
       load()
     }
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
     setDeleting(id)
-    setTimeout(() => {
-      deleteMessage(id)
-      if (selected?.id === id) setSelected(null)
-      load()
-      setDeleting(null)
-    }, 300)
+    await deleteMessage(id)
+    if (selected?.id === id) setSelected(null)
+    load()
+    setDeleting(null)
   }
 
-  function handleMarkAllRead() {
-    markAllRead()
+  async function handleMarkAllRead() {
+    await markAllRead()
     load()
   }
 

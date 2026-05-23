@@ -1,22 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ArticleForm from '@/components/admin/ArticleForm'
 import { saveArticle } from '@/lib/db/articles'
 import { Article } from '@/lib/types'
 
 export default function NewArticlePage() {
-  const router  = useRouter()
   const [saving, setSaving] = useState(false)
   const [done,   setDone]   = useState(false)
+  const [error,  setError]  = useState<string | null>(null)
 
   async function handleSave(data: Partial<Article>) {
     setSaving(true)
+    setError(null)
     const { data: saved, error } = await saveArticle(data)
     setSaving(false)
-    if (!error && saved) setDone(true)
+    if (error) { setError(error); return }
+    if (saved) setDone(true)
   }
 
   return (
@@ -33,6 +34,12 @@ export default function NewArticlePage() {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-extrabold" style={{ color: '#0f172a' }}>Write New Article</h2>
       </div>
+
+      {error && (
+        <div className="rounded-xl px-4 py-3 text-sm font-semibold" style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}>
+          {error}
+        </div>
+      )}
 
       {done ? (
         <div

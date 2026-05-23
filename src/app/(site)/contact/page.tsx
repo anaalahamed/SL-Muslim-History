@@ -147,13 +147,11 @@ export default function ContactPage() {
     { label: 'Instagram',  href: config.instagram,  color: '#e1306c', icon: socialIcons.instagram },
   ].filter((s) => !!s.href)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setStatus('sending')
-    setTimeout(() => {
-      saveMessage({ name: form.name, email: form.email, reason: form.reason, message: form.message })
-      setStatus('sent')
-    }, 600)
+    await saveMessage({ name: form.name, email: form.email, reason: form.reason, message: form.message })
+    setStatus('sent')
   }
 
   return (

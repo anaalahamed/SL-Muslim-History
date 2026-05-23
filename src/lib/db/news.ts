@@ -5,7 +5,7 @@ import { NewsPost } from '../types'
 export async function getNews(): Promise<NewsPost[]> {
   if (!supabase) return mockNews
   const { data, error } = await supabase
-    .from('news_posts')
+    .from('news')
     .select('*')
     .order('published_at', { ascending: false })
   if (error || !data) return mockNews
@@ -15,7 +15,7 @@ export async function getNews(): Promise<NewsPost[]> {
 export async function getNewsBySlug(slug: string): Promise<NewsPost | null> {
   if (!supabase) return mockNews.find((n) => n.slug === slug) ?? null
   const { data, error } = await supabase
-    .from('news_posts')
+    .from('news')
     .select('*')
     .eq('slug', slug)
     .single()
@@ -26,7 +26,7 @@ export async function getNewsBySlug(slug: string): Promise<NewsPost | null> {
 export async function getNewsById(id: string): Promise<NewsPost | null> {
   if (!supabase) return mockNews.find((n) => n.id === id) ?? null
   const { data, error } = await supabase
-    .from('news_posts')
+    .from('news')
     .select('*')
     .eq('id', id)
     .single()
@@ -37,7 +37,7 @@ export async function getNewsById(id: string): Promise<NewsPost | null> {
 export async function getBreakingNews(): Promise<NewsPost[]> {
   if (!supabase) return mockNews.filter((n) => n.is_breaking)
   const { data, error } = await supabase
-    .from('news_posts')
+    .from('news')
     .select('*')
     .eq('is_breaking', true)
     .order('published_at', { ascending: false })
@@ -49,7 +49,7 @@ export async function getBreakingNews(): Promise<NewsPost[]> {
 export async function getLatestNews(limit = 5): Promise<NewsPost[]> {
   if (!supabase) return mockNews.slice(0, limit)
   const { data, error } = await supabase
-    .from('news_posts')
+    .from('news')
     .select('*')
     .order('published_at', { ascending: false })
     .limit(limit)
@@ -62,7 +62,7 @@ export async function saveNews(post: Partial<NewsPost>): Promise<{ data: NewsPos
   if (post.id) {
     const { id, ...rest } = post
     const { data, error } = await supabase
-      .from('news_posts')
+      .from('news')
       .update(rest)
       .eq('id', id)
       .select()
@@ -70,7 +70,7 @@ export async function saveNews(post: Partial<NewsPost>): Promise<{ data: NewsPos
     return { data: data as NewsPost | null, error: error?.message ?? null }
   }
   const { data, error } = await supabase
-    .from('news_posts')
+    .from('news')
     .insert(post)
     .select()
     .single()
@@ -79,12 +79,12 @@ export async function saveNews(post: Partial<NewsPost>): Promise<{ data: NewsPos
 
 export async function deleteNews(id: string): Promise<string | null> {
   if (!supabase) return 'Supabase not configured'
-  const { error } = await supabase.from('news_posts').delete().eq('id', id)
+  const { error } = await supabase.from('news').delete().eq('id', id)
   return error?.message ?? null
 }
 
 export async function toggleBreakingNews(id: string, is_breaking: boolean): Promise<string | null> {
   if (!supabase) return 'Supabase not configured'
-  const { error } = await supabase.from('news_posts').update({ is_breaking }).eq('id', id)
+  const { error } = await supabase.from('news').update({ is_breaking }).eq('id', id)
   return error?.message ?? null
 }

@@ -220,6 +220,15 @@ export default function ArticleDetail({ params }: { params: Promise<{ slug: stri
                       <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>The author is still writing this article.</p>
                     </div>
                   )}
+
+                  {/* Photo gallery */}
+                  {article.gallery && article.gallery.length > 0 && (
+                    <div className="mt-8 pt-8" style={{ borderTop: '2px solid var(--green-light)' }}>
+                      <h3 className="font-extrabold text-sm mb-1" style={{ color: 'var(--dark)' }}>📷 Photo Gallery</h3>
+                      <p className="text-xs mb-3" style={{ color: 'var(--muted)' }}>Click any photo to view full size</p>
+                      <GalleryLightbox images={article.gallery} />
+                    </div>
+                  )}
                 </div>
 
                 {/* Footer bar */}

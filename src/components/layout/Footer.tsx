@@ -56,6 +56,7 @@ export default function Footer() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+
   async function handleSubscribe(e: React.FormEvent) {
     e.preventDefault()
     if (!email.trim()) return
@@ -238,25 +239,14 @@ export default function Footer() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Your email address"
-                    style={{
-                      padding: '10px 12px', fontSize: '12px', borderRadius: '3px',
-                      background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)',
-                      color: 'white', outline: 'none', transition: 'border-color 0.2s',
-                    }}
+                    style={{ padding: '10px 12px', fontSize: '12px', borderRadius: '3px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', outline: 'none', transition: 'border-color 0.2s' }}
                     onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--gold)' }}
                     onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
                   />
                   <button
                     type="submit"
                     disabled={subStatus === 'loading'}
-                    style={{
-                      padding: '10px', fontSize: '12px', fontWeight: 900,
-                      letterSpacing: '0.07em', textTransform: 'uppercase',
-                      background: 'var(--gold)', color: '#0f2a0f',
-                      border: 'none', borderRadius: '3px', cursor: subStatus === 'loading' ? 'not-allowed' : 'pointer',
-                      opacity: subStatus === 'loading' ? 0.7 : 1,
-                      transition: 'background 0.2s',
-                    }}
+                    style={{ padding: '10px', fontSize: '12px', fontWeight: 900, letterSpacing: '0.07em', textTransform: 'uppercase', background: 'var(--gold)', color: '#0f2a0f', border: 'none', borderRadius: '3px', cursor: subStatus === 'loading' ? 'not-allowed' : 'pointer', opacity: subStatus === 'loading' ? 0.7 : 1, transition: 'background 0.2s' }}
                     onMouseEnter={(e) => { if (subStatus !== 'loading') e.currentTarget.style.background = '#cfa040' }}
                     onMouseLeave={(e) => { if (subStatus !== 'loading') e.currentTarget.style.background = 'var(--gold)' }}
                   >

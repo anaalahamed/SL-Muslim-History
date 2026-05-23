@@ -6,6 +6,7 @@ import { getCategories } from '@/lib/db/categories'
 import { getAuthors, saveAuthor } from '@/lib/db/authors'
 import { Article, Category, Author, GalleryImage } from '@/lib/types'
 import ImageUpload from './ImageUpload'
+import { supabase } from '@/lib/supabase'
 
 interface Props {
   initial?: Partial<Article>
@@ -87,8 +88,34 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
   }
 
   // ── Gallery ──
-  const [gallery, setGallery] = useState<GalleryImage[]>(initial.gallery ?? [])
+  const [gallery,        setGallery]        = useState<GalleryImage[]>(initial.gallery ?? [])
+  const [galleryUploading, setGalleryUploading] = useState(false)
+  const [galleryError,   setGalleryError]   = useState<string | null>(null)
   const galleryRef = useRef<HTMLInputElement>(null)
+
+  async function uploadGalleryFiles(files: File[]) {
+    setGalleryUploading(true)
+    setGalleryError(null)
+    for (const file of files) {
+      try {
+        let url: string
+        if (supabase) {
+          const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+          const path = `${Date.now()}-${safe}`
+          const { data, error } = await supabase.storage.from('media').upload(path, file, { upsert: false })
+          if (error) { setGalleryError(error.message); continue }
+          url = supabase.storage.from('media').getPublicUrl(data.path).data.publicUrl
+        } else {
+          url = URL.createObjectURL(file)
+          setGalleryError('Supabase not connected — gallery URLs are temporary.')
+        }
+        addGalleryImage(url)
+      } catch {
+        setGalleryError('Failed to upload one or more images.')
+      }
+    }
+    setGalleryUploading(false)
+  }
 
   function addGalleryImage(url: string) {
     const img: GalleryImage = { id: uid(), url, caption: '', order: gallery.length, is_featured: gallery.length === 0 }
@@ -239,19 +266,17 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
                 <h3 className="text-sm font-extrabold" style={{ color: '#0f172a' }}>📷 Photo Gallery</h3>
                 <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>Upload multiple photos. Click ⭐ to set as featured thumbnail.</p>
               </div>
-              <button type="button" onClick={() => galleryRef.current?.click()} className="px-4 py-2 rounded-xl text-xs font-bold text-white" style={{ background: '#4a9e1f' }}>
-                + Add Photos
+              <button type="button" onClick={() => galleryRef.current?.click()} disabled={galleryUploading} className="px-4 py-2 rounded-xl text-xs font-bold text-white" style={{ background: galleryUploading ? '#94a3b8' : '#4a9e1f' }}>
+                {galleryUploading ? '⏳ Uploading...' : '+ Add Photos'}
               </button>
             </div>
+            {galleryError && <p className="text-xs mb-3 font-semibold" style={{ color: '#dc2626' }}>{galleryError}</p>}
 
             {/* Hidden file input for gallery */}
             <input ref={galleryRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => {
-              Array.from(e.target.files ?? []).forEach((file) => {
-                const reader = new FileReader()
-                reader.onload = (ev) => addGalleryImage(ev.target?.result as string)
-                reader.readAsDataURL(file)
-              })
+              const files = Array.from(e.target.files ?? [])
               if (galleryRef.current) galleryRef.current.value = ''
+              uploadGalleryFiles(files)
             }} />
 
             {/* URL add */}
