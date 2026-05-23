@@ -45,8 +45,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // Poll unread message count
   useEffect(() => {
-    setUnreadMsgs(getUnreadCount())
-    const interval = setInterval(() => setUnreadMsgs(getUnreadCount()), 5000)
+    getUnreadCount().then(setUnreadMsgs)
+    const interval = setInterval(() => getUnreadCount().then(setUnreadMsgs), 5000)
     return () => clearInterval(interval)
   }, [pathname])
 

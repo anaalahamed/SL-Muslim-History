@@ -1,44 +1,47 @@
+import { supabase } from '../supabase'
 import { ContactMessage } from '../types'
 
-const KEY = 'slmh_contact_messages'
-
-export function getMessages(): ContactMessage[] {
-  if (typeof window === 'undefined') return []
-  try {
-    return JSON.parse(localStorage.getItem(KEY) ?? '[]') as ContactMessage[]
-  } catch {
-    return []
-  }
+export async function getMessages(): Promise<ContactMessage[]> {
+  if (!supabase) return []
+  const { data, error } = await supabase
+    .from('contact_messages')
+    .select('*')
+    .order('received_at', { ascending: false })
+  if (error || !data) return []
+  return data as ContactMessage[]
 }
 
-export function saveMessage(data: Omit<ContactMessage, 'id' | 'received_at' | 'read'>): ContactMessage {
-  const message: ContactMessage = {
-    ...data,
-    id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-    received_at: new Date().toISOString(),
-    read: false,
-  }
-  const all = getMessages()
-  all.unshift(message)
-  localStorage.setItem(KEY, JSON.stringify(all))
-  return message
+export async function saveMessage(data: Omit<ContactMessage, 'id' | 'received_at' | 'read'>): Promise<ContactMessage | null> {
+  if (!supabase) return null
+  const { data: saved, error } = await supabase
+    .from('contact_messages')
+    .insert({ ...data, received_at: new Date().toISOString(), read: false })
+    .select()
+    .single()
+  if (error) return null
+  return saved as ContactMessage
 }
 
-export function markRead(id: string): void {
-  const all = getMessages().map((m) => m.id === id ? { ...m, read: true } : m)
-  localStorage.setItem(KEY, JSON.stringify(all))
+export async function markRead(id: string): Promise<void> {
+  if (!supabase) return
+  await supabase.from('contact_messages').update({ read: true }).eq('id', id)
 }
 
-export function markAllRead(): void {
-  const all = getMessages().map((m) => ({ ...m, read: true }))
-  localStorage.setItem(KEY, JSON.stringify(all))
+export async function markAllRead(): Promise<void> {
+  if (!supabase) return
+  await supabase.from('contact_messages').update({ read: true }).eq('read', false)
 }
 
-export function deleteMessage(id: string): void {
-  const all = getMessages().filter((m) => m.id !== id)
-  localStorage.setItem(KEY, JSON.stringify(all))
+export async function deleteMessage(id: string): Promise<void> {
+  if (!supabase) return
+  await supabase.from('contact_messages').delete().eq('id', id)
 }
 
-export function getUnreadCount(): number {
-  return getMessages().filter((m) => !m.read).length
+export async function getUnreadCount(): Promise<number> {
+  if (!supabase) return 0
+  const { count } = await supabase
+    .from('contact_messages')
+    .select('*', { count: 'exact', head: true })
+    .eq('read', false)
+  return count ?? 0
 }

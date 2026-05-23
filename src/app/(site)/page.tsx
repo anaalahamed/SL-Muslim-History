@@ -7,7 +7,6 @@ import MostRead from '@/components/home/MostRead'
 import CategoryGrid from '@/components/home/CategoryGrid'
 import SidebarAd from '@/components/home/SidebarAd'
 import DonationCTA from '@/components/home/DonationCTA'
-import NewsletterBox from '@/components/home/NewsletterBox'
 
 export default function HomePage() {
   return (
@@ -36,7 +35,6 @@ export default function HomePage() {
       </div>
 
       <DonationCTA />
-      <NewsletterBox />
     </>
   )
 }
