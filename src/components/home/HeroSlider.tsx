@@ -13,9 +13,6 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Notable Figures':      '#fbeaf0',
   'Literature & Arts':    '#f3e8ff',
   'Community & Society':  '#e0f2fe',
-  'World News':           '#faeeda',
-  'Local News':           '#fbeaf0',
-  'News':                 '#e6f1fb',
 }
 const CATEGORY_TEXT: Record<string, string> = {
   'Early History':        '#27500a',
@@ -24,9 +21,6 @@ const CATEGORY_TEXT: Record<string, string> = {
   'Notable Figures':      '#72243e',
   'Literature & Arts':    '#5b21b6',
   'Community & Society':  '#0c4a6e',
-  'World News':           '#633806',
-  'Local News':           '#72243e',
-  'News':                 '#0c447c',
 }
 const SLIDE_BG = [
   'linear-gradient(160deg,#0a200a,#1a3d1a)',
@@ -37,27 +31,24 @@ const SLIDE_BG = [
 ]
 
 export default function HeroSlider() {
-  const [slides, setSlides]   = useState<Article[]>([])
-  const [cur,    setCur]      = useState(0)
+  const [slides,  setSlides]  = useState<Article[]>([])
+  const [cur,     setCur]     = useState(0)
   const [loading, setLoading] = useState(true)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    getArticles().then((all) => {
-      setSlides(all.slice(0, 5))
-      setLoading(false)
-    })
+    getArticles().then((all) => { setSlides(all.slice(0, 5)); setLoading(false) })
   }, [])
 
   const go = (n: number) => {
     setCur(n)
     if (timerRef.current) clearInterval(timerRef.current)
-    timerRef.current = setInterval(() => setCur((c) => (c + 1) % slides.length), 4500)
+    timerRef.current = setInterval(() => setCur((c) => (c + 1) % slides.length), 5000)
   }
 
   useEffect(() => {
     if (slides.length === 0) return
-    timerRef.current = setInterval(() => setCur((c) => (c + 1) % slides.length), 4500)
+    timerRef.current = setInterval(() => setCur((c) => (c + 1) % slides.length), 5000)
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [slides.length])
 
@@ -74,12 +65,16 @@ export default function HeroSlider() {
       <div style={{ display: 'flex', gap: '4px', marginLeft: '7px' }}>
         <button
           onClick={() => go((cur - 1 + slides.length) % slides.length)}
-          style={{ width: '22px', height: '22px', borderRadius: '2px', background: 'var(--white)', border: '1px solid var(--border)', cursor: 'pointer', fontSize: '13px', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ width: '26px', height: '26px', borderRadius: '3px', background: 'var(--white)', border: '1px solid var(--border)', cursor: 'pointer', fontSize: '15px', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--green-dark)'; e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'var(--green-dark)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'var(--white)'; e.currentTarget.style.color = 'var(--muted)'; e.currentTarget.style.borderColor = 'var(--border)' }}
           aria-label="Previous slide"
         >‹</button>
         <button
           onClick={() => go((cur + 1) % slides.length)}
-          style={{ width: '22px', height: '22px', borderRadius: '2px', background: 'var(--white)', border: '1px solid var(--border)', cursor: 'pointer', fontSize: '13px', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ width: '26px', height: '26px', borderRadius: '3px', background: 'var(--white)', border: '1px solid var(--border)', cursor: 'pointer', fontSize: '15px', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--green-dark)'; e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'var(--green-dark)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'var(--white)'; e.currentTarget.style.color = 'var(--muted)'; e.currentTarget.style.borderColor = 'var(--border)' }}
           aria-label="Next slide"
         >›</button>
       </div>
@@ -89,7 +84,7 @@ export default function HeroSlider() {
   if (loading) return (
     <div>
       {LabelRow}
-      <div style={{ height: '240px', borderRadius: '3px', border: '1px solid var(--border)', overflow: 'hidden' }}>
+      <div style={{ height: '300px', borderRadius: '4px', border: '1px solid var(--border)', overflow: 'hidden' }}>
         <div className="animate-shimmer" style={{ width: '100%', height: '100%' }} />
       </div>
     </div>
@@ -98,9 +93,10 @@ export default function HeroSlider() {
   return (
     <div>
       {LabelRow}
-      <div style={{ borderRadius: '3px', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--green-deeper)' }}>
+      <div style={{ borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--green-deeper)' }}>
+
         {/* Slides */}
-        <div style={{ position: 'relative', overflow: 'hidden', height: '210px' }}>
+        <div style={{ position: 'relative', overflow: 'hidden', height: '300px' }}>
           {slides.map((article, i) => (
             <div
               key={article.id}
@@ -108,45 +104,50 @@ export default function HeroSlider() {
                 position: 'absolute', inset: 0,
                 background: SLIDE_BG[i % SLIDE_BG.length],
                 opacity: i === cur ? 1 : 0,
-                transition: 'opacity .5s ease',
+                transition: 'opacity .55s ease',
                 pointerEvents: i === cur ? 'auto' : 'none',
                 display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-                padding: '18px 16px 14px',
+                padding: '24px 22px 20px',
               }}
             >
-              {/* Background image */}
+              {/* Background image — more visible now */}
               {article.featured_image && (
                 <img
                   src={article.featured_image}
                   alt={article.title}
-                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.35 }}
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.55 }}
                 />
               )}
-              {/* Overlay */}
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top,rgba(5,18,5,.96) 0%,rgba(5,18,5,.3) 100%)' }} />
 
-              {/* Content */}
-              <div style={{ position: 'relative', zIndex: 2, maxWidth: '500px' }}>
+              {/* Gradient overlay — lighter at top, strong only at bottom for text */}
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(4,14,4,0.88) 0%, rgba(4,14,4,0.45) 45%, rgba(4,14,4,0.08) 100%)' }} />
+
+              {/* Slide content */}
+              <div style={{ position: 'relative', zIndex: 2, maxWidth: '520px' }}>
                 <span style={{
-                  display: 'inline-block', marginBottom: '6px',
-                  fontSize: '9px', fontWeight: 900, letterSpacing: '.09em', textTransform: 'uppercase',
-                  padding: '2px 7px', borderRadius: '2px',
+                  display: 'inline-block', marginBottom: '8px',
+                  fontSize: '10px', fontWeight: 900, letterSpacing: '.09em', textTransform: 'uppercase',
+                  padding: '3px 9px', borderRadius: '3px',
                   background: catBg(article.category), color: catText(article.category),
                 }}>
                   {article.category}
                 </span>
-                <h2 style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '15px', fontWeight: 700, color: '#fff', lineHeight: 1.5, marginBottom: '6px' }}>
+                <h2 style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '17px', fontWeight: 700, color: '#fff', lineHeight: 1.55, marginBottom: '8px', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
                   {article.title}
                 </h2>
-                <div style={{ width: '24px', height: '2px', background: 'var(--gold)', marginBottom: '7px' }} />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '9px' }}>
-                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,.55)' }}>{article.author}</span>
-                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,.4)' }}>{formatDate(article.published_at)}</span>
-                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,.4)' }}>👁 {article.views}</span>
+                <div style={{ width: '28px', height: '2px', background: 'var(--gold)', marginBottom: '10px' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '11px', color: 'rgba(255,255,255,.7)', fontWeight: 500 }}>{article.author}</span>
+                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,.4)' }}>·</span>
+                  <span style={{ fontSize: '11px', color: 'rgba(255,255,255,.5)' }}>{formatDate(article.published_at)}</span>
+                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,.4)' }}>·</span>
+                  <span style={{ fontSize: '11px', color: 'rgba(255,255,255,.45)' }}>👁 {article.views}</span>
                 </div>
                 <Link
                   href={`/articles/${article.slug}`}
-                  style={{ background: 'var(--gold)', color: '#0f2a0f', fontSize: '10px', fontWeight: 900, padding: '5px 13px', borderRadius: '3px', display: 'inline-block' }}
+                  style={{ background: 'var(--gold)', color: '#0f2a0f', fontSize: '11px', fontWeight: 900, padding: '7px 16px', borderRadius: '3px', display: 'inline-block', letterSpacing: '0.04em', transition: 'background 0.15s' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = '#d4a030' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'var(--gold)' }}
                 >
                   Read More →
                 </Link>
@@ -155,21 +156,30 @@ export default function HeroSlider() {
           ))}
         </div>
 
-        {/* Dots */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '6px 0', background: 'rgba(0,0,0,.45)' }}>
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => go(i)}
-              aria-label={`Go to slide ${i + 1}`}
-              style={{
-                width: i === cur ? '30px' : '18px', height: '3px', borderRadius: '2px',
-                background: i === cur ? 'var(--gold)' : 'rgba(255,255,255,.28)',
-                border: 'none', cursor: 'pointer', padding: 0,
-                transition: 'all .3s',
-              }}
-            />
-          ))}
+        {/* Progress bar + dots */}
+        <div style={{ background: 'rgba(0,0,0,0.5)', padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+          {/* Slide dots */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => go(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                style={{
+                  width: i === cur ? '28px' : '8px',
+                  height: '4px', borderRadius: '2px',
+                  background: i === cur ? 'var(--gold)' : 'rgba(255,255,255,.28)',
+                  border: 'none', cursor: 'pointer', padding: 0,
+                  transition: 'all .3s ease',
+                  flexShrink: 0,
+                }}
+              />
+            ))}
+          </div>
+          {/* Slide counter */}
+          <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, letterSpacing: '0.05em' }}>
+            {cur + 1} / {slides.length}
+          </span>
         </div>
       </div>
     </div>
