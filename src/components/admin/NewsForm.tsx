@@ -11,8 +11,6 @@ interface Props {
   saving?: boolean
 }
 
-const NEWS_CATEGORIES = ['Community', 'Heritage', 'Education', 'Literature', 'Events', 'General']
-
 function toSlug(text: string) {
   const ascii = text
     .toLowerCase()
@@ -27,12 +25,11 @@ function toSlug(text: string) {
 export default function NewsForm({ initial = {}, onSave, saving }: Props) {
   const [title,      setTitle]      = useState(initial.title      ?? '')
   const [slug,       setSlug]       = useState(initial.slug       ?? '')
-  const [excerpt,    setExcerpt]    = useState(initial.excerpt    ?? '')
   const [content,    setContent]    = useState(initial.content    ?? '')
-  const [category,   setCategory]   = useState(initial.category   ?? '')
-  const [isBreaking,  setIsBreaking]  = useState(initial.is_breaking ?? false)
-  const [slugLocked,  setSlugLocked]  = useState(!!initial.slug)
-  const [image, setImage] = useState(initial.featured_image ?? '')
+  const [newsType,   setNewsType]   = useState<'special' | 'janaza'>(initial.news_type ?? 'special')
+  const [slugLocked, setSlugLocked] = useState(!!initial.slug)
+  const [slugError,  setSlugError]  = useState('')
+  const [image,      setImage]      = useState(initial.featured_image ?? '')
   const contentRef = useRef<HTMLTextAreaElement>(null)
 
   function insertMarkdown(before: string, after = '', placeholder = '') {
@@ -55,8 +52,6 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
     if (!slugLocked) setSlug(toSlug(val))
   }
 
-  const [slugError, setSlugError] = useState('')
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const cleanSlug = slug.trim()
@@ -72,10 +67,8 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
     onSave({
       title,
       slug: cleanSlug,
-      excerpt,
       content,
-      category,
-      is_breaking:    isBreaking,
+      news_type:      newsType,
       featured_image: image,
       published_at:   initial.published_at ?? new Date().toISOString(),
     })
@@ -83,26 +76,22 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
 
   const inputClass = "w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all"
   const inputStyle = { border: '1px solid #e2e8f0', background: '#f8fafc', color: '#1e293b' }
-  const focus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const focus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     e.currentTarget.style.borderColor = '#4a9e1f'
     e.currentTarget.style.boxShadow = '0 0 0 3px rgba(74,158,31,0.1)'
   }
-  const blur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const blur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     e.currentTarget.style.borderColor = '#e2e8f0'
     e.currentTarget.style.boxShadow = 'none'
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Left — main content */}
         <div className="lg:col-span-2 space-y-5">
-          <div
-            className="rounded-2xl p-5"
-            style={{ background: 'white', border: '1px solid #e2e8f0' }}
-          >
+          <div className="rounded-2xl p-5" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
             <h3 className="text-sm font-extrabold mb-4" style={{ color: '#0f172a' }}>News Content</h3>
 
             <div className="space-y-4">
@@ -131,12 +120,7 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
                 </label>
                 <div className="flex gap-2">
                   <div className="flex-1 relative">
-                    <span
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-xs"
-                      style={{ color: '#94a3b8' }}
-                    >
-                      /news/
-                    </span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: '#94a3b8' }}>/news/</span>
                     <input
                       type="text"
                       value={slug}
@@ -156,27 +140,7 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
                     {slugLocked ? '🔒 Locked' : '🔓 Editing'}
                   </button>
                 </div>
-                {slugError && (
-                  <p className="text-xs mt-1.5 font-semibold" style={{ color: '#dc2626' }}>{slugError}</p>
-                )}
-              </div>
-
-              {/* Excerpt */}
-              <div>
-                <label className="block text-xs font-bold mb-1.5" style={{ color: '#334155' }}>
-                  Excerpt (Tamil) <span style={{ color: '#dc2626' }}>*</span>
-                </label>
-                <textarea
-                  required
-                  rows={3}
-                  value={excerpt}
-                  onChange={(e) => setExcerpt(e.target.value)}
-                  placeholder="செய்தியின் சுருக்கமான விளக்கம்..."
-                  className={inputClass}
-                  style={{ ...inputStyle, resize: 'vertical', fontFamily: "'Noto Sans Tamil', sans-serif" }}
-                  onFocus={focus} onBlur={blur}
-                />
-                <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>{excerpt.length} characters</p>
+                {slugError && <p className="text-xs mt-1.5 font-semibold" style={{ color: '#dc2626' }}>{slugError}</p>}
               </div>
 
               {/* Content */}
@@ -184,38 +148,29 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
                 <label className="block text-xs font-bold mb-1.5" style={{ color: '#334155' }}>
                   Full Content (Tamil)
                 </label>
-                {/* Markdown toolbar */}
                 <div
                   className="flex flex-wrap gap-1 px-2 py-1.5 rounded-t-xl"
                   style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', borderBottom: 'none' }}
                 >
                   {[
-                    { label: 'H2',  title: 'Heading 2',    action: () => insertMarkdown('## ', '', 'Heading') },
-                    { label: 'H3',  title: 'Heading 3',    action: () => insertMarkdown('### ', '', 'Heading') },
-                    { label: 'B',   title: 'Bold',          action: () => insertMarkdown('**', '**', 'bold text'), bold: true },
-                    { label: 'I',   title: 'Italic',        action: () => insertMarkdown('*', '*', 'italic text'), italic: true },
-                    { label: '""',  title: 'Blockquote',    action: () => insertMarkdown('> ', '', 'quote') },
-                    { label: '—',   title: 'Divider',       action: () => insertMarkdown('\n\n---\n\n') },
-                    { label: '• ',  title: 'Bullet list',   action: () => insertMarkdown('- ', '', 'list item') },
-                    { label: '1.',  title: 'Numbered list', action: () => insertMarkdown('1. ', '', 'list item') },
-                    { label: '🔗',  title: 'Link',          action: () => insertMarkdown('[', '](url)', 'link text') },
+                    { label: 'H2',  action: () => insertMarkdown('## ', '', 'Heading') },
+                    { label: 'H3',  action: () => insertMarkdown('### ', '', 'Heading') },
+                    { label: 'B',   action: () => insertMarkdown('**', '**', 'bold text'), bold: true },
+                    { label: 'I',   action: () => insertMarkdown('*', '*', 'italic text'), italic: true },
+                    { label: '""',  action: () => insertMarkdown('> ', '', 'quote') },
+                    { label: '—',   action: () => insertMarkdown('\n\n---\n\n') },
+                    { label: '• ',  action: () => insertMarkdown('- ', '', 'list item') },
+                    { label: '1.',  action: () => insertMarkdown('1. ', '', 'list item') },
+                    { label: '🔗',  action: () => insertMarkdown('[', '](url)', 'link text') },
                   ].map((btn) => (
                     <button
                       key={btn.label}
                       type="button"
-                      title={btn.title}
                       onClick={btn.action}
                       className="px-2 py-0.5 rounded text-xs transition-all"
-                      style={{
-                        background: 'white',
-                        color: '#475569',
-                        border: '1px solid #e2e8f0',
-                        fontWeight: btn.bold ? 700 : 400,
-                        fontStyle: btn.italic ? 'italic' : 'normal',
-                        minWidth: '28px',
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = '#4a9e1f'; e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = '#4a9e1f' }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#e2e8f0' }}
+                      style={{ background: 'white', color: '#475569', border: '1px solid #e2e8f0', fontWeight: btn.bold ? 700 : 400, fontStyle: btn.italic ? 'italic' : 'normal', minWidth: '28px' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#4a9e1f'; e.currentTarget.style.color = 'white' }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#475569' }}
                     >
                       {btn.label}
                     </button>
@@ -232,7 +187,7 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
                   onFocus={focus} onBlur={blur}
                 />
                 <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>
-                  {content.split(/\s+/).filter(Boolean).length} words · Supports Markdown: **bold**, *italic*, ## heading, &gt; quote, - list
+                  {content.split(/\s+/).filter(Boolean).length} words
                 </p>
               </div>
             </div>
@@ -243,55 +198,56 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
         <div className="space-y-5">
 
           {/* Publish box */}
-          <div
-            className="rounded-2xl p-5"
-            style={{ background: 'white', border: '1px solid #e2e8f0' }}
-          >
+          <div className="rounded-2xl p-5" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
             <h3 className="text-sm font-extrabold mb-4" style={{ color: '#0f172a' }}>Publish</h3>
 
-            {/* Breaking toggle */}
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <p className="text-sm font-semibold" style={{ color: '#1e293b' }}>Breaking News</p>
-                <p className="text-xs" style={{ color: '#94a3b8' }}>Show in breaking news ticker</p>
+            {/* News type selector */}
+            <div className="mb-5">
+              <p className="text-xs font-bold mb-3" style={{ color: '#334155' }}>Post to Section <span style={{ color: '#dc2626' }}>*</span></p>
+              <div className="space-y-2">
+                {[
+                  { value: 'special' as const, label: 'சிறப்புச் செய்திகள்', desc: 'Appears in the Special News section', color: '#1a3d1a' },
+                  { value: 'janaza' as const,  label: 'Janaza News',          desc: 'Appears in the Janaza News section',  color: '#0369a1' },
+                ].map((opt) => (
+                  <label
+                    key={opt.value}
+                    className="flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all"
+                    style={{
+                      background: newsType === opt.value ? '#f0fdf4' : '#f8fafc',
+                      border: `1px solid ${newsType === opt.value ? '#4a9e1f' : '#e2e8f0'}`,
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="news_type"
+                      value={opt.value}
+                      checked={newsType === opt.value}
+                      onChange={() => setNewsType(opt.value)}
+                      className="mt-0.5 accent-green-600"
+                    />
+                    <div>
+                      <p className="text-xs font-bold" style={{ color: opt.color, fontFamily: opt.value === 'special' ? "'Noto Sans Tamil', sans-serif" : undefined }}>
+                        {opt.label}
+                      </p>
+                      <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{opt.desc}</p>
+                    </div>
+                  </label>
+                ))}
               </div>
-              <button
-                type="button"
-                onClick={() => setIsBreaking(!isBreaking)}
-                className="relative w-11 h-6 rounded-full transition-all flex-shrink-0"
-                style={{ background: isBreaking ? '#dc2626' : '#e2e8f0' }}
-              >
-                <span
-                  className="absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all"
-                  style={{ left: isBreaking ? '22px' : '2px', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }}
-                />
-              </button>
             </div>
-
-            {isBreaking && (
-              <div
-                className="flex items-center gap-2 px-3 py-2 rounded-xl mb-4 text-xs font-semibold"
-                style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}
-              >
-                🔴 Will appear in the breaking news ticker
-              </div>
-            )}
 
             <div className="flex flex-col gap-2">
               <button
                 type="submit"
                 disabled={saving}
                 className="w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all"
-                style={{
-                  background: saving ? '#94a3b8' : '#4a9e1f',
-                  boxShadow: saving ? 'none' : '0 2px 8px rgba(74,158,31,0.3)',
-                }}
+                style={{ background: saving ? '#94a3b8' : '#4a9e1f', boxShadow: saving ? 'none' : '0 2px 8px rgba(74,158,31,0.3)' }}
               >
                 {saving ? 'Saving...' : initial.id ? '💾 Update Post' : '🚀 Publish Post'}
               </button>
               <Link
                 href="/admin/news"
-                className="w-full py-2.5 rounded-xl text-sm font-bold text-center transition-all"
+                className="w-full py-2.5 rounded-xl text-sm font-bold text-center transition-all block"
                 style={{ background: '#f1f5f9', color: '#64748b' }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = '#e2e8f0' }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = '#f1f5f9' }}
@@ -301,33 +257,10 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
             </div>
           </div>
 
-          {/* Category */}
-          <div
-            className="rounded-2xl p-5"
-            style={{ background: 'white', border: '1px solid #e2e8f0' }}
-          >
-            <h3 className="text-sm font-extrabold mb-4" style={{ color: '#0f172a' }}>Category</h3>
-            <select
-              required
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className={inputClass}
-              style={inputStyle}
-              onFocus={focus} onBlur={blur}
-            >
-              <option value="">Select a category</option>
-              {NEWS_CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-
           {/* Featured Image */}
-          <div
-            className="rounded-2xl p-5"
-            style={{ background: 'white', border: '1px solid #e2e8f0' }}
-          >
-            <h3 className="text-sm font-extrabold mb-4" style={{ color: '#0f172a' }}>Featured Image</h3>
+          <div className="rounded-2xl p-5" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
+            <h3 className="text-sm font-extrabold mb-1" style={{ color: '#0f172a' }}>Featured Image</h3>
+            <p className="text-xs mb-3" style={{ color: '#94a3b8' }}>Optional. Cropping is optional — you can upload as-is.</p>
             <ImageUpload value={image} onChange={setImage} />
           </div>
 

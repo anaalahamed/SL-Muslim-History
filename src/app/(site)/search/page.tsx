@@ -39,14 +39,13 @@ function SearchResults() {
       const term = q.toLowerCase()
       setArticles(a.filter((x) =>
         x.title.toLowerCase().includes(term) ||
-        x.excerpt.toLowerCase().includes(term) ||
+        (x.excerpt ?? '').toLowerCase().includes(term) ||
         x.category.toLowerCase().includes(term) ||
         x.author.toLowerCase().includes(term)
       ))
       setNews(n.filter((x) =>
         x.title.toLowerCase().includes(term) ||
-        x.excerpt.toLowerCase().includes(term) ||
-        x.category.toLowerCase().includes(term)
+        (x.content ?? '').toLowerCase().includes(term)
       ))
       setLoading(false)
     })
@@ -198,16 +197,18 @@ function SearchResults() {
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            {post.is_breaking && (
-                              <span className="text-xs font-black px-2 py-0.5 rounded-full" style={{ background: '#fee2e2', color: '#dc2626' }}>Breaking</span>
-                            )}
-                            <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'var(--green-light)', color: 'var(--green)' }}>
-                              {post.category}
+                            <span
+                              className="text-xs font-bold px-2 py-0.5 rounded-full"
+                              style={post.news_type === 'janaza'
+                                ? { background: '#f0f9ff', color: '#0369a1' }
+                                : { background: '#f0fdf4', color: '#166534' }}
+                            >
+                              {post.news_type === 'janaza' ? 'Janaza' : 'சிறப்பு'}
                             </span>
                             <span className="text-xs" style={{ color: 'var(--muted)' }}>{formatDate(post.published_at)}</span>
                           </div>
                           <h3 className="font-extrabold text-sm mb-1 line-clamp-1" style={{ color: 'var(--dark)' }}>{post.title}</h3>
-                          <p className="text-xs line-clamp-2" style={{ color: 'var(--muted)', lineHeight: '1.6' }}>{post.excerpt}</p>
+                          <p className="text-xs line-clamp-2" style={{ color: 'var(--muted)', lineHeight: '1.6' }}>{post.content?.split('\n\n')[0] ?? ''}</p>
                         </div>
                         <span className="text-sm flex-shrink-0" style={{ color: 'var(--green)' }}>→</span>
                       </Link>

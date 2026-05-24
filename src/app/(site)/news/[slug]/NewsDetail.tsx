@@ -13,13 +13,6 @@ import { DetailPageSkeleton } from '@/components/ui/Skeleton'
 import ReadingProgress from '@/components/ui/ReadingProgress'
 import AdBanner from '@/components/ui/AdBanner'
 
-const categoryStyle: Record<string, { bg: string; text: string }> = {
-  Community:  { bg: '#dcfce7', text: '#15803d' },
-  Heritage:   { bg: '#fef9c3', text: '#a16207' },
-  Education:  { bg: '#dbeafe', text: '#1d4ed8' },
-  Literature: { bg: '#f3e8ff', text: '#7c3aed' },
-}
-
 export default function NewsDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
   const [post, setPost] = useState<NewsPost | null | undefined>(undefined)
@@ -32,7 +25,7 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
       setPost(data ?? null)
       if (data) {
         getNews().then((all) => {
-          setRelated(all.filter((n) => n.id !== data.id && n.category === data.category).slice(0, 3))
+          setRelated(all.filter((n) => n.id !== data.id && n.news_type === data.news_type).slice(0, 3))
           setRecent(all.filter((n) => n.id !== data.id).slice(0, 4))
         })
       }
@@ -61,6 +54,9 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
     }
   }
 
+  const typeLabel = post.news_type === 'janaza' ? 'Janaza News' : 'சிறப்புச் செய்திகள்'
+  const typeBg    = post.news_type === 'janaza' ? '#f0f9ff' : '#f0fdf4'
+  const typeColor = post.news_type === 'janaza' ? '#0369a1' : '#166534'
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
@@ -71,13 +67,9 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
         className="relative overflow-hidden"
         style={{ background: 'linear-gradient(160deg, #0d2e1b 0%, #163522 55%, #0a2213 100%)', paddingTop: '48px', paddingBottom: '48px' }}
       >
-        {/* Gold top border */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, var(--gold) 30%, #f0d060 50%, var(--gold) 70%, transparent)' }} />
-        {/* Glow top-right */}
         <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,168,76,0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        {/* Glow bottom-left */}
         <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: '220px', height: '220px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(74,158,31,0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        {/* Decorative arc right */}
         <div className="absolute right-0 top-0 bottom-0 pointer-events-none hidden md:block" style={{ width: '280px', opacity: 0.05 }}>
           <svg viewBox="0 0 280 160" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
             <circle cx="280" cy="80" r="120" stroke="#c9a84c" strokeWidth="1" fill="none" />
@@ -94,19 +86,14 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
               <span style={{ color: 'rgba(255,255,255,0.25)' }}>/</span>
               <Link href="/news" className="hover:text-white transition-colors">News</Link>
               <span style={{ color: 'rgba(255,255,255,0.25)' }}>/</span>
-              <span style={{ color: 'var(--gold)' }}>{post.category}</span>
+              <span style={{ color: 'var(--gold)' }}>{typeLabel}</span>
             </div>
 
-            {/* Gold bar + badges */}
+            {/* Gold bar + type badge */}
             <div className="flex items-center gap-3 mb-4">
               <div style={{ width: '3px', height: '32px', borderRadius: '9999px', background: 'var(--gold)', flexShrink: 0 }} />
-              {post.is_breaking && (
-                <span className="text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider" style={{ background: '#dc2626', color: 'white' }}>
-                  🔴 Breaking
-                </span>
-              )}
-              <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: categoryStyle[post.category]?.bg ?? 'rgba(255,255,255,0.1)', color: categoryStyle[post.category]?.text ?? 'rgba(255,255,255,0.85)' }}>
-                {post.category}
+              <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: typeBg, color: typeColor }}>
+                {typeLabel}
               </span>
             </div>
 
@@ -123,10 +110,8 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
             </div>
           </AnimateIn>
         </div>
-        {/* Gold bottom border */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.3) 50%, transparent)' }} />
       </div>
-
 
       {/* Main layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
@@ -139,7 +124,6 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
                 className="rounded-2xl overflow-hidden"
                 style={{ border: '1px solid var(--border)', background: 'white' }}
               >
-                {/* News hero — fixed 4:3 */}
                 {post.featured_image ? (
                   <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3' }}>
                     <Image
@@ -160,22 +144,7 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
                   </div>
                 )}
 
-                {/* Content */}
                 <div className="p-6 md:p-10">
-                  {/* Lead excerpt */}
-                  <p
-                    className="tamil-text text-base leading-loose mb-8 pb-8"
-                    style={{
-                      color: 'var(--dark)',
-                      borderBottom: '2px solid var(--green-light)',
-                      fontSize: '1.05rem',
-                      fontWeight: 500,
-                    }}
-                  >
-                    {post.excerpt}
-                  </p>
-
-                  {/* Body */}
                   {post.content?.trim() ? (
                     <RichContent content={post.content} />
                   ) : (
@@ -190,7 +159,6 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
                   )}
                 </div>
 
-                {/* Footer bar */}
                 <div
                   className="px-6 md:px-10 py-5 flex items-center justify-between flex-wrap gap-4"
                   style={{ borderTop: '1px solid var(--border)', background: 'var(--bg)' }}
@@ -203,19 +171,9 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
                   <Link
                     href="/news"
                     className="text-sm font-semibold px-5 py-2 rounded-xl transition-all"
-                    style={{
-                      background: 'var(--green-light)',
-                      color: 'var(--green)',
-                      border: '1px solid var(--border)',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'var(--green)'
-                      e.currentTarget.style.color = 'white'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'var(--green-light)'
-                      e.currentTarget.style.color = 'var(--green)'
-                    }}
+                    style={{ background: 'var(--green-light)', color: 'var(--green)', border: '1px solid var(--border)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--green)'; e.currentTarget.style.color = 'white' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--green-light)'; e.currentTarget.style.color = 'var(--green)' }}
                   >
                     ← Back to News
                   </Link>
@@ -236,7 +194,7 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
                     style={{ border: '1px solid var(--border)', background: 'white' }}
                   >
                     <h3 className="font-extrabold text-sm mb-4 flex items-center gap-2" style={{ color: 'var(--dark)' }}>
-                      <span className="w-1 h-5 rounded-full inline-block" style={{ background: '#dc2626' }} />
+                      <span className="w-1 h-5 rounded-full inline-block" style={{ background: typeColor }} />
                       Related Stories
                     </h3>
                     <div className="space-y-3">
@@ -266,14 +224,6 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
                             )}
                           </div>
                           <div className="min-w-0">
-                            {item.is_breaking && (
-                              <span
-                                className="inline-block text-xs font-bold px-1.5 py-0.5 rounded mb-1"
-                                style={{ background: '#fee2e2', color: '#b91c1c' }}
-                              >
-                                Breaking
-                              </span>
-                            )}
                             <p
                               className="tamil-heading text-xs font-semibold line-clamp-2"
                               style={{ color: 'var(--dark)', lineHeight: '1.6' }}
@@ -391,7 +341,6 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
                 </div>
               </AnimateIn>
 
-              {/* Ad banner */}
               <AdBanner position="sidebar" />
 
             </div>

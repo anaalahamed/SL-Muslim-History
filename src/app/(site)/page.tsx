@@ -2,7 +2,7 @@ import HeroSlider from '@/components/home/HeroSlider'
 import SpecialNews from '@/components/home/SpecialNews'
 import FeaturedArticle from '@/components/home/FeaturedArticle'
 import AllArticles from '@/components/home/AllArticles'
-import LatestNews from '@/components/home/LatestNews'
+import JanazaNews from '@/components/home/JanazaNews'
 import MostRead from '@/components/home/MostRead'
 import CategoryGrid from '@/components/home/CategoryGrid'
 import SidebarAd from '@/components/home/SidebarAd'
@@ -22,11 +22,11 @@ export default function HomePage() {
             <AllArticles />
           </div>
 
-          {/* RIGHT SIDEBAR: Special News → Ad → Latest News → Most Read → Categories */}
+          {/* RIGHT SIDEBAR: Special News → Ad → Janaza News → Most Read → Categories */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignSelf: 'start' }}>
             <SpecialNews />
             <SidebarAd />
-            <LatestNews />
+            <JanazaNews />
             <MostRead />
             <CategoryGrid />
           </div>

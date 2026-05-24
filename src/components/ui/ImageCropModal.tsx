@@ -44,10 +44,11 @@ interface Props {
   fileName: string
   onDone:   (blob: Blob, fileName: string) => void
   onCancel: () => void
+  onSkip?:  () => void
 }
 
 // ── component ─────────────────────────────────────────────────────────────────
-export default function ImageCropModal({ imageSrc, fileName, onDone, onCancel }: Props) {
+export default function ImageCropModal({ imageSrc, fileName, onDone, onCancel, onSkip }: Props) {
   const imgRef     = useRef<HTMLImageElement>(null)
   const previewRef = useRef<HTMLCanvasElement>(null)
 
@@ -249,7 +250,7 @@ export default function ImageCropModal({ imageSrc, fileName, onDone, onCancel }:
               ? `${Math.round(pixelCrop.width)} × ${Math.round(pixelCrop.height)} px selected`
               : 'Drag the crop area to adjust'}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
               onClick={onCancel}
@@ -258,6 +259,16 @@ export default function ImageCropModal({ imageSrc, fileName, onDone, onCancel }:
             >
               Cancel
             </button>
+            {onSkip && (
+              <button
+                type="button"
+                onClick={onSkip}
+                className="px-5 py-2.5 rounded-xl text-sm font-bold transition-all"
+                style={{ background: '#fef9c3', color: '#a16207', border: '1px solid #fde68a' }}
+              >
+                Upload Without Cropping
+              </button>
+            )}
             <button
               type="button"
               onClick={handleConfirm}

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { getNews } from '@/lib/db/news'
+import { getSpecialNews } from '@/lib/db/news'
 import { NewsPost } from '@/lib/types'
 
 export default function SpecialNews() {
@@ -11,7 +11,7 @@ export default function SpecialNews() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getNews().then((all) => { setItems(all.slice(0, 6)); setLoading(false) })
+    getSpecialNews(6).then((items) => { setItems(items); setLoading(false) })
   }, [])
 
   return (

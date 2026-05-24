@@ -173,7 +173,7 @@ export default function FeaturedArticles() {
                       className="tamil-text line-clamp-2"
                       style={{ fontSize: '0.86rem', color: 'var(--muted)', lineHeight: '1.8', flex: 1, marginBottom: '14px' }}
                     >
-                      {buildPreview(article.excerpt, article.content)}
+                      {buildPreview(article.excerpt ?? '', article.content)}
                     </p>
 
                     {/* Footer */}

@@ -3,36 +3,25 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { formatDate } from '@/lib/utils'
-import { getNews, deleteNews, toggleBreakingNews } from '@/lib/db/news'
+import { getNews, deleteNews } from '@/lib/db/news'
 import { NewsPost } from '@/lib/types'
 
-const NEWS_CATEGORIES = ['Community', 'Heritage', 'Education', 'Literature', 'Events', 'General']
-
 export default function AdminNewsPage() {
-  const [search,      setSearch]      = useState('')
-  const [filterCat,   setFilterCat]   = useState('all')
-  const [filterBreak, setFilterBreak] = useState('all')
-  const [news,        setNews]        = useState<NewsPost[]>([])
-  const [deleteId,    setDeleteId]    = useState<string | null>(null)
+  const [search,     setSearch]     = useState('')
+  const [filterType, setFilterType] = useState<'all' | 'special' | 'janaza'>('all')
+  const [news,       setNews]       = useState<NewsPost[]>([])
+  const [deleteId,   setDeleteId]   = useState<string | null>(null)
 
   useEffect(() => {
     getNews().then(setNews)
   }, [])
 
   const filtered = news
-    .filter((n) => filterCat   === 'all' || n.category === filterCat)
-    .filter((n) => filterBreak === 'all' || (filterBreak === 'breaking' ? n.is_breaking : !n.is_breaking))
+    .filter((n) => filterType === 'all' || n.news_type === filterType)
     .filter((n) =>
       search.trim() === '' ||
       n.title.toLowerCase().includes(search.toLowerCase())
     )
-
-  async function toggleBreaking(id: string) {
-    const post = news.find((n) => n.id === id)
-    if (!post) return
-    await toggleBreakingNews(id, !post.is_breaking)
-    setNews((prev) => prev.map((n) => n.id === id ? { ...n, is_breaking: !n.is_breaking } : n))
-  }
 
   async function doDelete() {
     if (deleteId) {
@@ -71,27 +60,16 @@ export default function AdminNewsPage() {
           />
         </div>
 
-        {/* Category filter */}
+        {/* Type filter */}
         <select
-          value={filterCat}
-          onChange={(e) => setFilterCat(e.target.value)}
-          className="px-3 py-2.5 rounded-xl text-sm font-semibold outline-none cursor-pointer"
-          style={{ border: '1px solid #e2e8f0', background: '#f8fafc', color: '#475569' }}
-        >
-          <option value="all">All Categories</option>
-          {NEWS_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
-
-        {/* Breaking filter */}
-        <select
-          value={filterBreak}
-          onChange={(e) => setFilterBreak(e.target.value)}
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value as 'all' | 'special' | 'janaza')}
           className="px-3 py-2.5 rounded-xl text-sm font-semibold outline-none cursor-pointer"
           style={{ border: '1px solid #e2e8f0', background: '#f8fafc', color: '#475569' }}
         >
           <option value="all">All Posts</option>
-          <option value="breaking">Breaking only</option>
-          <option value="regular">Not breaking</option>
+          <option value="special">சிறப்புச் செய்திகள் only</option>
+          <option value="janaza">Janaza News only</option>
         </select>
 
         <span className="flex items-center text-xs font-semibold px-3" style={{ color: '#94a3b8' }}>
@@ -107,12 +85,11 @@ export default function AdminNewsPage() {
         {/* Table head */}
         <div
           className="grid gap-4 px-5 py-3 text-xs font-black uppercase tracking-wider"
-          style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', color: '#94a3b8' }}
+          style={{ gridTemplateColumns: '2fr 1fr 1fr auto', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', color: '#94a3b8' }}
         >
           <span>Title</span>
-          <span>Category</span>
+          <span>Type</span>
           <span>Date</span>
-          <span>Breaking</span>
           <span>Actions</span>
         </div>
 
@@ -128,7 +105,7 @@ export default function AdminNewsPage() {
               key={post.id}
               className="grid gap-4 px-5 py-4 items-center transition-colors"
               style={{
-                gridTemplateColumns: '2fr 1fr 1fr auto auto',
+                gridTemplateColumns: '2fr 1fr 1fr auto',
                 borderBottom: i < filtered.length - 1 ? '1px solid #f8fafc' : 'none',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc' }}
@@ -140,29 +117,20 @@ export default function AdminNewsPage() {
                 <p className="text-xs mt-0.5 truncate" style={{ color: '#94a3b8' }}>/news/{post.slug}</p>
               </div>
 
-              {/* Category */}
+              {/* Type badge */}
               <span
                 className="text-xs font-bold px-2.5 py-1 rounded-full self-start"
-                style={{ background: '#f0f9ff', color: '#0369a1' }}
+                style={
+                  post.news_type === 'janaza'
+                    ? { background: '#f0f9ff', color: '#0369a1' }
+                    : { background: '#f0fdf4', color: '#166534' }
+                }
               >
-                {post.category}
+                {post.news_type === 'janaza' ? 'Janaza' : 'சிறப்பு'}
               </span>
 
               {/* Date */}
               <p className="text-xs" style={{ color: '#94a3b8' }}>{formatDate(post.published_at)}</p>
-
-              {/* Breaking toggle */}
-              <button
-                onClick={() => toggleBreaking(post.id)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-                style={{
-                  background: post.is_breaking ? '#fef2f2' : '#f8fafc',
-                  color:      post.is_breaking ? '#dc2626'  : '#94a3b8',
-                  border:     `1px solid ${post.is_breaking ? '#fecaca' : '#e2e8f0'}`,
-                }}
-              >
-                {post.is_breaking ? '🔴 Breaking' : '○ Regular'}
-              </button>
 
               {/* Actions */}
               <div className="flex items-center gap-2">

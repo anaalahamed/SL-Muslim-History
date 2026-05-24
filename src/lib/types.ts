@@ -2,7 +2,7 @@ export interface Article {
   id: string
   title: string
   slug: string
-  excerpt: string
+  excerpt?: string
   content: string
   category: string          // primary category name
   category_slug: string     // primary category slug
@@ -39,11 +39,9 @@ export interface NewsPost {
   id: string
   title: string
   slug: string
-  excerpt: string
   content: string
-  category: string
   featured_image: string
-  is_breaking: boolean
+  news_type: 'special' | 'janaza'
   published_at: string
 }
 
