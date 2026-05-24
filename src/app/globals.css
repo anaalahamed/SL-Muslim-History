@@ -217,6 +217,152 @@ body {
 .link-underline:hover::after { width: 100%; }
 
 /* ════════════════════════════════
+   MOBILE RESPONSIVE
+════════════════════════════════ */
+
+/* Homepage 2-col → 1-col on tablet/mobile */
+@media (max-width: 900px) {
+  .home-content-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+
+  /* ── Base typography ── */
+  body { font-size: 15px; }
+
+  .tamil-text {
+    font-size: 0.92rem !important;
+    line-height: 1.95 !important;
+  }
+  .tamil-heading {
+    line-height: 1.55 !important;
+  }
+
+  /* ── Article hero section ── */
+  .article-hero-title {
+    font-size: 1.45rem !important;
+  }
+
+  /* ── Touch-friendly buttons ── */
+  button, a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── Gallery carousel on mobile ── */
+  .gallery-thumb-strip {
+    gap: 4px !important;
+  }
+  .gallery-thumb-strip > div {
+    width: 52px !important;
+    height: 40px !important;
+  }
+
+  /* ── Better padding on article/news detail pages ── */
+  .max-w-7xl {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  /* ── Sidebar ad: hide on very small screens if needed ── */
+  .sidebar-ad-mobile-hide {
+    display: none;
+  }
+
+  /* ── News page filter pills ── */
+  .news-filter-bar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  /* ── Pagination ── */
+  .pagination-prev-next span {
+    display: none;
+  }
+
+  /* ── Article content padding on mobile ── */
+  .article-body-pad {
+    padding: 20px 16px !important;
+  }
+
+  /* ── Footer: reduce padding ── */
+  footer {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* ── Category grid: 2-col on mobile ── */
+  .category-grid-cols {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* ── Admin: table scroll ── */
+  .admin-table-scroll {
+    overflow-x: auto;
+  }
+
+  /* ── Stat cards: 2-col on mobile ── */
+  .stat-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+
+  /* ── Masthead compact ── */
+  .site-masthead-title {
+    font-size: 17px !important;
+  }
+  .site-masthead-subtitle {
+    font-size: 9px !important;
+  }
+
+  /* ── Hero slider: taller on phone for better readability ── */
+  .hero-slide-container {
+    height: 240px !important;
+  }
+
+  /* ── Article hero: tighter ── */
+  .article-hero-pad {
+    padding-top: 32px !important;
+    padding-bottom: 32px !important;
+  }
+
+  /* ── Gallery arrows: larger touch target ── */
+  .gallery-arrow-btn {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 26px !important;
+  }
+
+  /* ── Related articles: stack image + text ── */
+  .related-article-item {
+    flex-direction: column !important;
+  }
+
+  /* ── View count section ── */
+  .view-count-section {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  /* ── Donation CTA: single column ── */
+  .donation-cta-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Hide decorative elements on tiny screens ── */
+  .decorative-arc { display: none !important; }
+
+  /* ── News detail header: smaller text ── */
+  .news-detail-title {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* ════════════════════════════════
    PRINT
 ════════════════════════════════ */
 @media print {
