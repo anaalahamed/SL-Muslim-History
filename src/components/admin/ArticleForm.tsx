@@ -60,6 +60,7 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
   const [slugLocked,  setSlugLocked] = useState(!!initial.slug)
   const [slugError,   setSlugError]  = useState('')
   const [image,       setImage]      = useState(initial.featured_image ?? '')
+  const [views,       setViews]      = useState(initial.views ?? 26)
 
   // ── Multiple categories ──
   const [selCats, setSelCats] = useState<string[]>(
@@ -196,7 +197,7 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
       featured_image: featuredGalleryImg?.url || image,
       gallery:       galleryWithFeatured,
       published_at:  initial.published_at ?? new Date().toISOString(),
-      ...(initial.id ? {} : { views: 26 }),
+      views,
     })
   }
 
@@ -353,6 +354,23 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
               <button type="button" onClick={() => setFeatured(!featured)} className="relative w-11 h-6 rounded-full transition-all flex-shrink-0" style={{ background: featured ? '#4a9e1f' : '#e2e8f0' }}>
                 <span className="absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all" style={{ left: featured ? '22px' : '2px', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
               </button>
+            </div>
+
+            {/* View count */}
+            <div className="mb-4">
+              <label className="block text-xs font-bold mb-1.5" style={{ color: '#334155' }}>
+                👁 View Count
+                <span className="ml-1 font-normal" style={{ color: '#94a3b8' }}>{initial.id ? '(edit to override)' : '(starting count)'}</span>
+              </label>
+              <input
+                type="number" min={0} value={views}
+                onChange={(e) => setViews(Math.max(0, parseInt(e.target.value) || 0))}
+                className={inputClass} style={IS}
+                onFocus={focus} onBlur={blur}
+              />
+              <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>
+                Live visitors add on top of this number automatically.
+              </p>
             </div>
 
             <div className="flex flex-col gap-2">
