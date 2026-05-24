@@ -10,10 +10,10 @@ export async function generateMetadata(
   if (!post) return { title: 'Story Not Found' }
   return {
     title: post.title,
-    description: post.excerpt,
+    description: post.content?.split('\n\n')[0]?.slice(0, 160) ?? post.title,
     openGraph: {
       title: post.title,
-      description: post.excerpt,
+      description: post.content?.split('\n\n')[0]?.slice(0, 160) ?? post.title,
       type: 'article',
       publishedTime: post.published_at,
       images: post.featured_image
@@ -23,7 +23,7 @@ export async function generateMetadata(
     twitter: {
       card: 'summary_large_image',
       title: post.title,
-      description: post.excerpt,
+      description: post.content?.split('\n\n')[0]?.slice(0, 160) ?? post.title,
       images: post.featured_image ? [post.featured_image] : [],
     },
   }

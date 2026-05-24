@@ -1,8 +1,8 @@
-import { getBreakingNews } from '@/lib/db/news'
+import { getSpecialNews } from '@/lib/db/news'
 
 export default async function BreakingTicker() {
-  const breakingNews = await getBreakingNews()
-  if (breakingNews.length === 0) return null
+  const specialNews = await getSpecialNews(6)
+  if (specialNews.length === 0) return null
 
   return (
     <div
@@ -21,7 +21,7 @@ export default async function BreakingTicker() {
         }}
       >
         <span className="animate-pulse" style={{ fontSize: '8px' }}>●</span>
-        Breaking
+        Special
       </div>
 
       {/* Divider */}
@@ -30,7 +30,7 @@ export default async function BreakingTicker() {
       {/* Scrolling text */}
       <div className="flex-1 overflow-hidden relative" style={{ paddingLeft: '12px' }}>
         <div className="ticker-move flex items-center gap-16" style={{ color: 'rgba(255,255,255,0.88)' }}>
-          {[...breakingNews, ...breakingNews].map((news, i) => (
+          {[...specialNews, ...specialNews].map((news, i) => (
             <span
               key={i}
               className="tamil-heading flex items-center gap-2 flex-shrink-0 text-sm"

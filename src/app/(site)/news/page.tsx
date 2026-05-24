@@ -11,44 +11,30 @@ import PageHero from '@/components/ui/PageHero'
 import { NewsListSkeleton } from '@/components/ui/Skeleton'
 import AdBanner from '@/components/ui/AdBanner'
 
-const NEWS_CATEGORIES = ['All', 'Community', 'Heritage', 'Education', 'Literature']
-
 const PER_PAGE = 12
 
-const categoryStyle: Record<string, { bg: string; text: string }> = {
-  Community:  { bg: '#dcfce7', text: '#15803d' },
-  Heritage:   { bg: '#fef9c3', text: '#a16207' },
-  Education:  { bg: '#dbeafe', text: '#1d4ed8' },
-  Literature: { bg: '#f3e8ff', text: '#7c3aed' },
-}
-
 export default function NewsPage() {
-  const [activeCategory, setActiveCategory] = useState('All')
-  const [showBreakingOnly, setShowBreakingOnly] = useState(false)
+  const [filterType, setFilterType] = useState<'all' | 'special' | 'janaza'>('all')
   const [allNews, setAllNews] = useState<NewsPost[]>([])
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => { getNews().then((d) => { setAllNews(d); setLoading(false) }) }, [])
 
-  // Reset to page 1 when filters change
-  useEffect(() => { setPage(1) }, [activeCategory, showBreakingOnly])
+  useEffect(() => { setPage(1) }, [filterType])
 
-  const filtered = allNews
-    .filter((n) => activeCategory === 'All' || n.category === activeCategory)
-    .filter((n) => !showBreakingOnly || n.is_breaking)
+  const filtered = allNews.filter((n) => filterType === 'all' || n.news_type === filterType)
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE)
   const paginated  = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 
-  const breaking = allNews.filter((n) => n.is_breaking)
   const featured = allNews[0] ?? null
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
 
       <PageHero
-        badge="Latest News"
+        badge="News"
         title="News & Updates"
         subtitle="Stay informed with the latest news about Sri Lanka's Muslim heritage, community events, and historical discoveries."
       />
@@ -58,48 +44,6 @@ export default function NewsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-
-        {/* Breaking news banner */}
-        {breaking.length > 0 && (
-          <AnimateIn direction="up" className="mb-8">
-            <div
-              className="rounded-2xl p-5"
-              style={{ background: '#fef2f2', border: '1px solid #fecaca' }}
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <span
-                  className="text-xs font-black px-3 py-1.5 rounded-full uppercase tracking-wider animate-pulse"
-                  style={{ background: '#dc2626', color: 'white' }}
-                >
-                  🔴 Breaking
-                </span>
-                <span className="text-sm font-semibold" style={{ color: '#991b1b' }}>
-                  {breaking.length} breaking {breaking.length === 1 ? 'story' : 'stories'}
-                </span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {breaking.map((item) => (
-                  <Link
-                    key={item.id}
-                    href={`/news/${item.slug}`}
-                    className="flex items-start gap-3 p-3 rounded-xl transition-all"
-                    style={{ background: 'white', border: '1px solid #fecaca' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#dc2626' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#fecaca' }}
-                  >
-                    <span className="text-red-600 mt-0.5 flex-shrink-0">→</span>
-                    <p
-                      className="tamil-heading text-sm font-semibold line-clamp-2"
-                      style={{ color: '#991b1b', lineHeight: '1.6' }}
-                    >
-                      {item.title}
-                    </p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </AnimateIn>
-        )}
 
         {/* Top featured news */}
         {featured && <AnimateIn direction="up" className="mb-8">
@@ -121,7 +65,6 @@ export default function NewsPage() {
               e.currentTarget.style.transform = 'translateY(0)'
             }}
           >
-            {/* Featured story image */}
             <div className="relative md:w-72 h-52 md:h-auto flex-shrink-0 overflow-hidden" style={{ minHeight: '200px' }}>
               {featured.featured_image ? (
                 <Image
@@ -140,25 +83,17 @@ export default function NewsPage() {
                 </div>
               )}
             </div>
-            {/* Content */}
             <div className="p-6 flex flex-col justify-center">
               <div className="flex items-center gap-3 mb-3">
-                {featured.is_breaking && (
-                  <span
-                    className="text-xs font-bold px-2.5 py-1 rounded-full"
-                    style={{ background: '#fee2e2', color: '#b91c1c' }}
-                  >
-                    Breaking
-                  </span>
-                )}
                 <span
                   className="text-xs font-bold px-2.5 py-1 rounded-full"
-                  style={{
-                    background: categoryStyle[featured.category]?.bg ?? '#f1f5f9',
-                    color:      categoryStyle[featured.category]?.text ?? '#475569',
-                  }}
+                  style={
+                    featured.news_type === 'janaza'
+                      ? { background: '#f0f9ff', color: '#0369a1' }
+                      : { background: '#f0fdf4', color: '#166534' }
+                  }
                 >
-                  {featured.category}
+                  {featured.news_type === 'janaza' ? 'Janaza News' : 'சிறப்புச் செய்திகள்'}
                 </span>
                 <span className="text-xs" style={{ color: 'var(--muted)' }}>
                   {formatDate(featured.published_at)}
@@ -174,7 +109,7 @@ export default function NewsPage() {
                 className="tamil-text text-sm line-clamp-3"
                 style={{ color: 'var(--muted)', lineHeight: '1.8' }}
               >
-                {featured.excerpt}
+                {featured.content?.split('\n\n')[0] ?? ''}
               </p>
               <span
                 className="mt-4 inline-flex items-center gap-1 text-sm font-bold"
@@ -192,42 +127,31 @@ export default function NewsPage() {
             className="p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
             style={{ background: 'white', border: '1px solid var(--border)' }}
           >
-            {/* Category pills */}
             <div className="flex items-center gap-2 flex-wrap">
-              {NEWS_CATEGORIES.map((cat) => (
+              {([
+                { key: 'all',     label: 'All News' },
+                { key: 'special', label: 'சிறப்புச் செய்திகள்' },
+                { key: 'janaza',  label: 'Janaza News' },
+              ] as const).map(({ key, label }) => (
                 <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
+                  key={key}
+                  onClick={() => setFilterType(key)}
                   className="px-4 py-1.5 rounded-full text-xs font-bold transition-all"
                   style={{
-                    background: activeCategory === cat ? 'var(--green)' : 'var(--bg)',
-                    color:      activeCategory === cat ? 'white'        : 'var(--muted)',
-                    border: `1px solid ${activeCategory === cat ? 'var(--green)' : 'var(--border)'}`,
+                    background: filterType === key ? 'var(--green)' : 'var(--bg)',
+                    color:      filterType === key ? 'white'        : 'var(--muted)',
+                    border: `1px solid ${filterType === key ? 'var(--green)' : 'var(--border)'}`,
                   }}
                 >
-                  {cat}
+                  {label}
                 </button>
               ))}
             </div>
 
-            {/* Breaking toggle + count */}
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setShowBreakingOnly(!showBreakingOnly)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-                style={{
-                  background: showBreakingOnly ? '#dc2626' : 'var(--bg)',
-                  color:      showBreakingOnly ? 'white'    : 'var(--muted)',
-                  border: `1px solid ${showBreakingOnly ? '#dc2626' : 'var(--border)'}`,
-                }}
-              >
-                🔴 Breaking only
-              </button>
-              <span className="text-xs" style={{ color: 'var(--muted)' }}>
-                <strong style={{ color: 'var(--dark)' }}>{filtered.length}</strong> stories
-                {totalPages > 1 && <> — page <strong style={{ color: 'var(--dark)' }}>{page}</strong> of {totalPages}</>}
-              </span>
-            </div>
+            <span className="text-xs" style={{ color: 'var(--muted)' }}>
+              <strong style={{ color: 'var(--dark)' }}>{filtered.length}</strong> stories
+              {totalPages > 1 && <> — page <strong style={{ color: 'var(--dark)' }}>{page}</strong> of {totalPages}</>}
+            </span>
           </div>
         </AnimateIn>
 
@@ -240,7 +164,7 @@ export default function NewsPage() {
           <AnimateIn direction="up" className="text-center py-24">
             <div className="text-5xl mb-4">📭</div>
             <p className="text-lg font-bold" style={{ color: 'var(--dark)' }}>No stories found</p>
-            <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>Try a different category or filter.</p>
+            <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>Try a different filter.</p>
           </AnimateIn>
         ) : (
           <div className="flex flex-col gap-4">
@@ -264,45 +188,31 @@ export default function NewsPage() {
                     e.currentTarget.style.transform = 'translateY(0)'
                   }}
                 >
-                  {/* Breaking banner */}
-                  {news.is_breaking && (
-                    <div
-                      className="flex items-center gap-2 px-4 py-1.5 text-xs font-black uppercase tracking-widest"
-                      style={{ background: '#dc2626', color: 'white' }}
-                    >
-                      <span className="animate-pulse">●</span> Breaking News
-                    </div>
-                  )}
-
                   <div className="flex gap-0">
-                    {/* Colored left accent bar */}
+                    {/* Left accent bar */}
                     <div
                       className="w-1 flex-shrink-0 self-stretch"
-                      style={{ background: categoryStyle[news.category]?.text ?? 'var(--green)' }}
+                      style={{ background: news.news_type === 'janaza' ? '#0369a1' : 'var(--green)' }}
                     />
 
-                    {/* Main content */}
                     <div className="flex flex-col sm:flex-row flex-1 gap-4 p-4 md:p-5">
-
-                      {/* Text — left side */}
                       <div className="flex-1 min-w-0">
-                        {/* Dateline */}
                         <div className="flex items-center gap-2 mb-2">
                           <span
                             className="text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded"
-                            style={{
-                              background: categoryStyle[news.category]?.bg ?? '#f1f5f9',
-                              color:      categoryStyle[news.category]?.text ?? '#475569',
-                            }}
+                            style={
+                              news.news_type === 'janaza'
+                                ? { background: '#f0f9ff', color: '#0369a1' }
+                                : { background: '#f0fdf4', color: '#166534' }
+                            }
                           >
-                            {news.category}
+                            {news.news_type === 'janaza' ? 'Janaza' : 'சிறப்பு'}
                           </span>
                           <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
                             {new Date(news.published_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                           </span>
                         </div>
 
-                        {/* Headline */}
                         <h2
                           className="tamil-heading font-extrabold text-base md:text-lg mb-2 group-hover:text-green-800 transition-colors"
                           style={{ color: 'var(--dark)', lineHeight: '1.5' }}
@@ -310,7 +220,6 @@ export default function NewsPage() {
                           {news.title}
                         </h2>
 
-                        {/* Body preview */}
                         <p
                           className="tamil-text text-sm"
                           style={{
@@ -318,18 +227,14 @@ export default function NewsPage() {
                             lineHeight: '1.85',
                             fontSize: '0.875rem',
                             display: '-webkit-box',
-                            WebkitLineClamp: 5,
+                            WebkitLineClamp: 3,
                             WebkitBoxOrient: 'vertical',
                             overflow: 'hidden',
                           }}
                         >
-                          {news.excerpt}
-                          {news.content?.trim() && news.content.trim() !== news.excerpt?.trim()
-                            ? ' — ' + news.content.split('\n\n').find(p => p.trim() && p.trim() !== news.excerpt?.trim())
-                            : ''}
+                          {news.content?.split('\n\n')[0] ?? ''}
                         </p>
 
-                        {/* Read more */}
                         <span
                           className="inline-block mt-3 text-xs font-bold"
                           style={{ color: 'var(--green)' }}
@@ -338,7 +243,7 @@ export default function NewsPage() {
                         </span>
                       </div>
 
-                      {/* Thumbnail — fixed 4:3 */}
+                      {/* Thumbnail */}
                       <div
                         className="relative w-full sm:w-44 md:w-52 flex-shrink-0 rounded-xl overflow-hidden"
                         style={{ aspectRatio: '4/3' }}
@@ -354,7 +259,7 @@ export default function NewsPage() {
                         ) : (
                           <div
                             className="absolute inset-0 flex items-center justify-center text-4xl"
-                            style={{ background: categoryStyle[news.category]?.bg ?? 'var(--green-light)' }}
+                            style={{ background: 'var(--green-light)' }}
                           >
                             📰
                           </div>

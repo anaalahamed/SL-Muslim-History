@@ -77,7 +77,7 @@ export default function ArticlesPage() {
     .filter((a) =>
       searchQuery.trim() === '' ||
       a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
+      (a.excerpt ?? '').toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
       if (sortBy === 'popular') return b.views - a.views
@@ -284,7 +284,7 @@ export default function ArticlesPage() {
                           opacity: 0.8,
                         }}
                       >
-                        {buildPreview(article.excerpt, article.content)}
+                        {buildPreview(article.excerpt ?? '', article.content)}
                       </p>
 
                       {/* Footer row */}

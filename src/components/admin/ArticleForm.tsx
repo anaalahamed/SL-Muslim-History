@@ -45,7 +45,6 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
   // ── Fields ──
   const [title,       setTitle]      = useState(initial.title     ?? '')
   const [slug,        setSlug]       = useState(initial.slug      ?? '')
-  const [excerpt,     setExcerpt]    = useState(initial.excerpt   ?? '')
   const [content,     setContent]    = useState(initial.content   ?? '')
   const [featured,    setFeatured]   = useState(initial.is_featured ?? false)
   const [slugLocked,  setSlugLocked] = useState(!!initial.slug)
@@ -172,7 +171,7 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
     const galleryWithFeatured = gallery.map((g, i) => ({ ...g, order: i }))
     const featuredGalleryImg = galleryWithFeatured.find((g) => g.is_featured)
     onSave({
-      title, slug: cleanSlug, excerpt, content,
+      title, slug: cleanSlug, content,
       category:      primaryCat?.name_en ?? '',
       category_slug: selCats[0] ?? '',
       categories:    selCats,
@@ -226,12 +225,6 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
                   </button>
                 </div>
                 {slugError && <p className="text-xs mt-1.5 font-semibold" style={{ color: '#dc2626' }}>{slugError}</p>}
-              </div>
-
-              {/* Excerpt */}
-              <div>
-                <label className="block text-xs font-bold mb-1.5" style={{ color: '#334155' }}>Excerpt (Tamil) <span style={{ color: '#dc2626' }}>*</span></label>
-                <textarea required rows={3} value={excerpt} onChange={(e) => setExcerpt(e.target.value)} placeholder="சுருக்கமான விளக்கம்..." className={inputClass} style={{ ...IS, resize: 'vertical', fontFamily: "'Noto Sans Tamil', sans-serif" }} onFocus={focus} onBlur={blur} />
               </div>
 
               {/* Content */}

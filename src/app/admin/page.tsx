@@ -76,8 +76,8 @@ export default function AdminDashboard() {
           </div>
           <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.15)' }} />
           <div>
-            <div className="text-2xl font-black" style={{ color: '#c9a84c' }}>{news.filter(n => n.is_breaking).length}</div>
-            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Breaking</div>
+            <div className="text-2xl font-black" style={{ color: '#c9a84c' }}>{news.filter(n => n.news_type === 'special').length}</div>
+            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Special</div>
           </div>
         </div>
       </div>
@@ -226,19 +226,19 @@ export default function AdminDashboard() {
               <Link href="/admin/news" className="text-xs font-bold" style={{ color: '#4a9e1f' }}>View all →</Link>
             </div>
             <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
-              {recentNews.map((news) => (
-                <div key={news.id} className="flex items-start gap-3 px-5 py-3">
-                  {news.is_breaking && (
-                    <span
-                      className="flex-shrink-0 text-xs font-black px-1.5 py-0.5 rounded mt-0.5"
-                      style={{ background: '#fee2e2', color: '#dc2626' }}
-                    >
-                      🔴
-                    </span>
-                  )}
+              {recentNews.map((item) => (
+                <div key={item.id} className="flex items-start gap-3 px-5 py-3">
+                  <span
+                    className="flex-shrink-0 text-xs font-bold px-1.5 py-0.5 rounded mt-0.5"
+                    style={item.news_type === 'janaza'
+                      ? { background: '#f0f9ff', color: '#0369a1' }
+                      : { background: '#f0fdf4', color: '#166534' }}
+                  >
+                    {item.news_type === 'janaza' ? 'J' : 'S'}
+                  </span>
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold line-clamp-2" style={{ color: '#1e293b', lineHeight: '1.5' }}>{news.title}</p>
-                    <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>{formatDate(news.published_at)}</p>
+                    <p className="text-xs font-semibold line-clamp-2" style={{ color: '#1e293b', lineHeight: '1.5' }}>{item.title}</p>
+                    <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>{formatDate(item.published_at)}</p>
                   </div>
                 </div>
               ))}
