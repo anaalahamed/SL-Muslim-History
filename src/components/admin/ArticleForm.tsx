@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import { getCategories } from '@/lib/db/categories'
 import { getAuthors, saveAuthor } from '@/lib/db/authors'
+import { getArticles } from '@/lib/db/articles'
 import { Article, Category, Author, GalleryImage } from '@/lib/types'
 import ImageUpload from './ImageUpload'
 import { supabase } from '@/lib/supabase'
@@ -26,10 +27,19 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
   // ── Data ──
   const [categories, setCategories] = useState<Category[]>([])
   const [authors,    setAuthors]    = useState<Author[]>([])
+  const [nextNum,    setNextNum]    = useState(46)
   useEffect(() => {
     getCategories().then(setCategories)
     getAuthors().then(setAuthors)
-  }, [])
+    if (!initial.id) {
+      getArticles().then(articles => {
+        const nums = articles
+          .map(a => { const m = a.slug.match(/^(\d+)-/); return m ? parseInt(m[1]) : 0 })
+          .filter(n => n >= 46)
+        setNextNum(nums.length > 0 ? Math.max(...nums) + 1 : 46)
+      })
+    }
+  }, [initial.id])
 
   const contentRef = useRef<HTMLTextAreaElement>(null)
 
@@ -157,7 +167,11 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
   // ── Submit ──
   function handleTitleChange(val: string) {
     setTitle(val)
-    if (!slugLocked) setSlug(toSlug(val))
+    if (!slugLocked) {
+      const numStr  = String(nextNum).padStart(3, '0')
+      const txtSlug = toSlug(val)
+      setSlug(txtSlug ? `${numStr}-${txtSlug}` : numStr)
+    }
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -182,6 +196,7 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
       featured_image: featuredGalleryImg?.url || image,
       gallery:       galleryWithFeatured,
       published_at:  initial.published_at ?? new Date().toISOString(),
+      ...(initial.id ? {} : { views: 26 }),
     })
   }
 

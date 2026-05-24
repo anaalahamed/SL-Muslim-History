@@ -122,7 +122,7 @@ export default function ArticleDetail({ params }: { params: Promise<{ slug: stri
             </div>
 
             {/* Title */}
-            <h1 className="tamil-heading font-extrabold text-2xl md:text-3xl text-white mb-5" style={{ lineHeight: '1.45', maxWidth: '680px' }}>
+            <h1 className="tamil-heading article-hero-title font-extrabold text-2xl md:text-3xl text-white mb-5" style={{ lineHeight: '1.45', maxWidth: '680px' }}>
               {article.title}
             </h1>
 
@@ -185,7 +185,7 @@ export default function ArticleDetail({ params }: { params: Promise<{ slug: stri
                 )}
 
                 {/* Article content */}
-                <div className="p-6 md:p-10">
+                <div className="article-body-pad p-6 md:p-10">
                   {/* Excerpt / lead */}
                   <p
                     className="tamil-text text-base leading-loose mb-8 pb-8"
@@ -225,10 +225,35 @@ export default function ArticleDetail({ params }: { params: Promise<{ slug: stri
                   {article.gallery && article.gallery.length > 0 && (
                     <div className="mt-8 pt-8" style={{ borderTop: '2px solid var(--green-light)' }}>
                       <h3 className="font-extrabold text-sm mb-1" style={{ color: 'var(--dark)' }}>📷 Photo Gallery</h3>
-                      <p className="text-xs mb-3" style={{ color: 'var(--muted)' }}>Click any photo to view full size</p>
+                      <p className="text-xs mb-3" style={{ color: 'var(--muted)' }}>Use arrows to browse · Click to view full size</p>
                       <GalleryLightbox images={article.gallery} />
                     </div>
                   )}
+
+                  {/* View count */}
+                  <div
+                    className="mt-8 pt-6 flex items-center gap-4 flex-wrap"
+                    style={{ borderTop: '1px solid var(--green-light)' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', background: 'var(--green-pale)', borderRadius: '30px', border: '1px solid var(--green-light)' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--green)', flexShrink: 0 }}>
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                      <span style={{ fontSize: '15px', fontWeight: 800, color: 'var(--green-dark)' }}>{formatViews(article.views)}</span>
+                      <span style={{ fontSize: '13px', color: 'var(--muted)', fontWeight: 500 }}>views</span>
+                    </div>
+                    {article.content && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--muted)', fontSize: '13px' }}>
+                        <span>⏱</span>
+                        <span>{readingTime(article.content)} read</span>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--muted)', fontSize: '13px' }}>
+                      <span>📅</span>
+                      <span>{formatDate(article.published_at)}</span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Footer bar */}
