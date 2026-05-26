@@ -389,6 +389,35 @@ img, video, iframe, embed, object {
 }
 
 /* ════════════════════════════════
+   ACCESSIBILITY — REDUCED MOTION
+════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ticker-move { animation: none !important; }
+  .animate-shimmer, .animate-shimmer-light { animation: none !important; background: #e8e4de !important; }
+}
+
+/* ════════════════════════════════
+   CLS PREVENTION
+════════════════════════════════ */
+/* Reserve space for images while loading to prevent layout shift */
+img {
+  height: auto;
+}
+/* Ensure Next.js Image fill containers don't collapse */
+[style*="position: relative"] > img,
+[style*="position:relative"] > img {
+  position: absolute;
+}
+
+/* ════════════════════════════════
    PRINT
 ════════════════════════════════ */
 @media print {

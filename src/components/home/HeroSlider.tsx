@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
-import { getArticles } from '@/lib/db/articles'
+import { getRecentArticles } from '@/lib/db/articles'
 import { Article } from '@/lib/types'
 import { formatDate } from '@/lib/utils'
 
@@ -37,7 +38,7 @@ export default function HeroSlider() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    getArticles().then((all) => { setSlides(all.slice(0, 5)); setLoading(false) })
+    getRecentArticles(5).then((articles) => { setSlides(articles); setLoading(false) })
   }, [])
 
   const go = (n: number) => {
@@ -55,7 +56,6 @@ export default function HeroSlider() {
   const catBg   = (cat: string) => CATEGORY_COLORS[cat] ?? '#f1f5f9'
   const catText = (cat: string) => CATEGORY_TEXT[cat]   ?? '#475569'
 
-  /* Label row with prev/next */
   const LabelRow = (
     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '6px' }}>
       <div style={{ background: 'var(--green-dark)', color: '#fff', fontSize: '10px', fontWeight: 900, padding: '5px 11px', letterSpacing: '.08em', textTransform: 'uppercase' }}>
@@ -110,16 +110,19 @@ export default function HeroSlider() {
                 padding: '24px 22px 20px',
               }}
             >
-              {/* Background image — more visible now */}
+              {/* Background image — Next.js optimized */}
               {article.featured_image && (
-                <img
+                <Image
                   src={article.featured_image}
                   alt={article.title}
-                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.55 }}
+                  fill
+                  priority={i === 0}
+                  sizes="(max-width: 900px) 100vw, 65vw"
+                  style={{ objectFit: 'cover', opacity: 0.55 }}
                 />
               )}
 
-              {/* Gradient overlay — lighter at top, strong only at bottom for text */}
+              {/* Gradient overlay */}
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(4,14,4,0.88) 0%, rgba(4,14,4,0.45) 45%, rgba(4,14,4,0.08) 100%)' }} />
 
               {/* Slide content */}
@@ -158,7 +161,6 @@ export default function HeroSlider() {
 
         {/* Progress bar + dots */}
         <div style={{ background: 'rgba(0,0,0,0.5)', padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-          {/* Slide dots */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
             {slides.map((_, i) => (
               <button
@@ -176,7 +178,6 @@ export default function HeroSlider() {
               />
             ))}
           </div>
-          {/* Slide counter */}
           <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, letterSpacing: '0.05em' }}>
             {cur + 1} / {slides.length}
           </span>
