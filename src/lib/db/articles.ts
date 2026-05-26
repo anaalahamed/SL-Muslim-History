@@ -40,7 +40,8 @@ export async function getFeaturedArticles(): Promise<Article[]> {
 export async function getRelatedArticles(id: string, category: string): Promise<Article[]> {
   if (!supabase) return mockArticles.filter((a) => a.id !== id && a.category === category).slice(0, 3)
   const { data, error } = await supabase
-    .from('articles').select('*').eq('category', category).neq('id', id).limit(3)
+    .from('articles').select('*').eq('category', category).neq('id', id)
+    .order('published_at', { ascending: false }).limit(3)
   if (error || !data) return []
   return data as Article[]
 }
