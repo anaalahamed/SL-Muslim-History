@@ -15,6 +15,12 @@ interface Props {
   saving?: boolean
 }
 
+function toDatetimeLocal(iso: string): string {
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
 function toSlug(text: string) {
   const ascii = text.toLowerCase().replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-')
   if (!ascii) return `article-${Date.now()}`
@@ -61,6 +67,7 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
   const [slugError,   setSlugError]  = useState('')
   const [image,       setImage]      = useState(initial.featured_image ?? '')
   const [views,       setViews]      = useState(initial.views ?? 26)
+  const [publishedAt, setPublishedAt] = useState(toDatetimeLocal(initial.published_at ?? new Date().toISOString()))
 
   // ── Multiple categories ──
   const [selCats, setSelCats] = useState<string[]>(
@@ -196,7 +203,7 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
       is_featured:   featured,
       featured_image: featuredGalleryImg?.url || image,
       gallery:       galleryWithFeatured,
-      published_at:  initial.published_at ?? new Date().toISOString(),
+      published_at:  new Date(publishedAt).toISOString(),
       views,
     })
   }
@@ -354,6 +361,23 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
               <button type="button" onClick={() => setFeatured(!featured)} className="relative w-11 h-6 rounded-full transition-all flex-shrink-0" style={{ background: featured ? '#4a9e1f' : '#e2e8f0' }}>
                 <span className="absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all" style={{ left: featured ? '22px' : '2px', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
               </button>
+            </div>
+
+            {/* Publish date */}
+            <div className="mb-4">
+              <label className="block text-xs font-bold mb-1.5" style={{ color: '#334155' }}>
+                📅 Publish Date &amp; Time
+              </label>
+              <input
+                type="datetime-local"
+                value={publishedAt}
+                onChange={(e) => setPublishedAt(e.target.value)}
+                className={inputClass} style={IS}
+                onFocus={focus} onBlur={blur}
+              />
+              <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>
+                All listings order by this date. Defaults to now.
+              </p>
             </div>
 
             {/* View count */}
