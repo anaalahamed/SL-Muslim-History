@@ -112,7 +112,7 @@ export default function Footer() {
         {/* Stats strip */}
         <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '16px 24px' }}>
           <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+            <div className="footer-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
               {stats.map((s) => (
                 <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <span style={{ fontSize: '22px' }}>{s.icon}</span>
@@ -128,7 +128,7 @@ export default function Footer() {
 
         {/* Main content */}
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '40px 24px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.4fr', gap: '32px' }}>
+          <div className="footer-main-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.4fr', gap: '32px' }}>
 
             {/* Brand */}
             <div>
@@ -136,7 +136,7 @@ export default function Footer() {
                 <Image src="/logo.png" alt="SL Muslim History" width={110} height={52} className="object-contain" style={{ height: '46px', width: 'auto', display: 'block' }} />
               </div>
               <h3 className="serif-heading" style={{ fontSize: '17px', fontWeight: 700, color: 'white', marginBottom: '4px' }}>
-                இலங்கை முஸ்லிம் வரலாறு
+                இலங்கை முஸ்லிம்களின் வரலாறு
               </h3>
               <p style={{ fontSize: '10px', color: 'var(--gold)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '10px', fontWeight: 700 }}>
                 Sri Lanka Muslim History

@@ -217,6 +217,21 @@ body {
 .link-underline:hover::after { width: 100%; }
 
 /* ════════════════════════════════
+   GLOBAL OVERFLOW GUARD
+════════════════════════════════ */
+html {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+img, video, iframe, embed, object {
+  max-width: 100%;
+}
+
+/* ════════════════════════════════
    MOBILE RESPONSIVE
 ════════════════════════════════ */
 
@@ -292,6 +307,14 @@ body {
     padding-right: 16px !important;
   }
 
+  /* ── Footer grids: collapse on mobile ── */
+  .footer-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .footer-main-grid {
+    grid-template-columns: 1fr !important;
+  }
+
   /* ── Category grid: 2-col on mobile ── */
   .category-grid-cols {
     grid-template-columns: repeat(2, 1fr) !important;
@@ -306,6 +329,9 @@ body {
   .stat-cards-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* ── Prevent any fixed-width child from breaking layout ── */
+  * { max-width: 100%; box-sizing: border-box; }
 }
 
 @media (max-width: 480px) {

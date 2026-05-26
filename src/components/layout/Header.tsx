@@ -104,7 +104,7 @@ export default function Header() {
               className="serif-heading"
               style={{ fontSize: '22px', fontWeight: 900, color: 'var(--green-dark)', lineHeight: 1, letterSpacing: '-0.3px' }}
             >
-              இலங்கை முஸ்லிம் வரலாறு
+              இலங்கை முஸ்லிம்களின் வரலாறு
             </h1>
             <p style={{ fontSize: '10px', color: 'var(--gold)', letterSpacing: '0.16em', textTransform: 'uppercase', marginTop: '3px', fontWeight: 700 }}>
               Sri Lanka Muslim History

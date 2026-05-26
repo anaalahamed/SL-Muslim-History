@@ -4,7 +4,7 @@ export const dynamic = 'force-static'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'SL Muslim History | இலங்கை முஸ்லிம் வரலாறு',
+    name: 'SL Muslim History | இலங்கை முஸ்லிம்களின் வரலாறு',
     short_name: 'SL Muslim History',
     description: "Preserving the rich history and living heritage of Sri Lanka's Muslim community.",
     start_url: '/',
