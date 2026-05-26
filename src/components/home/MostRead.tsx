@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { getArticles } from '@/lib/db/articles'
+import { getMostReadArticles } from '@/lib/db/articles'
 import { Article } from '@/lib/types'
 
 const RANK_COLORS = [
@@ -26,8 +26,7 @@ export default function MostRead() {
   const [loading, setLoading]   = useState(true)
 
   useEffect(() => {
-    getArticles().then((all) => {
-      const top = [...all].sort((a, b) => (b.views ?? 0) - (a.views ?? 0)).slice(0, 5)
+    getMostReadArticles(5).then((top) => {
       setArticles(top)
       setLoading(false)
     })

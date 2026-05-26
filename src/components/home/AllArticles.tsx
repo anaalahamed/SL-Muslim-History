@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { getArticles } from '@/lib/db/articles'
+import { getArticlesPaginated } from '@/lib/db/articles'
 import { Article } from '@/lib/types'
 import { formatDate } from '@/lib/utils'
 
@@ -36,21 +36,21 @@ const BG_FALLBACKS = [
 
 export default function AllArticles() {
   const [articles, setArticles] = useState<Article[]>([])
+  const [total, setTotal]       = useState(0)
   const [page, setPage]         = useState(1)
   const [loading, setLoading]   = useState(true)
 
   useEffect(() => {
-    getArticles().then((all) => {
-      // exclude featured (pinned) articles from this list
-      const rest = all.filter((a) => !a.is_featured)
-      setArticles(rest)
+    setLoading(true)
+    getArticlesPaginated(page, ITEMS_PER_PAGE).then(({ articles, total }) => {
+      setArticles(articles)
+      setTotal(total)
       setLoading(false)
     })
-  }, [])
+  }, [page])
 
-  const totalPages = Math.ceil(articles.length / ITEMS_PER_PAGE)
-  const visible    = articles.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
-  const cat        = (name: string) => CAT_COLORS[name] ?? { bg: '#f1f5f9', text: '#475569' }
+  const totalPages = Math.ceil(total / ITEMS_PER_PAGE)
+  const cat = (name: string) => CAT_COLORS[name] ?? { bg: '#f1f5f9', text: '#475569' }
 
   const goPage = (p: number) => {
     setPage(p)
@@ -84,9 +84,9 @@ export default function AllArticles() {
                 </div>
               </div>
             ))
-          : visible.map((article, i) => {
+          : articles.map((article, i) => {
             const c = cat(article.category)
-            const isLast = i === visible.length - 1
+            const isLast = i === articles.length - 1
             return (
               <Link
                 key={article.id}
@@ -108,7 +108,7 @@ export default function AllArticles() {
                   if (t) t.style.color = 'var(--dark)'
                 }}
               >
-                {/* Thumbnail — stretches to full row height */}
+                {/* Thumbnail */}
                 <div style={{ width: '90px', flexShrink: 0, alignSelf: 'stretch', position: 'relative', background: 'var(--green-light)' }}>
                   {article.featured_image ? (
                     <Image src={article.featured_image} alt={article.title} fill sizes="90px" style={{ objectFit: 'cover' }} />
@@ -119,24 +119,20 @@ export default function AllArticles() {
 
                 {/* Body */}
                 <div style={{ flex: 1, minWidth: 0, padding: '7px 10px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  {/* Category badge */}
                   <div>
                     <span style={{ display: 'inline-block', marginBottom: '3px', fontSize: '9px', fontWeight: 900, letterSpacing: '.09em', textTransform: 'uppercase', padding: '2px 7px', borderRadius: '2px', background: c.bg, color: c.text }}>
                       {article.category}
                     </span>
                   </div>
-                  {/* Title — 2 line clamp */}
                   <p
                     className="art-title"
                     style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '11px', fontWeight: 700, lineHeight: 1.5, color: 'var(--dark)', transition: 'color .2s', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
                   >
                     {article.title}
                   </p>
-                  {/* Excerpt — 1 line */}
                   <p style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '10px', color: 'var(--muted)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginTop: '2px' }}>
                     {article.excerpt}
                   </p>
-                  {/* Meta */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', fontSize: '9px', color: 'var(--muted)' }}>
                     <span>👁 {article.views}</span>
                     <span style={{ color: 'var(--border)' }}>·</span>
@@ -160,9 +156,7 @@ export default function AllArticles() {
           {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
             const p = i + 1
             return (
-              <button key={p} onClick={() => goPage(p)} style={pgBtn(p === page)}>
-                {p}
-              </button>
+              <button key={p} onClick={() => goPage(p)} style={pgBtn(p === page)}>{p}</button>
             )
           })}
           {totalPages > 7 && (
