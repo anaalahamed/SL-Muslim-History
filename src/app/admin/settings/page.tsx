@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getAdminConfig, saveAdminConfig, defaultConfig, AdminConfig, TeamMember, Stat } from '@/lib/adminConfig'
+import { getAdminConfig, saveAdminConfig, saveSocialLinksToSupabase, defaultConfig, AdminConfig, TeamMember, Stat } from '@/lib/adminConfig'
 
 const ADMIN_PASSWORD_KEY = 'slmh_admin_password'
 
@@ -23,6 +23,8 @@ export default function SettingsPage() {
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
     saveAdminConfig(config)
+    // Also persist social links to Supabase so all devices/browsers can read them
+    saveSocialLinksToSupabase(config)
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
   }

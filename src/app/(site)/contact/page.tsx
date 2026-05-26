@@ -5,6 +5,7 @@ import Link from 'next/link'
 import AnimateIn from '@/components/ui/AnimateIn'
 import PageHero from '@/components/ui/PageHero'
 import { getAdminConfig, defaultConfig, AdminConfig } from '@/lib/adminConfig'
+import { supabase } from '@/lib/supabase'
 import { saveMessage } from '@/lib/db/contact'
 
 const faqs = [
@@ -129,7 +130,29 @@ export default function ContactPage() {
   const [form,   setForm]   = useState({ name: '', email: '', reason: '', message: '' })
   const [status, setStatus] = useState<FormState>('idle')
   const [config, setConfig] = useState<AdminConfig>(defaultConfig)
-  useEffect(() => { setConfig(getAdminConfig()) }, [])
+  useEffect(() => {
+    async function load() {
+      // Try Supabase for social links (works on all devices)
+      if (supabase) {
+        try {
+          const { data } = await supabase
+            .from('site_settings')
+            .select('config')
+            .eq('id', 1)
+            .maybeSingle()
+          if (data?.config && typeof data.config === 'object') {
+            const sc = data.config as Record<string, string>
+            if (Object.values(sc).some(Boolean)) {
+              setConfig((prev) => ({ ...prev, ...sc }))
+              return
+            }
+          }
+        } catch { /* fall through */ }
+      }
+      setConfig(getAdminConfig())
+    }
+    load()
+  }, [])
 
   // Build contact info from adminConfig
   const contactInfo = [
@@ -408,16 +431,14 @@ export default function ContactPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-3 p-3 rounded-xl transition-all"
-                        style={{ border: '1px solid var(--border)' }}
+                        style={{ border: '1px solid var(--border)', minWidth: 0, overflow: 'hidden' }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.background = s.color
+                          e.currentTarget.style.background = s.color + '12'
                           e.currentTarget.style.borderColor = s.color
-                          e.currentTarget.style.color = 'white'
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background = 'transparent'
                           e.currentTarget.style.borderColor = 'var(--border)'
-                          e.currentTarget.style.color = ''
                         }}
                       >
                         <div
@@ -426,14 +447,29 @@ export default function ContactPage() {
                         >
                           {s.icon}
                         </div>
-                        <div>
+                        {/* min-w-0 prevents flex child from overflowing */}
+                        <div style={{ minWidth: 0, flex: 1 }}>
                           <div className="text-xs font-bold" style={{ color: 'var(--dark)' }}>{s.label}</div>
-                          <div className="text-xs" style={{ color: 'var(--muted)' }}>{s.href}</div>
+                          <div
+                            className="text-xs"
+                            style={{
+                              color: 'var(--muted)',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              maxWidth: '100%',
+                            }}
+                          >
+                            {s.href}
+                          </div>
                         </div>
+                        <span style={{ fontSize: '12px', color: 'var(--muted)', flexShrink: 0 }}>→</span>
                       </a>
                     ))}
                     {activeSocials.length === 0 && (
-                      <p className="text-xs" style={{ color: 'var(--muted)' }}>No social links configured yet.</p>
+                      <p className="text-xs" style={{ color: 'var(--muted)' }}>
+                        No social links configured yet. Add them in Admin → Settings → Social.
+                      </p>
                     )}
                   </div>
                 </div>

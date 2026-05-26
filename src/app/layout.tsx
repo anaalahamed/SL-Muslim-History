@@ -3,7 +3,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'SL Muslim History | இலங்கை முஸ்லிம் வரலாறு',
+    default: 'SL Muslim History | இலங்கை முஸ்லிம்களின் வரலாறு',
     template: '%s | SL Muslim History',
   },
   description:

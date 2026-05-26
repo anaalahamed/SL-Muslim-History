@@ -4,6 +4,7 @@ import FeaturedArticle from '@/components/home/FeaturedArticle'
 import AllArticles from '@/components/home/AllArticles'
 import JanazaNews from '@/components/home/JanazaNews'
 import MostRead from '@/components/home/MostRead'
+import FollowUs from '@/components/home/FollowUs'
 import CategoryGrid from '@/components/home/CategoryGrid'
 import SidebarAd from '@/components/home/SidebarAd'
 import DonationCTA from '@/components/home/DonationCTA'
@@ -28,6 +29,7 @@ export default function HomePage() {
             <SidebarAd />
             <JanazaNews />
             <MostRead />
+            <FollowUs />
             <CategoryGrid />
           </div>
 
