@@ -25,7 +25,7 @@ export default function AdminLoginPage() {
       const storedUser = localStorage.getItem(ADMIN_USERNAME_KEY) ?? 'admin'
 
       if (username === storedUser && password === storedPwd) {
-        sessionStorage.setItem('slmh_admin_auth', 'true')
+        document.cookie = `slmh_admin_session=1; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
         router.push('/admin')
       } else {
         setError('Incorrect username or password.')
