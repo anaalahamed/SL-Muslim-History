@@ -11,6 +11,12 @@ interface Props {
   saving?: boolean
 }
 
+function toDatetimeLocal(iso: string): string {
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
 function toSlug(text: string) {
   const ascii = text
     .toLowerCase()
@@ -29,7 +35,8 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
   const [newsType,   setNewsType]   = useState<'special' | 'janaza'>(initial.news_type ?? 'special')
   const [slugLocked, setSlugLocked] = useState(!!initial.slug)
   const [slugError,  setSlugError]  = useState('')
-  const [image,      setImage]      = useState(initial.featured_image ?? '')
+  const [image,       setImage]       = useState(initial.featured_image ?? '')
+  const [publishedAt, setPublishedAt] = useState(toDatetimeLocal(initial.published_at ?? new Date().toISOString()))
   const contentRef = useRef<HTMLTextAreaElement>(null)
 
   function insertMarkdown(before: string, after = '', placeholder = '') {
@@ -70,7 +77,7 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
       content,
       news_type:      newsType,
       featured_image: image,
-      published_at:   initial.published_at ?? new Date().toISOString(),
+      published_at:   new Date(publishedAt).toISOString(),
     })
   }
 
@@ -200,6 +207,24 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
           {/* Publish box */}
           <div className="rounded-2xl p-5" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
             <h3 className="text-sm font-extrabold mb-4" style={{ color: '#0f172a' }}>Publish</h3>
+
+            {/* Publish date */}
+            <div className="mb-5">
+              <label className="block text-xs font-bold mb-1.5" style={{ color: '#334155' }}>
+                📅 Publish Date &amp; Time
+              </label>
+              <input
+                type="datetime-local"
+                value={publishedAt}
+                onChange={(e) => setPublishedAt(e.target.value)}
+                className={inputClass}
+                style={inputStyle}
+                onFocus={focus} onBlur={blur}
+              />
+              <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>
+                All listings order by this date. Defaults to now.
+              </p>
+            </div>
 
             {/* News type selector */}
             <div className="mb-5">
