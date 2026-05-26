@@ -29,13 +29,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [unreadMsgs,    setUnreadMsgs]    = useState(0)
   const [newSubs,       setNewSubs]       = useState(0)
 
-  // Auth guard — redirect to login if not authenticated
-  useEffect(() => {
-    if (pathname === '/admin/login') return
-    const auth = sessionStorage.getItem('slmh_admin_auth')
-    if (!auth) router.replace('/admin/login')
-  }, [pathname, router])
-
   // Load owner name from config (fall back to login username if display name not set)
   useEffect(() => {
     const config = getAdminConfig()
@@ -204,7 +197,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.35)' }}>Administrator</div>
           </div>
           <button
-            onClick={() => { sessionStorage.removeItem('slmh_admin_auth'); router.push('/admin/login') }}
+            onClick={() => {
+              document.cookie = 'slmh_admin_session=; path=/; max-age=0'
+              router.push('/admin/login')
+            }}
             title="Sign out"
             className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all"
             style={{ color: 'rgba(255,255,255,0.35)' }}
