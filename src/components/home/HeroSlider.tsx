@@ -84,7 +84,8 @@ export default function HeroSlider() {
   if (loading) return (
     <div>
       {LabelRow}
-      <div style={{ height: '300px', borderRadius: '4px', border: '1px solid var(--border)', overflow: 'hidden' }}>
+      {/* Same height as the real slider so there's no layout shift on load */}
+      <div className="hero-slide-container" style={{ borderRadius: '4px', border: '1px solid var(--border)', overflow: 'hidden', height: '300px' }}>
         <div className="animate-shimmer" style={{ width: '100%', height: '100%' }} />
       </div>
     </div>
@@ -95,8 +96,8 @@ export default function HeroSlider() {
       {LabelRow}
       <div style={{ borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--green-deeper)' }}>
 
-        {/* Slides */}
-        <div style={{ position: 'relative', overflow: 'hidden', height: '300px' }}>
+        {/* Slides — hero-slide-container applies responsive height via CSS */}
+        <div className="hero-slide-container" style={{ position: 'relative', overflow: 'hidden', height: '300px' }}>
           {slides.map((article, i) => (
             <div
               key={article.id}

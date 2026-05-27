@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import FontLoader from '@/components/layout/FontLoader'
 
 const SITE_URL = 'https://srilankamuslimhistory.com'
 const SITE_NAME = 'SL Muslim History'
@@ -44,9 +45,7 @@ export const metadata: Metadata = {
     description: SITE_DESC,
     images: ['/og-image.jpg'],
   },
-  alternates: {
-    canonical: SITE_URL,
-  },
+  alternates: { canonical: SITE_URL },
 }
 
 const jsonLd = {
@@ -60,27 +59,31 @@ const jsonLd = {
   sameAs: [],
 }
 
+// Critical inline CSS — visible immediately, before fonts download.
+// Fallback families chosen to match the metric of the real fonts (reduces CLS).
+const criticalCSS = `
+  body { font-family: system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif; }
+  .serif-heading { font-family: Georgia,'Times New Roman',serif; }
+  .tamil-text,.tamil-heading { font-family: 'Noto Sans Tamil',system-ui,sans-serif; }
+`
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ta" data-scroll-behavior="smooth">
       <head>
+        {/* Preconnect so DNS/TCP is ready when FontLoader requests the stylesheet */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="preload"
-          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;600;700;800&display=swap"
-          as="style"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Lato:wght@400;700;900&family=Noto+Sans+Tamil:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
+        {/* Inline critical font fallbacks — no blocking network request */}
+        <style dangerouslySetInnerHTML={{ __html: criticalCSS }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
+        {/* Loads full Google Fonts stylesheet after hydration — non-render-blocking */}
+        <FontLoader />
         {children}
       </body>
     </html>
