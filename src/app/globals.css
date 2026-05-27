@@ -229,6 +229,32 @@ body {
 }
 img, video, iframe, embed, object {
   max-width: 100%;
+  height: auto;
+}
+
+/* ════════════════════════════════
+   CLS — STABLE IMAGE CONTAINERS
+════════════════════════════════ */
+/* Any div used as a Next.js Image fill container must have an explicit
+   height so the layout doesn't collapse while the image loads */
+[data-image-container] {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sidebar thumbnails */
+.thumb-60  { width: 60px;  min-height: 54px; }
+.thumb-80  { width: 80px;  min-height: 60px; }
+.thumb-90  { width: 90px;  min-height: 72px; }
+.thumb-52  { width: 52px;  min-height: 54px; }
+
+/* ════════════════════════════════
+   PERFORMANCE — CONTENT VISIBILITY
+════════════════════════════════ */
+/* Paint footer lazily — it's always off-screen on first load */
+footer {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 400px;
 }
 
 /* ════════════════════════════════
