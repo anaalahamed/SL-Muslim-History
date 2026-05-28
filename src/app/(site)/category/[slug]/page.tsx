@@ -1,6 +1,16 @@
-// Server component wrapper — provides generateStaticParams for static export
-import { getCategories } from '@/lib/db/categories'
+import type { Metadata } from 'next'
+import { getCategories, getCategoryBySlug } from '@/lib/db/categories'
+import { categoryMetadata } from '@/lib/seo'
 import CategoryPageClient from './CategoryPageClient'
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ slug: string }> }
+): Promise<Metadata> {
+  const { slug } = await params
+  const category = await getCategoryBySlug(slug)
+  if (!category) return { title: 'Category Not Found' }
+  return categoryMetadata(category.name_en, category.name_ta, slug)
+}
 
 export async function generateStaticParams() {
   try {

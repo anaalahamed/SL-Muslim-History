@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { getArticleBySlug } from '@/lib/db/articles'
+import { articleMetadata, articleJsonLd, breadcrumbJsonLd, BASE_URL, SITE_NAME } from '@/lib/seo'
 import ArticleDetail from './ArticleDetail'
 
 export async function generateMetadata(
@@ -8,29 +9,39 @@ export async function generateMetadata(
   const { slug } = await params
   const article = await getArticleBySlug(slug)
   if (!article) return { title: 'Article Not Found' }
-  return {
-    title: article.title,
-    description: article.excerpt,
-    openGraph: {
-      title: article.title,
-      description: article.excerpt,
-      type: 'article',
-      publishedTime: article.published_at,
-      images: article.featured_image
-        ? [{ url: article.featured_image, width: 1200, height: 630, alt: article.title }]
-        : [],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: article.title,
-      description: article.excerpt,
-      images: article.featured_image ? [article.featured_image] : [],
-    },
-  }
+  return articleMetadata(article)
 }
 
-export default function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
-  return <ArticleDetail params={params} />
+export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const article = await getArticleBySlug(slug)
+
+  const breadcrumbs = article
+    ? breadcrumbJsonLd([
+        { name: SITE_NAME, url: BASE_URL },
+        { name: 'Articles', url: `${BASE_URL}/articles` },
+        { name: article.category, url: `${BASE_URL}/category/${article.category_slug}` },
+        { name: article.title, url: `${BASE_URL}/articles/${article.slug}` },
+      ])
+    : null
+
+  return (
+    <>
+      {article && (
+        <>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd(article)) }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+          />
+        </>
+      )}
+      <ArticleDetail params={params} />
+    </>
+  )
 }
 
 export async function generateStaticParams() {

@@ -1,10 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import FontLoader from '@/components/layout/FontLoader'
-
-const SITE_URL = 'https://srilankamuslimhistory.com'
-const SITE_NAME = 'SL Muslim History'
-const SITE_DESC = "Preserving the rich history and living heritage of Sri Lanka's Muslim community."
+import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS, websiteJsonLd, organizationJsonLd } from '@/lib/seo'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -14,14 +11,14 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
+  metadataBase: new URL(BASE_URL),
   title: {
-    default: `${SITE_NAME} | இலங்கை முஸ்லிம்களின் வரலாறு`,
+    default: `Sri Lanka Muslim History | இலங்கை முஸ்லிம்களின் வரலாறு`,
     template: `%s | ${SITE_NAME}`,
   },
-  description: SITE_DESC,
-  keywords: ['Sri Lanka Muslim history', 'இலங்கை முஸ்லிம்', 'Muslim heritage Sri Lanka', 'Tamil Muslim history', 'Islamic history Sri Lanka'],
-  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
+  authors: [{ name: SITE_NAME, url: BASE_URL }],
   creator: SITE_NAME,
   publisher: SITE_NAME,
   robots: {
@@ -33,30 +30,19 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'ta_LK',
     alternateLocale: 'en_US',
-    url: SITE_URL,
+    url: BASE_URL,
     siteName: SITE_NAME,
-    title: `${SITE_NAME} | இலங்கை முஸ்லிம்களின் வரலாறு`,
-    description: SITE_DESC,
+    title: `Sri Lanka Muslim History | இலங்கை முஸ்லிம்களின் வரலாறு`,
+    description: SITE_DESCRIPTION,
     images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: SITE_NAME }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE_NAME} | இலங்கை முஸ்லிம்களின் வரலாறு`,
-    description: SITE_DESC,
+    title: `Sri Lanka Muslim History | இலங்கை முஸ்லிம்களின் வரலாறு`,
+    description: SITE_DESCRIPTION,
     images: ['/og-image.jpg'],
   },
-  alternates: { canonical: SITE_URL },
-}
-
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: SITE_NAME,
-  url: SITE_URL,
-  description: SITE_DESC,
-  inLanguage: ['ta', 'en'],
-  foundingDate: '2020',
-  sameAs: [],
+  alternates: { canonical: BASE_URL },
 }
 
 // Critical inline CSS — visible immediately, before fonts download.
@@ -78,7 +64,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <style dangerouslySetInnerHTML={{ __html: criticalCSS }} />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd()) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
         />
       </head>
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>

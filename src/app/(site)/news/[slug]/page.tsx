@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { getNewsBySlug } from '@/lib/db/news'
+import { newsMetadata, newsJsonLd, breadcrumbJsonLd, BASE_URL, SITE_NAME } from '@/lib/seo'
 import NewsDetail from './NewsDetail'
 
 export async function generateMetadata(
@@ -8,29 +9,42 @@ export async function generateMetadata(
   const { slug } = await params
   const post = await getNewsBySlug(slug)
   if (!post) return { title: 'Story Not Found' }
-  return {
-    title: post.title,
-    description: post.content?.split('\n\n')[0]?.slice(0, 160) ?? post.title,
-    openGraph: {
-      title: post.title,
-      description: post.content?.split('\n\n')[0]?.slice(0, 160) ?? post.title,
-      type: 'article',
-      publishedTime: post.published_at,
-      images: post.featured_image
-        ? [{ url: post.featured_image, width: 1200, height: 630, alt: post.title }]
-        : [],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: post.title,
-      description: post.content?.split('\n\n')[0]?.slice(0, 160) ?? post.title,
-      images: post.featured_image ? [post.featured_image] : [],
-    },
-  }
+  return newsMetadata(post)
 }
 
-export default function NewsPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  return <NewsDetail params={params} />
+export default async function NewsPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const post = await getNewsBySlug(slug)
+
+  const isJanaza = post?.news_type === 'janaza'
+  const sectionLabel = isJanaza ? 'Janaza News' : 'Special News'
+  const sectionPath = isJanaza ? 'news?type=janaza' : 'news?type=special'
+
+  const breadcrumbs = post
+    ? breadcrumbJsonLd([
+        { name: SITE_NAME, url: BASE_URL },
+        { name: sectionLabel, url: `${BASE_URL}/${sectionPath}` },
+        { name: post.title, url: `${BASE_URL}/news/${post.slug}` },
+      ])
+    : null
+
+  return (
+    <>
+      {post && (
+        <>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(newsJsonLd(post)) }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+          />
+        </>
+      )}
+      <NewsDetail params={params} />
+    </>
+  )
 }
 
 export async function generateStaticParams() {
