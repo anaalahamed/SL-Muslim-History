@@ -7,13 +7,15 @@ const BASE = 'https://srilankamuslimhistory.com'
 export const revalidate = 3600
 
 const staticPages: MetadataRoute.Sitemap = [
-  { url: BASE,                         lastModified: new Date(), changeFrequency: 'daily',   priority: 1   },
+  { url: BASE,                         lastModified: new Date(), changeFrequency: 'daily',   priority: 1.0 },
   { url: `${BASE}/articles`,           lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
   { url: `${BASE}/news`,               lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
   { url: `${BASE}/category`,           lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
   { url: `${BASE}/about`,              lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
   { url: `${BASE}/contact`,            lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
   { url: `${BASE}/donate`,             lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+  { url: `${BASE}/privacy`,            lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.3 },
+  { url: `${BASE}/terms`,              lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.3 },
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -25,7 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const db = createClient(supabaseUrl, supabaseKey)
 
-    const [{ data: articles }, { data: news }] = await Promise.all([
+    const [{ data: articles }, { data: news }, { data: categories }] = await Promise.all([
       db.from('articles')
         .select('slug, published_at')
         .order('published_at', { ascending: false })
@@ -34,6 +36,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .select('slug, published_at')
         .order('published_at', { ascending: false })
         .limit(500),
+      db.from('categories')
+        .select('slug')
+        .order('name_en', { ascending: true }),
     ])
 
     const articlePages: MetadataRoute.Sitemap = (articles ?? []).map((a) => ({
@@ -50,7 +55,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }))
 
-    return [...staticPages, ...articlePages, ...newsPages]
+    const categoryPages: MetadataRoute.Sitemap = (categories ?? []).map((c) => ({
+      url: `${BASE}/category/${c.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.75,
+    }))
+
+    return [...staticPages, ...categoryPages, ...articlePages, ...newsPages]
   } catch {
     return staticPages
   }

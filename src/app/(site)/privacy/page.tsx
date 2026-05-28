@@ -1,7 +1,22 @@
-'use client'
-
+import type { Metadata } from 'next'
 import PageHero from '@/components/ui/PageHero'
 import AnimateIn from '@/components/ui/AnimateIn'
+import { BASE_URL, SITE_NAME } from '@/lib/seo'
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy',
+  description: 'Learn how Sri Lanka Muslim History collects, uses, and protects your personal information. We are committed to your privacy and data security.',
+  alternates: { canonical: `${BASE_URL}/privacy` },
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: 'website',
+    url: `${BASE_URL}/privacy`,
+    siteName: SITE_NAME,
+    title: `Privacy Policy | ${SITE_NAME}`,
+    description: 'How we collect, use, and protect your information.',
+    images: [{ url: `${BASE_URL}/og-image.jpg`, width: 1200, height: 630, alt: SITE_NAME }],
+  },
+}
 
 const sections = [
   {

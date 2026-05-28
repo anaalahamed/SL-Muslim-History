@@ -1,5 +1,28 @@
+import type { Metadata } from 'next'
 import dynamic from 'next/dynamic'
 import HeroSlider from '@/components/home/HeroSlider'
+import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
+
+export const metadata: Metadata = {
+  title: `Sri Lanka Muslim History | இலங்கை முஸ்லிம்களின் வரலாறு`,
+  description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
+  alternates: { canonical: BASE_URL },
+  openGraph: {
+    type: 'website',
+    url: BASE_URL,
+    siteName: SITE_NAME,
+    title: `Sri Lanka Muslim History | இலங்கை முஸ்லிம்களின் வரலாறு`,
+    description: SITE_DESCRIPTION,
+    images: [{ url: `${BASE_URL}/og-image.jpg`, width: 1200, height: 630, alt: SITE_NAME }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `Sri Lanka Muslim History | இலங்கை முஸ்லிம்களின் வரலாறு`,
+    description: SITE_DESCRIPTION,
+    images: [`${BASE_URL}/og-image.jpg`],
+  },
+}
 import SpecialNews from '@/components/home/SpecialNews'
 import FeaturedArticle from '@/components/home/FeaturedArticle'
 import AllArticles from '@/components/home/AllArticles'
