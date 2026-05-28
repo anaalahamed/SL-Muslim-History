@@ -43,6 +43,7 @@ export const metadata: Metadata = {
     images: ['/og-image.jpg'],
   },
   alternates: { canonical: BASE_URL },
+  verification: { google: 'MAeIaxJFGMQyiWZsaSBa9wjuTm3VvLJCc_aY8o5a24c' },
 }
 
 // Critical inline CSS — visible immediately, before fonts download.
