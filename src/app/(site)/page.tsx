@@ -4,7 +4,7 @@ import HeroSlider from '@/components/home/HeroSlider'
 import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
 
 export const metadata: Metadata = {
-  title: `Sri Lanka Muslim History | இலங்கை முஸ்லிம்களின் வரலாறு`,
+  title: { absolute: `Sri Lanka Muslim History | இலங்கை முஸ்லிம்களின் வரலாறு` },
   description: SITE_DESCRIPTION,
   keywords: SITE_KEYWORDS,
   alternates: { canonical: BASE_URL },

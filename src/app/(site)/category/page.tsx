@@ -3,7 +3,7 @@ import { BASE_URL, SITE_NAME, SITE_KEYWORDS } from '@/lib/seo'
 import CategoryIndexClient from './CategoryIndexClient'
 
 export const metadata: Metadata = {
-  title: 'Categories | Browse Sri Lanka Muslim History Topics',
+  title: 'Browse by Category',
   description: 'Browse all categories of Sri Lankan Muslim history — Early History, Mosques & Places, Culture & Traditions, Notable Figures, Literature & Arts, Community & Society.',
   keywords: ['Sri Lanka Muslim History categories', 'இலங்கை முஸ்லிம் வகைகள்', ...SITE_KEYWORDS.slice(0, 10)],
   alternates: { canonical: `${BASE_URL}/category` },

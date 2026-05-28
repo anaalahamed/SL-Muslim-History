@@ -3,7 +3,7 @@ import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
 import ArticlesClient from './ArticlesClient'
 
 export const metadata: Metadata = {
-  title: 'Articles | Sri Lanka Muslim History',
+  title: 'Articles',
   description: `Browse all articles on Sri Lankan Muslim history, culture, heritage, and traditions. ${SITE_DESCRIPTION}`,
   keywords: SITE_KEYWORDS,
   alternates: { canonical: `${BASE_URL}/articles` },

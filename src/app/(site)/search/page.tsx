@@ -3,7 +3,7 @@ import { BASE_URL, SITE_NAME } from '@/lib/seo'
 import SearchClient from './SearchClient'
 
 export const metadata: Metadata = {
-  title: 'Search | Sri Lanka Muslim History',
+  title: 'Search',
   description: 'Search articles, news, and historical content about Sri Lankan Muslim history, culture, and heritage.',
   alternates: { canonical: `${BASE_URL}/search` },
   robots: { index: false, follow: true },

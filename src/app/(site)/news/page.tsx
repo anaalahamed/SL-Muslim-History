@@ -3,7 +3,7 @@ import { BASE_URL, SITE_NAME, SITE_KEYWORDS } from '@/lib/seo'
 import NewsClient from './NewsClient'
 
 export const metadata: Metadata = {
-  title: 'News & Updates | Sri Lanka Muslim History',
+  title: 'News & Updates',
   description: 'Latest news, special announcements, and Janaza news from the Sri Lankan Muslim community. Stay informed about community events, heritage discoveries, and cultural milestones.',
   keywords: ['Janaza News Sri Lanka', 'ஜனாஸா செய்திகள்', 'Sri Lanka Muslim News', 'Special News Sri Lanka Muslims', ...SITE_KEYWORDS.slice(0, 10)],
   alternates: { canonical: `${BASE_URL}/news` },
