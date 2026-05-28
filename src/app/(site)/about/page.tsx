@@ -3,7 +3,7 @@ import { BASE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/seo'
 import AboutClient from './AboutClient'
 
 export const metadata: Metadata = {
-  title: 'About Us | Sri Lanka Muslim History',
+  title: 'About Us',
   description: `Learn about Sri Lanka Muslim History — our mission to preserve 1,400 years of Sri Lankan Muslim heritage, culture, and traditions. ${SITE_DESCRIPTION}`,
   alternates: { canonical: `${BASE_URL}/about` },
   robots: { index: true, follow: true },

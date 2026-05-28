@@ -3,7 +3,7 @@ import { BASE_URL, SITE_NAME } from '@/lib/seo'
 import DonateClient from './DonateClient'
 
 export const metadata: Metadata = {
-  title: 'Donate | Support Sri Lanka Muslim History',
+  title: 'Donate',
   description: 'Support the preservation of Sri Lankan Muslim heritage. Your donation helps us research, document, and share 1,400 years of Muslim history in Sri Lanka.',
   alternates: { canonical: `${BASE_URL}/donate` },
   robots: { index: true, follow: true },

@@ -3,7 +3,7 @@ import { BASE_URL, SITE_NAME } from '@/lib/seo'
 import ContactClient from './ContactClient'
 
 export const metadata: Metadata = {
-  title: 'Contact Us | Sri Lanka Muslim History',
+  title: 'Contact Us',
   description: 'Get in touch with Sri Lanka Muslim History. Submit articles, share historical photographs, report errors, or partner with us to preserve Sri Lankan Muslim heritage.',
   alternates: { canonical: `${BASE_URL}/contact` },
   robots: { index: true, follow: true },
