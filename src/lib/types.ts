@@ -39,9 +39,12 @@ export interface NewsPost {
   id: string
   title: string
   slug: string
+  excerpt?: string
   content: string
   featured_image: string
+  is_breaking?: boolean
   news_type: 'special' | 'janaza'
+  category?: string
   published_at: string
 }
 

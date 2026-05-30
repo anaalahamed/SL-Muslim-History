@@ -36,7 +36,7 @@ export async function getMostReadArticles(limit: number): Promise<Article[]> {
     .select('*')
     .order('views', { ascending: false })
     .limit(limit)
-  if (error || !data) return []
+  if (error || !data) return [...mockArticles].sort((a, b) => (b.views ?? 0) - (a.views ?? 0)).slice(0, limit)
   return data as Article[]
 }
 
