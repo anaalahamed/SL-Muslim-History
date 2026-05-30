@@ -16,7 +16,7 @@ export default function CategoryGrid() {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
         <div style={{ width: '4px', height: '18px', background: 'var(--gold)', flexShrink: 0 }} />
-        <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--green-dark)' }}>பிரிவுகள்</span>
+        <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--green-dark)' }}>Categories</span>
         <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
       </div>
 

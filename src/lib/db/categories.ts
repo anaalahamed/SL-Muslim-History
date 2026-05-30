@@ -4,12 +4,21 @@ import { Category } from '../types'
 
 export async function getCategories(): Promise<Category[]> {
   if (!supabase) return mockCategories.map((c) => ({ ...c, parent_id: null }))
-  const { data, error } = await supabase
-    .from('categories')
-    .select('*')
-    .order('name_en', { ascending: true })
-  if (error || !data) return mockCategories.map((c) => ({ ...c, parent_id: null }))
-  return data as Category[]
+
+  const [{ data: cats, error }, { data: articleRows }] = await Promise.all([
+    supabase.from('categories').select('*').order('name_en', { ascending: true }),
+    supabase.from('articles').select('category_slug'),
+  ])
+
+  if (error || !cats) return mockCategories.map((c) => ({ ...c, parent_id: null }))
+
+  // Build a count map from live article data
+  const countMap: Record<string, number> = {}
+  for (const row of (articleRows ?? [])) {
+    if (row.category_slug) countMap[row.category_slug] = (countMap[row.category_slug] ?? 0) + 1
+  }
+
+  return cats.map((cat) => ({ ...cat, article_count: countMap[cat.slug] ?? 0 })) as Category[]
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
