@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from 'next'
+import { Suspense } from 'react'
 import './globals.css'
 import FontLoader from '@/components/layout/FontLoader'
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
+import AnalyticsPageView from '@/components/analytics/AnalyticsPageView'
 import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS, websiteJsonLd, organizationJsonLd } from '@/lib/seo'
 
 export const viewport: Viewport = {
@@ -73,9 +76,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
-        {/* Loads full Google Fonts stylesheet after hydration — non-render-blocking */}
         <FontLoader />
+        <Suspense>
+          <AnalyticsPageView />
+        </Suspense>
         {children}
+        <GoogleAnalytics />
       </body>
     </html>
   )
