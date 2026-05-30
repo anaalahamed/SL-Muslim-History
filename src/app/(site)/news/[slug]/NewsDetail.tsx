@@ -12,6 +12,7 @@ import RichContent from '@/components/ui/RichContent'
 import { DetailPageSkeleton } from '@/components/ui/Skeleton'
 import ReadingProgress from '@/components/ui/ReadingProgress'
 import AdBanner from '@/components/ui/AdBanner'
+import { BASE_URL } from '@/lib/seo'
 
 export default function NewsDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
@@ -35,7 +36,7 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
   if (post === undefined) return <DetailPageSkeleton />
   if (!post) notFound()
 
-  const pageUrl     = typeof window !== 'undefined' ? window.location.href : `https://srilankamuslimhistory.com/news/${slug}`
+  const pageUrl     = typeof window !== 'undefined' ? window.location.href : `${BASE_URL}/news/${slug}`
   const encodedUrl   = encodeURIComponent(pageUrl)
   const encodedTitle = encodeURIComponent(post.title)
 

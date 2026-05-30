@@ -13,6 +13,7 @@ import RichContent from '@/components/ui/RichContent'
 import { DetailPageSkeleton } from '@/components/ui/Skeleton'
 import ReadingProgress from '@/components/ui/ReadingProgress'
 import AdBanner from '@/components/ui/AdBanner'
+import { BASE_URL } from '@/lib/seo'
 import GalleryLightbox from '@/components/ui/GalleryLightbox'
 
 const categoryColors: Record<string, string> = {
@@ -53,7 +54,7 @@ export default function ArticleDetail({ params }: { params: Promise<{ slug: stri
   if (article === undefined) return <DetailPageSkeleton />
   if (!article) notFound()
 
-  const pageUrl = typeof window !== 'undefined' ? window.location.href : `https://srilankamuslimhistory.com/articles/${slug}`
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : `${BASE_URL}/articles/${slug}`
   const encodedUrl   = encodeURIComponent(pageUrl)
   const encodedTitle = encodeURIComponent(article.title)
 

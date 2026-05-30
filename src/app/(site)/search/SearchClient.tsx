@@ -45,6 +45,7 @@ function SearchResults() {
       ))
       setNews(n.filter((x) =>
         x.title.toLowerCase().includes(term) ||
+        (x.excerpt ?? '').toLowerCase().includes(term) ||
         (x.content ?? '').toLowerCase().includes(term)
       ))
       setLoading(false)

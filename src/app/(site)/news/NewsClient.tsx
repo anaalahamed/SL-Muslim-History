@@ -28,7 +28,7 @@ export default function NewsClient() {
   const totalPages = Math.ceil(filtered.length / PER_PAGE)
   const paginated  = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 
-  const featured = allNews[0] ?? null
+  const featured = filtered[0] ?? null
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
