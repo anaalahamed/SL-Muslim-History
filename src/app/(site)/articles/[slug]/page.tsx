@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getArticleBySlug } from '@/lib/db/articles'
 import { articleMetadata, articleJsonLd, breadcrumbJsonLd, BASE_URL, SITE_NAME } from '@/lib/seo'
 import ArticleDetail from './ArticleDetail'
+import GAContentView from '@/components/analytics/GAContentView'
 
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
@@ -36,6 +37,15 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+          />
+          <GAContentView
+            eventName="article_view"
+            params={{
+              article_slug:  article.slug,
+              article_title: article.title,
+              category:      article.category,
+              author:        article.author,
+            }}
           />
         </>
       )}

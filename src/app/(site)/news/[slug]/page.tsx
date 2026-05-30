@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getNewsBySlug } from '@/lib/db/news'
 import { newsMetadata, newsJsonLd, breadcrumbJsonLd, BASE_URL, SITE_NAME } from '@/lib/seo'
 import NewsDetail from './NewsDetail'
+import GAContentView from '@/components/analytics/GAContentView'
 
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
@@ -39,6 +40,14 @@ export default async function NewsPostPage({ params }: { params: Promise<{ slug:
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+          />
+          <GAContentView
+            eventName="news_view"
+            params={{
+              news_slug:  post.slug,
+              news_title: post.title,
+              news_type:  post.news_type,
+            }}
           />
         </>
       )}
