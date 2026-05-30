@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Only guard /admin routes (not the login page itself)
+  // Guard /admin routes — redirect to login if no session cookie
   if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
     const session = request.cookies.get('slmh_admin_session')
     if (!session?.value) {
