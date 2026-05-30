@@ -154,7 +154,7 @@ export function articleJsonLd(article: Article) {
     image: article.featured_image || `${BASE_URL}/og-image.jpg`,
     datePublished: article.published_at,
     dateModified: article.published_at,
-    author: { '@type': 'Person', name: article.author },
+    author: { '@type': 'Person', name: article.author, url: `${BASE_URL}/articles?author=${encodeURIComponent(article.author)}` },
     publisher: {
       '@type': 'Organization',
       name: SITE_NAME,
