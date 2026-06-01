@@ -31,6 +31,8 @@ export default function AdminAdsPage() {
   const betweenNews = ads.filter((a) => a.position === 'between-news')
   const sidebar     = ads.filter((a) => a.position === 'sidebar')
   const banner      = ads.filter((a) => a.position === 'banner')
+  const leftPanel   = ads.filter((a) => a.position === 'left-panel')
+  const rightPanel  = ads.filter((a) => a.position === 'right-panel')
 
   return (
     <div className="max-w-5xl space-y-6">
@@ -52,11 +54,13 @@ export default function AdminAdsPage() {
 
       {/* Info box */}
       <div className="rounded-2xl p-4 text-sm" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
-        <p className="font-bold mb-1" style={{ color: '#166534' }}>Three ad positions available:</p>
+        <p className="font-bold mb-1" style={{ color: '#166534' }}>Five ad positions available:</p>
         <ul className="text-xs space-y-1" style={{ color: '#15803d' }}>
-          <li><strong>Between News</strong> — Sidebar ad between Special News and Latest News sections</li>
-          <li><strong>General Sidebar</strong> — 300×250 box, appears in the right sidebar on article, news, category, and search pages</li>
-          <li><strong>Full Banner</strong> — 728×90 leaderboard, appears between sections on the homepage and listing pages</li>
+          <li><strong>Between News</strong> — Sidebar ad between Special News and Latest News sections on homepage</li>
+          <li><strong>General Sidebar</strong> — 300×250 box on article, news, category, and search page sidebars</li>
+          <li><strong>Full Banner</strong> — 728×90 leaderboard between sections on homepage and listing pages</li>
+          <li><strong>Left Side Panel</strong> — 160px skyscraper column, visible on desktop screens ≥ 1620px</li>
+          <li><strong>Right Side Panel</strong> — 160px skyscraper column, visible on desktop screens ≥ 1620px</li>
         </ul>
       </div>
 
@@ -68,6 +72,12 @@ export default function AdminAdsPage() {
 
       {/* Banner ads */}
       <AdSection title="Full Banner Ads (728×90)" ads={banner} onToggle={handleToggle} onDelete={setDeleteId} />
+
+      {/* Left panel ads */}
+      <AdSection title="Left Side Panel Ads (160px wide · desktop only)" ads={leftPanel} onToggle={handleToggle} onDelete={setDeleteId} />
+
+      {/* Right panel ads */}
+      <AdSection title="Right Side Panel Ads (160px wide · desktop only)" ads={rightPanel} onToggle={handleToggle} onDelete={setDeleteId} />
 
       {ads.length === 0 && (
         <div className="text-center py-16 rounded-2xl" style={{ background: 'white', border: '1px solid #e2e8f0' }}>

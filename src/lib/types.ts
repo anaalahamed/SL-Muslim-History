@@ -63,7 +63,7 @@ export interface Advertisement {
   title: string
   image_url: string
   link_url: string
-  position: 'sidebar' | 'banner' | 'between-news'
+  position: 'sidebar' | 'banner' | 'between-news' | 'left-panel' | 'right-panel'
   is_active: boolean
   created_at: string
 }

@@ -249,6 +249,44 @@ img, video, iframe, embed, object {
 .thumb-52  { width: 52px;  min-height: 54px; }
 
 /* ════════════════════════════════
+   PORTAL LAYOUT — Boxed news portal
+════════════════════════════════ */
+
+/*
+ * Three-column layout: [left ad 168px] [main content flex-1] [right ad 168px]
+ * Side columns appear only on screens ≥ 1620px (large desktop monitors).
+ * Below that breakpoint, portal-side is display:none and portal-main is 100% width.
+ * No existing page layouts need to change — they keep their own max-w-7xl containers.
+ */
+.portal-outer {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.portal-main {
+  flex: 1;
+  min-width: 0; /* prevent flex children from overflowing */
+}
+
+.portal-side {
+  width: 168px;
+  flex-shrink: 0;
+  padding: 16px 4px;
+  display: none;          /* hidden on all screens by default */
+}
+
+/* Show side ad columns only on large desktop monitors */
+@media (min-width: 1620px) {
+  .portal-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+}
+
+/* ════════════════════════════════
    PERFORMANCE — CONTENT VISIBILITY
 ════════════════════════════════ */
 /* Paint footer lazily — it's always off-screen on first load */
