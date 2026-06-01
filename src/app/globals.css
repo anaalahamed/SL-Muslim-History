@@ -254,8 +254,10 @@ img, video, iframe, embed, object {
 
 /*
  * Three-column layout: [left ad 168px] [main content flex-1] [right ad 168px]
- * Side columns appear only on screens ≥ 1620px (large desktop monitors).
- * Below that breakpoint, portal-side is display:none and portal-main is 100% width.
+ * Side columns appear only on screens ≥ 1440px (standard desktop monitors).
+ * At 1440px: main area = 1440 - 336 = 1104px — above the 900px home-grid
+ * collapse threshold, so all two-column layouts remain intact.
+ * Below 1440px portal-side is display:none and portal-main is 100% width.
  * No existing page layouts need to change — they keep their own max-w-7xl containers.
  */
 .portal-outer {
@@ -276,8 +278,8 @@ img, video, iframe, embed, object {
   display: none;          /* hidden on all screens by default */
 }
 
-/* Show side ad columns only on large desktop monitors */
-@media (min-width: 1620px) {
+/* Show side ad columns on standard desktop monitors (1440px+) */
+@media (min-width: 1440px) {
   .portal-side {
     display: flex;
     flex-direction: column;
