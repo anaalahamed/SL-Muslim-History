@@ -1,0 +1,134 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+
+function db() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+}
+
+function stripHtml(str: string): string {
+  return str
+    .replace(/<[^>]*>/g, '')          // strip HTML tags
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .trim()
+}
+
+function isValidUrl(url: string): boolean {
+  if (!url) return true
+  try {
+    const u = new URL(url.startsWith('http') ? url : `https://${url}`)
+    return ['http:', 'https:'].includes(u.protocol)
+  } catch {
+    return false
+  }
+}
+
+// GET /api/comments?article_id=xxx
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const articleId = searchParams.get('article_id')
+
+  if (!articleId) return NextResponse.json({ error: 'Missing article_id' }, { status: 400 })
+
+  const supabase = db()
+  const { data, error } = await supabase
+    .from('comments')
+    .select('id, name, website, content, created_at')
+    .eq('article_id', articleId)
+    .eq('status', 'approved')
+    .order('created_at', { ascending: true })
+
+  if (error) return NextResponse.json([], { status: 200 })
+  return NextResponse.json(data ?? [], { headers: { 'Cache-Control': 'no-store' } })
+}
+
+// POST /api/comments
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { article_id, name, content, website, visitor_id, hp } = body
+
+    // Honeypot — bots fill hidden field
+    if (hp) return NextResponse.json({ error: 'Spam detected', code: 'SPAM' }, { status: 400 })
+
+    // Required field validation
+    if (!article_id || !name || !content || !visitor_id) {
+      return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+    }
+
+    const cleanName    = stripHtml(String(name)).slice(0, 60)
+    const cleanContent = stripHtml(String(content)).slice(0, 1000)
+    const cleanWebsite = website ? String(website).trim().slice(0, 200) : null
+
+    if (cleanName.length < 2) {
+      return NextResponse.json({ error: 'Name too short' }, { status: 400 })
+    }
+    if (cleanContent.length < 10) {
+      return NextResponse.json({ error: 'Comment too short (min 10 characters)' }, { status: 400 })
+    }
+    if (cleanWebsite && !isValidUrl(cleanWebsite)) {
+      return NextResponse.json({ error: 'Invalid website URL' }, { status: 400 })
+    }
+    if (typeof visitor_id !== 'string' || visitor_id.length > 200) {
+      return NextResponse.json({ error: 'Invalid visitor_id' }, { status: 400 })
+    }
+
+    const supabase = db()
+
+    // Rate limit: max 3 comments per visitor per hour
+    const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    const { count } = await supabase
+      .from('comments')
+      .select('id', { count: 'exact', head: true })
+      .eq('visitor_id', visitor_id)
+      .gte('created_at', hourAgo)
+
+    if ((count ?? 0) >= 3) {
+      return NextResponse.json({ error: 'Too many comments. Please wait before submitting again.', code: 'RATE_LIMIT' }, { status: 429 })
+    }
+
+    // Block check
+    const { data: blocked } = await supabase
+      .from('comment_blocks')
+      .select('id')
+      .eq('visitor_id', visitor_id)
+      .maybeSingle()
+
+    if (blocked) {
+      return NextResponse.json({ error: 'Commenting is not available for your account.', code: 'SPAM' }, { status: 403 })
+    }
+
+    // Get IP hash for logging
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      ?? request.headers.get('x-real-ip')
+      ?? 'unknown'
+    let ipHash = ''
+    try {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ip + ':slmh26'))
+      ipHash = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('')
+    } catch { /* optional field */ }
+
+    const { error } = await supabase.from('comments').insert({
+      article_id: String(article_id).slice(0, 200),
+      name:       cleanName,
+      website:    cleanWebsite,
+      content:    cleanContent,
+      visitor_id: String(visitor_id).slice(0, 200),
+      ip_hash:    ipHash,
+      status:     'pending',
+    })
+
+    if (error) return NextResponse.json({ error: 'Failed to submit comment' }, { status: 500 })
+
+    return NextResponse.json({ success: true, message: 'Comment submitted for moderation' })
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+  }
+}

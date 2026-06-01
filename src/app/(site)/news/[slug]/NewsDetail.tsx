@@ -13,6 +13,7 @@ import { DetailPageSkeleton } from '@/components/ui/Skeleton'
 import ReadingProgress from '@/components/ui/ReadingProgress'
 import AdBanner from '@/components/ui/AdBanner'
 import { BASE_URL } from '@/lib/seo'
+import ReactionBar from '@/components/article/ReactionBar'
 
 export default function NewsDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
@@ -27,7 +28,7 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
       if (data) {
         getNews().then((all) => {
           setRelated(all.filter((n) => n.id !== data.id && n.news_type === data.news_type).slice(0, 3))
-          setRecent(all.filter((n) => n.id !== data.id).slice(0, 4))
+          setRecent(all.filter((n) => n.id !== data.id && n.news_type === data.news_type).slice(0, 4))
         })
       }
     })
@@ -345,6 +346,11 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
               <AdBanner position="sidebar" />
 
             </div>
+          </div>
+
+          {/* Reaction bar — full width below article+sidebar grid */}
+          <div className="mt-6">
+            <ReactionBar contentType="news" contentId={post.id} />
           </div>
         </div>
       </div>

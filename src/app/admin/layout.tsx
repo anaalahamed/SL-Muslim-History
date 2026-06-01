@@ -14,6 +14,8 @@ const navItems = [
   { label: 'News',        href: '/admin/news',          icon: '📰' },
   { label: 'Categories',  href: '/admin/categories',    icon: '🗂️' },
   { label: 'Authors',     href: '/admin/authors',        icon: '✍️' },
+  { label: 'Comments',    href: '/admin/comments',      icon: '💬' },
+  { label: 'Reactions',   href: '/admin/reactions',     icon: '⭐' },
   { label: 'Messages',    href: '/admin/messages',      icon: '✉️' },
   { label: 'Homepage',    href: '/admin/homepage',      icon: '🏠' },
   { label: 'Ads',          href: '/admin/ads',            icon: '📢' },

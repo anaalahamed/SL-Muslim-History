@@ -14,6 +14,8 @@ import { DetailPageSkeleton } from '@/components/ui/Skeleton'
 import ReadingProgress from '@/components/ui/ReadingProgress'
 import AdBanner from '@/components/ui/AdBanner'
 import { BASE_URL } from '@/lib/seo'
+import ReactionBar from '@/components/article/ReactionBar'
+import CommentSection from '@/components/article/CommentSection'
 import GalleryLightbox from '@/components/ui/GalleryLightbox'
 
 const categoryColors: Record<string, string> = {
@@ -296,6 +298,10 @@ export default function ArticleDetail({ params }: { params: Promise<{ slug: stri
                 </div>
               </div>
             </AnimateIn>
+
+            {/* Reactions + Comments below article card */}
+            <ReactionBar contentType="article" contentId={article.id} />
+            <CommentSection articleId={article.id} />
           </div>
 
           {/* Sidebar */}
