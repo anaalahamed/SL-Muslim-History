@@ -6,7 +6,6 @@ import AnimateIn from '@/components/ui/AnimateIn'
 export default function DonationCTA() {
   return (
     <section style={{ background: 'var(--green-deeper)', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '56px 24px' }}>
-      <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
         <AnimateIn direction="up">
           <div
             style={{
@@ -110,7 +109,6 @@ export default function DonationCTA() {
             </div>
           </div>
         </AnimateIn>
-      </div>
     </section>
   )
 }

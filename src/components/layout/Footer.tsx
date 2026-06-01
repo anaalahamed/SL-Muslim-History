@@ -102,23 +102,21 @@ export default function Footer() {
 
         {/* Stats strip */}
         <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '16px 24px' }}>
-          <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-            <div className="footer-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-              {stats.map((s) => (
-                <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '22px' }}>{s.icon}</span>
-                  <div>
-                    <p style={{ fontSize: '14px', fontWeight: 900, color: 'var(--gold)', lineHeight: 1 }}>{s.value}</p>
-                    <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.38)', marginTop: '3px' }}>{s.label}</p>
-                  </div>
+          <div className="footer-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+            {stats.map((s) => (
+              <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '22px' }}>{s.icon}</span>
+                <div>
+                  <p style={{ fontSize: '14px', fontWeight: 900, color: 'var(--gold)', lineHeight: 1 }}>{s.value}</p>
+                  <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.38)', marginTop: '3px' }}>{s.label}</p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Main content */}
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '40px 24px' }}>
+        <div style={{ padding: '40px 24px' }}>
           <div className="footer-main-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.4fr', gap: '32px' }}>
 
             {/* Brand */}
@@ -236,8 +234,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '14px 24px' }}>
-          <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.28)' }}>
               © {year || ''} SL Muslim History · Designed by{' '}
               <a
@@ -264,7 +261,6 @@ export default function Footer() {
                 </Link>
               ))}
             </div>
-          </div>
         </div>
 
       </footer>
