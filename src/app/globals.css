@@ -253,32 +253,52 @@ img, video, iframe, embed, object {
 ════════════════════════════════ */
 
 /*
- * Three-column layout: [left ad 168px] [main content flex-1] [right ad 168px]
- * Side columns appear only on screens ≥ 1440px (standard desktop monitors).
- * At 1440px: main area = 1440 - 336 = 1104px — above the 900px home-grid
- * collapse threshold, so all two-column layouts remain intact.
- * Below 1440px portal-side is display:none and portal-main is 100% width.
- * No existing page layouts need to change — they keep their own max-w-7xl containers.
+ * Three-column portal layout
+ * ─────────────────────────────────────────────────────────────
+ * Structure:  [left-ad 168px] | [portal-center flex-1] | [right-ad 168px]
+ *
+ * portal-center holds the ENTIRE site:
+ *   AnnouncementBanner → Header → BreakingTicker → <main> → Footer
+ * All visual sections therefore share exactly the same width, which
+ * eliminates the header/footer/content width mismatch.
+ *
+ * Side columns:
+ *   • display:none below 1440px  →  phones, tablets, 1280px laptops
+ *     are completely unaffected — same layout as before the portal upgrade.
+ *   • display:flex at ≥ 1440px   →  standard desktop monitors show ads.
+ *   • At 1440px: portal-center = 1440 − 336 = 1104px.
+ *     All max-w-7xl (1280px) containers inside portal-center are capped at
+ *     1104px — they do not overflow because max-width is a ceiling, not min.
+ *     1104px > 900px so the home-grid two-column layout stays intact.
+ *
+ * Sticky footer works because:
+ *   body          flex-col min-h-screen
+ *   portal-outer  flex-1 (fills body height)
+ *   portal-center flex-1 flex-col (stretch within portal-outer height)
+ *   main          flex-1 (pushes Footer to bottom of portal-center)
  */
 .portal-outer {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch; /* side panels stretch to match portal-center height */
   width: 100%;
 }
 
-.portal-main {
+/* Center column — contains header, content, footer (all share one width) */
+.portal-center {
   flex: 1;
-  min-width: 0; /* prevent flex children from overflowing */
+  min-width: 0;         /* prevent flex-child overflow */
+  display: flex;
+  flex-direction: column;
 }
 
 .portal-side {
   width: 168px;
   flex-shrink: 0;
   padding: 16px 4px;
-  display: none;          /* hidden on all screens by default */
+  display: none;        /* hidden on all screens by default */
 }
 
-/* Show side ad columns on standard desktop monitors (1440px+) */
+/* Show side ad columns on standard desktop monitors (≥ 1440px) */
 @media (min-width: 1440px) {
   .portal-side {
     display: flex;
