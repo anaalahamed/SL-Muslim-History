@@ -163,7 +163,7 @@ export default function AdminCategoriesPage() {
               </div>
               {/* Subcategory rows */}
               {subs.map((sub) => (
-                <div key={sub.id} className="flex items-center gap-4 p-3 pl-10" style={{ background: '#fafafa', borderTop: '1px solid #f1f5f9' }}>
+                <div key={sub.id} className="flex items-center gap-3 p-3 pl-5 sm:pl-10" style={{ background: '#fafafa', borderTop: '1px solid #f1f5f9' }}>
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0" style={{ background: '#f0fdf4' }}>{sub.icon}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-bold" style={{ color: '#334155' }}>{sub.name_en}</p>

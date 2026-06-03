@@ -242,7 +242,7 @@ export default function ImageCropModal({ imageSrc, fileName, onDone, onCancel, o
 
         {/* ── Footer ── */}
         <div
-          className="px-5 py-4 flex items-center justify-between flex-shrink-0"
+          className="px-4 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 flex-shrink-0"
           style={{ borderTop: '1px solid #e2e8f0' }}
         >
           <p className="text-xs" style={{ color: '#94a3b8' }}>
