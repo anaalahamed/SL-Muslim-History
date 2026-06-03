@@ -83,7 +83,7 @@ export default function Header() {
           background: 'var(--white)',
           borderBottom: '1px solid var(--border)',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'space-between',
           gap: '10px',
         }}
@@ -102,7 +102,7 @@ export default function Header() {
           <div style={{ minWidth: 0 }}>
             <h1
               className="serif-heading"
-              style={{ fontSize: 'clamp(14px, 4vw, 22px)', fontWeight: 900, color: 'var(--green-dark)', lineHeight: 1.1, letterSpacing: '-0.3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              style={{ fontSize: 'clamp(13px, 3.8vw, 22px)', fontWeight: 900, color: 'var(--green-dark)', lineHeight: 1.2, letterSpacing: '-0.3px' }}
             >
               இலங்கை முஸ்லிம்களின் வரலாறு
             </h1>
@@ -113,7 +113,7 @@ export default function Header() {
         </Link>
 
         {/* Right: search + donate + mobile toggle — never shrink below icon size */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, paddingTop: '2px' }}>
           {/* Donate — desktop */}
           <Link
             href="/donate"
