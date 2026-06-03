@@ -88,7 +88,12 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
               <span style={{ color: 'rgba(255,255,255,0.25)' }}>/</span>
               <Link href="/news" className="hover:text-white transition-colors">News</Link>
               <span style={{ color: 'rgba(255,255,255,0.25)' }}>/</span>
-              <span style={{ color: 'var(--gold)' }}>{typeLabel}</span>
+              <Link
+                href={post.news_type === 'janaza' ? '/news/janaza' : '/news/special'}
+                className="hover:text-white transition-colors"
+              >
+                {typeLabel}
+              </Link>
             </div>
 
             {/* Gold bar + type badge */}
@@ -171,13 +176,13 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
                     <span>SL Muslim History Editorial</span>
                   </div>
                   <Link
-                    href="/news"
+                    href={post.news_type === 'janaza' ? '/news/janaza' : '/news/special'}
                     className="text-sm font-semibold px-5 py-2 rounded-xl transition-all"
                     style={{ background: 'var(--green-light)', color: 'var(--green)', border: '1px solid var(--border)' }}
                     onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--green)'; e.currentTarget.style.color = 'white' }}
                     onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--green-light)'; e.currentTarget.style.color = 'var(--green)' }}
                   >
-                    ← Back to News
+                    ← Back to {post.news_type === 'janaza' ? 'Janaza News' : 'Special News'}
                   </Link>
                 </div>
               </div>
@@ -282,13 +287,13 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
                     ))}
                   </div>
                   <Link
-                    href="/news"
+                    href={post.news_type === 'janaza' ? '/news/janaza' : '/news/special'}
                     className="block text-center text-xs font-bold mt-4 py-2 rounded-xl transition-all"
                     style={{ background: 'var(--green-light)', color: 'var(--green)' }}
                     onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--green)'; e.currentTarget.style.color = 'white' }}
                     onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--green-light)'; e.currentTarget.style.color = 'var(--green)' }}
                   >
-                    View all news →
+                    View all {post.news_type === 'janaza' ? 'Janaza News' : 'Special News'} →
                   </Link>
                 </div>
               </AnimateIn>

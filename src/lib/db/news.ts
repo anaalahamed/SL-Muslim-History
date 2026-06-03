@@ -36,6 +36,17 @@ export async function getJanazaNews(limit = 5): Promise<NewsPost[]> {
   return data as NewsPost[]
 }
 
+export async function getAllNewsByType(type: 'special' | 'janaza'): Promise<NewsPost[]> {
+  if (!supabase) return mockNews.filter((n) => n.news_type === type)
+  const { data, error } = await supabase
+    .from('news')
+    .select('*')
+    .eq('news_type', type)
+    .order('published_at', { ascending: false })
+  if (error || !data) return mockNews.filter((n) => n.news_type === type)
+  return data as NewsPost[]
+}
+
 export async function getNewsBySlug(slug: string): Promise<NewsPost | null> {
   if (!supabase) return mockNews.find((n) => n.slug === slug) ?? null
   const { data, error } = await supabase

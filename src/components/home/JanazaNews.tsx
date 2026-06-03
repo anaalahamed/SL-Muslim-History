@@ -29,7 +29,7 @@ export default function JanazaNews() {
         <div style={{ width: '4px', height: '18px', background: 'var(--gold)', flexShrink: 0 }} />
         <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--green-dark)' }}>Janaza News</span>
         <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
-        <Link href="/news" style={{ fontSize: '10px', fontWeight: 700, color: 'var(--gold)' }}>All →</Link>
+        <Link href="/news/janaza" style={{ fontSize: '10px', fontWeight: 700, color: 'var(--gold)' }}>All →</Link>
       </div>
 
       <div style={{ background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '3px', overflow: 'hidden' }}>

@@ -79,7 +79,7 @@ export default function SpecialNews() {
         }
 
         <div style={{ padding: '6px 10px', borderTop: '1px solid var(--border)' }}>
-          <Link href="/news" style={{ fontSize: '10px', fontWeight: 700, color: 'var(--green)' }}>
+          <Link href="/news/special" style={{ fontSize: '10px', fontWeight: 700, color: 'var(--green)' }}>
             View all special news →
           </Link>
         </div>
