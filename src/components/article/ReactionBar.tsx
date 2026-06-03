@@ -3,14 +3,20 @@
 import { useState, useEffect, useCallback } from 'react'
 import Emoji from '@/components/ui/Emoji'
 import { getVisitorId, hashVisitorId } from '@/lib/fingerprint'
-import { REACTIONS, REACTION_LABELS } from '@/lib/reactions'
+import { DEFAULT_REACTIONS, JANAZA_REACTIONS, REACTION_LABELS } from '@/lib/reactions'
 
 interface Count { emoji: string; count: number }
-interface Props  { contentType: 'article' | 'news'; contentId: string }
+interface Props {
+  contentType: 'article' | 'news'
+  contentId:   string
+  /** Pass 'janaza' for Janaza News. All other content uses the default social order. */
+  order?:      'janaza' | 'default'
+}
 
 const STORE_KEY = (type: string, id: string) => `slmh_reaction_${type}_${id}`
 
-export default function ReactionBar({ contentType, contentId }: Props) {
+export default function ReactionBar({ contentType, contentId, order = 'default' }: Props) {
+  const REACTIONS = order === 'janaza' ? JANAZA_REACTIONS : DEFAULT_REACTIONS
   const [counts,     setCounts]     = useState<Count[]>(REACTIONS.map((e) => ({ emoji: e, count: 0 })))
   const [myReaction, setMyReaction] = useState<string | null>(null)
   const [loaded,     setLoaded]     = useState(false)

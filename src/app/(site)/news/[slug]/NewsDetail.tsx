@@ -355,7 +355,11 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
 
           {/* Reaction bar — full width below article+sidebar grid */}
           <div className="mt-6">
-            <ReactionBar contentType="news" contentId={post.id} />
+            <ReactionBar
+              contentType="news"
+              contentId={post.id}
+              order={post.news_type === 'janaza' ? 'janaza' : 'default'}
+            />
           </div>
         </div>
       </div>
