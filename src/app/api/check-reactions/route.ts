@@ -63,6 +63,11 @@ export async function GET() {
   const allOk = Object.values(results).every((r) => r.ok)
 
   const RLS_SQL = `
+-- Step 1: grant table-level access to the anon and authenticated roles
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE reactions TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE reactions TO authenticated;
+
+-- Step 2: enable RLS and create permissive policies
 ALTER TABLE reactions ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "reactions_select" ON reactions;
