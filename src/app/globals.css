@@ -433,6 +433,11 @@ footer {
 
   /* ── Prevent any fixed-width child from breaking layout ── */
   * { max-width: 100%; box-sizing: border-box; }
+
+  /* ── Ticker: must be wider than viewport to animate correctly ── */
+  /* The * rule above caps width at 100% of parent, which breaks translateX(-50%).
+     Restore unconstrained width so the keyframe scrolls the full content distance. */
+  .ticker-move { max-width: none; width: max-content; }
 }
 
 @media (max-width: 480px) {
