@@ -60,10 +60,15 @@ export default function ReactionBar({ contentType, contentId }: Props) {
         body: JSON.stringify({ content_type: contentType, content_id: contentId, emoji, visitor_id: hid }),
       })
       if (res.ok) {
-        const { reactions } = await res.json()
-        setCounts(REACTIONS.map((e) => ({ emoji: e, count: reactions.find((r: Count) => r.emoji === e)?.count ?? 0 })))
+        const body = await res.json()
+        // 'recount_failed' means the write succeeded but SELECT is blocked by RLS.
+        // Keep the optimistic count rather than resetting everything to zero.
+        if (body.reactions !== 'recount_failed') {
+          const reactions: Count[] = body.reactions
+          setCounts(REACTIONS.map((e) => ({ emoji: e, count: reactions.find((r) => r.emoji === e)?.count ?? 0 })))
+        }
       } else {
-        // Revert optimistic update on server error
+        // Revert optimistic update on server error (INSERT/UPDATE/DELETE failed)
         setCounts(prevC)
         setMyReaction(prevR)
         if (prevR) localStorage.setItem(key, prevR); else localStorage.removeItem(key)

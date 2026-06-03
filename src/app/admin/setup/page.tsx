@@ -15,14 +15,56 @@ type CheckResult = {
   message?:       string
 }
 
-const SQL = 'ALTER TABLE news ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE;'
+type RlsOp    = { ok: boolean; error?: string }
+type RlsResult = {
+  all_ok:     boolean
+  operations: { INSERT: RlsOp; SELECT: RlsOp; UPDATE: RlsOp; DELETE: RlsOp }
+  diagnosis:  string
+  fix_sql:    string | null
+}
+
+const SQL     = 'ALTER TABLE news ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE;'
+const RLS_SQL = `ALTER TABLE reactions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "reactions_select" ON reactions
+  FOR SELECT USING (true);
+
+CREATE POLICY IF NOT EXISTS "reactions_insert" ON reactions
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY IF NOT EXISTS "reactions_update" ON reactions
+  FOR UPDATE USING (true) WITH CHECK (true);
+
+CREATE POLICY IF NOT EXISTS "reactions_delete" ON reactions
+  FOR DELETE USING (true);`
 
 export default function SetupPage() {
-  const [result,  setResult]  = useState<CheckResult | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [running, setRunning] = useState(false)
-  const [migrMsg, setMigrMsg] = useState('')
-  const [copied,  setCopied]  = useState(false)
+  const [result,     setResult]     = useState<CheckResult | null>(null)
+  const [loading,    setLoading]    = useState(true)
+  const [running,    setRunning]    = useState(false)
+  const [migrMsg,    setMigrMsg]    = useState('')
+  const [copied,     setCopied]     = useState(false)
+  const [rlsResult,  setRlsResult]  = useState<RlsResult | null>(null)
+  const [rlsLoading, setRlsLoading] = useState(false)
+  const [rlsCopied,  setRlsCopied]  = useState(false)
+
+  async function testRls() {
+    setRlsLoading(true)
+    try {
+      const r = await fetch('/api/check-reactions')
+      setRlsResult(await r.json())
+    } catch {
+      setRlsResult(null)
+    }
+    setRlsLoading(false)
+  }
+
+  function copyRlsSql() {
+    navigator.clipboard.writeText(RLS_SQL).then(() => {
+      setRlsCopied(true)
+      setTimeout(() => setRlsCopied(false), 2500)
+    })
+  }
 
   useEffect(() => { load() }, [])
 
@@ -278,6 +320,98 @@ export default function SetupPage() {
 
         </>
       )}
+
+      {/* ══════════════════════════════════════════════════════════════════
+          SECTION 2 — Reactions RLS Check
+      ══════════════════════════════════════════════════════════════════ */}
+      <div style={{ borderTop: '2px solid #e2e8f0', paddingTop: '24px', marginTop: '8px' }}>
+        <h3 className="text-base font-extrabold mb-1" style={{ color: '#0f172a' }}>Reactions — RLS Check</h3>
+        <p className="text-sm mb-4" style={{ color: '#64748b' }}>
+          If clicking a reaction flashes a count then immediately returns to zero, the Supabase
+          <code style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: 4, fontSize: 12 }}> reactions </code>
+          table is blocking the anon key via Row Level Security. Click the button to test all four operations.
+        </p>
+
+        <button
+          onClick={testRls}
+          disabled={rlsLoading}
+          className="px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all mb-4"
+          style={{ background: rlsLoading ? '#94a3b8' : '#0369a1', cursor: rlsLoading ? 'wait' : 'pointer' }}
+        >
+          {rlsLoading ? '⏳ Testing…' : '🔍 Test Reactions RLS'}
+        </button>
+
+        {rlsResult && (
+          <div className="space-y-4">
+            {/* Per-operation status */}
+            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #e2e8f0', background: 'white' }}>
+              <div className="px-5 py-3" style={{ borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
+                <p className="text-xs font-black uppercase tracking-wider" style={{ color: '#94a3b8' }}>
+                  RLS operation results (anon key)
+                </p>
+              </div>
+              {(['INSERT', 'SELECT', 'UPDATE', 'DELETE'] as const).map((op) => {
+                const r = rlsResult.operations[op]
+                return (
+                  <div
+                    key={op}
+                    className="flex items-center gap-4 px-5 py-3"
+                    style={{ borderBottom: op !== 'DELETE' ? '1px solid #f8fafc' : 'none' }}
+                  >
+                    <span style={{ fontSize: 16 }}>{r.ok ? '✅' : '❌'}</span>
+                    <span className="text-sm font-bold w-16" style={{ color: r.ok ? '#166534' : '#dc2626' }}>{op}</span>
+                    <span className="text-xs flex-1" style={{ color: r.ok ? '#64748b' : '#dc2626' }}>
+                      {r.ok ? 'Allowed' : (r.error ?? 'Blocked')}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Diagnosis */}
+            <div
+              className="rounded-2xl p-4"
+              style={{
+                background: rlsResult.all_ok ? '#f0fdf4' : '#fef2f2',
+                border: `1px solid ${rlsResult.all_ok ? '#86efac' : '#fecaca'}`,
+              }}
+            >
+              <p className="text-sm font-semibold" style={{ color: rlsResult.all_ok ? '#166534' : '#dc2626' }}>
+                {rlsResult.all_ok ? '✅ Reactions are fully working — RLS is correctly configured.' : '❌ ' + rlsResult.diagnosis}
+              </p>
+            </div>
+
+            {/* Fix SQL */}
+            {!rlsResult.all_ok && (
+              <div className="rounded-2xl p-5" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
+                <p className="text-sm font-extrabold mb-1" style={{ color: '#0f172a' }}>Fix — run this SQL in Supabase</p>
+                <p className="text-xs mb-3" style={{ color: '#64748b' }}>
+                  Go to <strong>supabase.com</strong> → your project → <strong>SQL Editor</strong> → <strong>New query</strong> → paste → click <strong>Run</strong>.
+                </p>
+                <div className="relative">
+                  <pre
+                    className="rounded-xl p-4 text-xs overflow-x-auto"
+                    style={{ background: '#0f172a', color: '#86efac', fontFamily: 'monospace', lineHeight: 1.7 }}
+                  >
+{RLS_SQL}
+                  </pre>
+                  <button
+                    onClick={copyRlsSql}
+                    className="absolute top-2 right-2 px-3 py-1.5 rounded-lg text-xs font-bold"
+                    style={{ background: rlsCopied ? '#22c55e' : '#1e293b', color: 'white' }}
+                  >
+                    {rlsCopied ? '✓ Copied!' : 'Copy'}
+                  </button>
+                </div>
+                <p className="text-xs mt-3" style={{ color: '#94a3b8' }}>
+                  After running, click <strong>Test Reactions RLS</strong> again to confirm all four operations turn green.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
     </div>
   )
 }
