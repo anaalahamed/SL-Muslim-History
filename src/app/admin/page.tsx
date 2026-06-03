@@ -56,7 +56,7 @@ export default function AdminDashboard() {
 
       {/* Welcome banner */}
       <div
-        className="rounded-2xl px-7 py-6 flex items-center justify-between gap-6"
+        className="rounded-2xl px-5 sm:px-7 py-5 sm:py-6 flex flex-wrap items-center justify-between gap-4"
         style={{ background: 'linear-gradient(135deg, #1a3a0f 0%, #2d6112 100%)', color: 'white' }}
       >
         <div>
@@ -152,9 +152,9 @@ export default function AdminDashboard() {
                   <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{article.title}</p>
                   <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{article.category} · {formatDate(article.published_at)}</p>
                 </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
+                <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                   <span
-                    className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                    className="hidden sm:inline text-xs px-2 py-0.5 rounded-full font-semibold"
                     style={{
                       background: article.is_featured ? '#f0fdf4' : '#f8fafc',
                       color:      article.is_featured ? '#4a9e1f' : '#94a3b8',
@@ -162,10 +162,10 @@ export default function AdminDashboard() {
                   >
                     {article.is_featured ? '✦ Featured' : 'Draft'}
                   </span>
-                  <span className="text-xs" style={{ color: '#94a3b8' }}>👁 {formatViews(article.views)}</span>
+                  <span className="hidden sm:inline text-xs" style={{ color: '#94a3b8' }}>👁 {formatViews(article.views)}</span>
                   <Link
                     href={`/admin/articles/${article.id}`}
-                    className="text-xs font-bold px-3 py-1 rounded-lg transition-all"
+                    className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
                     style={{ background: '#f1f5f9', color: '#475569' }}
                     onMouseEnter={(e) => { e.currentTarget.style.background = '#4a9e1f'; e.currentTarget.style.color = 'white' }}
                     onMouseLeave={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#475569' }}

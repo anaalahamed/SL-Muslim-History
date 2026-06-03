@@ -103,15 +103,16 @@ export default function AdminArticlesPage() {
         </span>
       </div>
 
-      {/* Table */}
+      {/* Table — horizontally scrollable on mobile */}
       <div
         className="rounded-2xl overflow-hidden"
         style={{ background: 'white', border: '1px solid #e2e8f0' }}
       >
+        <div className="overflow-x-auto">
         {/* Table head */}
         <div
           className="grid gap-4 px-5 py-3 text-xs font-black uppercase tracking-wider"
-          style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto auto', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', color: '#94a3b8' }}
+          style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto auto', minWidth: '720px', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', color: '#94a3b8' }}
         >
           <span>Title</span>
           <span>Category</span>
@@ -122,7 +123,7 @@ export default function AdminArticlesPage() {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="py-16 text-center">
+          <div className="py-16 text-center" style={{ minWidth: '720px' }}>
             <div className="text-4xl mb-3">📭</div>
             <p className="font-semibold" style={{ color: '#64748b' }}>No articles found</p>
             <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>Try adjusting your search or filters.</p>
@@ -134,6 +135,7 @@ export default function AdminArticlesPage() {
               className="grid gap-4 px-5 py-4 items-center transition-colors"
               style={{
                 gridTemplateColumns: '2fr 1fr 1fr auto auto auto',
+                minWidth: '720px',
                 borderBottom: i < filtered.length - 1 ? '1px solid #f8fafc' : 'none',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc' }}
@@ -201,6 +203,7 @@ export default function AdminArticlesPage() {
             </div>
           ))
         )}
+        </div>{/* end overflow-x-auto */}
       </div>
 
       {/* Delete confirmation modal */}

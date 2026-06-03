@@ -88,7 +88,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* ── Sidebar ── */}
       <aside
-        className="fixed top-0 left-0 h-full z-30 flex flex-col transition-transform duration-300 md:translate-x-0"
+        className="fixed top-0 left-0 h-full z-30 flex flex-col transition-transform duration-300 -translate-x-full md:translate-x-0"
         style={{
           width: '240px',
           background: 'linear-gradient(180deg, #1a3a0f 0%, #0d2208 100%)',
@@ -218,7 +218,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* ── Main area ── */}
-      <div className="flex-1 flex flex-col min-w-0" style={{ marginLeft: '240px' }}>
+      <div className="flex-1 flex flex-col min-w-0 md:ml-[240px]">
 
         {/* Top bar */}
         <header
@@ -278,7 +278,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-4 sm:p-6">
           {children}
         </main>
       </div>
