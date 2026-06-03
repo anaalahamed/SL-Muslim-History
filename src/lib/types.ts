@@ -43,6 +43,7 @@ export interface NewsPost {
   content: string
   featured_image: string
   is_breaking?: boolean
+  is_featured?: boolean
   news_type: 'special' | 'janaza'
   category?: string
   published_at: string

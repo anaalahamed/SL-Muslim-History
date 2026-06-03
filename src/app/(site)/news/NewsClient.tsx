@@ -25,10 +25,13 @@ export default function NewsClient() {
 
   const filtered = allNews.filter((n) => filterType === 'all' || n.news_type === filterType)
 
-  const totalPages = Math.ceil(filtered.length / PER_PAGE)
-  const paginated  = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+  // Only show a featured story when the admin explicitly marks one (is_featured === true).
+  // Items are ordered by published_at desc so find() returns the newest featured item.
+  const featured = filtered.find((n) => n.is_featured) ?? null
+  const list     = featured ? filtered.filter((n) => n.id !== featured.id) : filtered
 
-  const featured = filtered[0] ?? null
+  const totalPages = Math.ceil(list.length / PER_PAGE)
+  const paginated  = list.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
@@ -150,6 +153,7 @@ export default function NewsClient() {
 
             <span className="text-xs" style={{ color: 'var(--muted)' }}>
               <strong style={{ color: 'var(--dark)' }}>{filtered.length}</strong> stories
+              {featured && <span style={{ color: 'var(--muted)' }}> (1 featured)</span>}
               {totalPages > 1 && <> — page <strong style={{ color: 'var(--dark)' }}>{page}</strong> of {totalPages}</>}
             </span>
           </div>

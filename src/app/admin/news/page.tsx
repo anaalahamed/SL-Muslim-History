@@ -113,7 +113,12 @@ export default function AdminNewsPage() {
             >
               {/* Title */}
               <div className="min-w-0">
-                <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{post.title}</p>
+                <div className="flex items-center gap-1.5">
+                  {post.is_featured && (
+                    <span title="Featured Story" style={{ fontSize: '13px', lineHeight: 1 }}>⭐</span>
+                  )}
+                  <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{post.title}</p>
+                </div>
                 <p className="text-xs mt-0.5 truncate" style={{ color: '#94a3b8' }}>/news/{post.slug}</p>
               </div>
 

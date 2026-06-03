@@ -33,6 +33,7 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
   const [slug,       setSlug]       = useState(initial.slug       ?? '')
   const [content,    setContent]    = useState(initial.content    ?? '')
   const [newsType,   setNewsType]   = useState<'special' | 'janaza'>(initial.news_type ?? 'special')
+  const [isFeatured, setIsFeatured] = useState(initial.is_featured ?? false)
   const [slugLocked, setSlugLocked] = useState(!!initial.slug)
   const [slugError,  setSlugError]  = useState('')
   const [image,       setImage]       = useState(initial.featured_image ?? '')
@@ -76,6 +77,7 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
       slug: cleanSlug,
       content,
       news_type:      newsType,
+      is_featured:    isFeatured,
       featured_image: image,
       published_at:   new Date(publishedAt).toISOString(),
     })
@@ -259,6 +261,33 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
                   </label>
                 ))}
               </div>
+            </div>
+
+            {/* Featured toggle */}
+            <div className="mb-5">
+              <p className="text-xs font-bold mb-2" style={{ color: '#334155' }}>Featured Story</p>
+              <label
+                className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all select-none"
+                style={{
+                  background: isFeatured ? '#fefce8' : '#f8fafc',
+                  border: `1px solid ${isFeatured ? '#ca8a04' : '#e2e8f0'}`,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={isFeatured}
+                  onChange={(e) => setIsFeatured(e.target.checked)}
+                  className="w-4 h-4 accent-yellow-600 cursor-pointer"
+                />
+                <div>
+                  <p className="text-xs font-bold" style={{ color: isFeatured ? '#92400e' : '#64748b' }}>
+                    {isFeatured ? '⭐ Marked as Featured' : 'Mark as Featured Story'}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>
+                    Shows in the Featured Story section. Only the newest featured item per page is shown.
+                  </p>
+                </div>
+              </label>
             </div>
 
             <div className="flex flex-col gap-2">

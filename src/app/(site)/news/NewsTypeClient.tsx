@@ -29,9 +29,13 @@ export default function NewsTypeClient({ newsType, badge, title, subtitle }: Pro
     getAllNewsByType(newsType).then((d) => { setNews(d); setLoading(false) })
   }, [newsType])
 
-  const totalPages = Math.ceil(news.length / PER_PAGE)
-  const paginated  = news.slice((page - 1) * PER_PAGE, page * PER_PAGE)
-  const featured   = news[0] ?? null
+  // Only show a featured story when the admin explicitly marks one (is_featured === true).
+  // Items are ordered by published_at desc so find() returns the newest featured item.
+  const featured = news.find((n) => n.is_featured) ?? null
+  const list     = featured ? news.filter((n) => n.id !== featured.id) : news
+
+  const totalPages = Math.ceil(list.length / PER_PAGE)
+  const paginated  = list.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 
   const accentColor = newsType === 'janaza' ? '#0369a1' : 'var(--green)'
   const badgeBg     = newsType === 'janaza' ? '#f0f9ff'  : '#f0fdf4'
@@ -137,6 +141,7 @@ export default function NewsTypeClient({ newsType, badge, title, subtitle }: Pro
               </span>
               <span className="text-xs" style={{ color: 'var(--muted)' }}>
                 <strong style={{ color: 'var(--dark)' }}>{news.length}</strong> stories
+                {featured && <span style={{ color: 'var(--muted)' }}> (1 featured)</span>}
                 {totalPages > 1 && <> — page <strong style={{ color: 'var(--dark)' }}>{page}</strong> of {totalPages}</>}
               </span>
             </div>
