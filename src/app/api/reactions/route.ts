@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { REACTIONS } from '@/lib/reactions'
 
-const VALID_EMOJIS = ['👍', '❤️', '🥰', '😍', '😡', '💯', '👏']
+// Cast to string[] so .includes() accepts arbitrary strings from request bodies.
+const VALID_EMOJIS: string[] = [...REACTIONS]
 const VALID_TYPES  = ['article', 'news']
 
 function db() {

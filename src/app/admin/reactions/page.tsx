@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { formatDate } from '@/lib/utils'
+import { REACTIONS } from '@/lib/reactions'
 
-const EMOJIS = ['👍', '❤️', '🥰', '😍', '😡', '💯', '👏']
+const EMOJIS = [...REACTIONS]
 
 interface ReactionSummary {
   content_type: string

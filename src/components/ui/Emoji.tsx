@@ -8,6 +8,8 @@ const BASE = 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg'
 
 // Pre-mapped codepoints for emojis used on this site
 const CODEPOINTS: Record<string, string> = {
+  // Reaction emojis
+  '🙏': '1f64f', '🤲': '1f932', '🙌': '1f64c', '🕯': '1f56f',
   '👍': '1f44d', '❤️': '2764-fe0f', '🥰': '1f970', '😍': '1f60d',
   '😡': '1f621', '💯': '1f4af', '👏': '1f44f',
   '📜': '1f4dc', '🕌': '1f54c', '🎨': '1f3a8', '👑': '1f451',
