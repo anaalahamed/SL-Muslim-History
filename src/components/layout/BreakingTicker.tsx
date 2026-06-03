@@ -37,7 +37,7 @@ export default async function BreakingTicker() {
 
       {/* Scrolling text */}
       <div className="flex-1 overflow-hidden relative" style={{ paddingLeft: '12px' }}>
-        <div className="ticker-move flex items-center gap-16" style={{ color: 'rgba(255,255,255,0.88)' }}>
+        <div className="ticker-move gap-16" style={{ color: 'rgba(255,255,255,0.88)' }}>
           {[...specialNews, ...specialNews].map((news, i) => (
             <span
               key={i}

@@ -91,8 +91,14 @@ body {
 .ticker-move {
   animation: ticker 40s linear infinite;
   white-space: nowrap;
-  display: flex;
-  width: max-content;
+  /* inline-flex: inline boxes always size to intrinsic content width,
+     unaffected by parent overflow:hidden or containing-block constraints.
+     display:flex + width:max-content breaks in Blink/WebKit when the
+     ancestor has overflow:hidden because max-content is capped at the
+     containing-block width, making translateX(-50%) scroll too little. */
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
 }
 .ticker-move:hover { animation-play-state: paused; }
 
@@ -434,10 +440,10 @@ footer {
   /* ── Prevent any fixed-width child from breaking layout ── */
   * { max-width: 100%; box-sizing: border-box; }
 
-  /* ── Ticker: must be wider than viewport to animate correctly ── */
-  /* The * rule above caps width at 100% of parent, which breaks translateX(-50%).
-     Restore unconstrained width so the keyframe scrolls the full content distance. */
-  .ticker-move { max-width: none; width: max-content; }
+  /* ── Ticker: exempt from the global max-width cap ── */
+  /* inline-flex already sizes to content, but max-width:none ensures
+     the * rule above cannot shrink the element on any breakpoint. */
+  .ticker-move { max-width: none; }
 }
 
 @media (max-width: 480px) {
