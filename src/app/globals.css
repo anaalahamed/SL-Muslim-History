@@ -85,17 +85,17 @@ body {
    TICKER
 ════════════════════════════════ */
 @keyframes ticker {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  from { transform: translateX(0); }
+  /* --ticker-shift is set to exact pixel value by TickerTrack.tsx after
+     DOM measurement via scrollWidth. Fallback -16.67% = -1/6 is correct
+     for the 6× repetition used in TickerTrack before JS runs. */
+  to   { transform: translateX(var(--ticker-shift, -16.67%)); }
 }
 .ticker-move {
-  animation: ticker 40s linear infinite;
+  /* --ticker-dur is set by TickerTrack.tsx based on actual content width
+     and a target speed of 80 px/s. Fallback 30s covers SSR/no-JS. */
+  animation: ticker var(--ticker-dur, 30s) linear infinite;
   white-space: nowrap;
-  /* inline-flex: inline boxes always size to intrinsic content width,
-     unaffected by parent overflow:hidden or containing-block constraints.
-     display:flex + width:max-content breaks in Blink/WebKit when the
-     ancestor has overflow:hidden because max-content is capped at the
-     containing-block width, making translateX(-50%) scroll too little. */
   display: inline-flex;
   align-items: center;
   vertical-align: middle;
