@@ -9,6 +9,25 @@ import { formatDate } from '@/lib/utils'
 
 const ITEMS_PER_PAGE = 10
 
+// Returns a plain-text preview for an article card.
+// Prefers article.excerpt; falls back to the first paragraph of content.
+// Strips basic markdown so raw symbols don't appear in the preview.
+function getExcerpt(article: Article, maxWords = 30): string {
+  const src = article.excerpt?.trim()
+    || article.content?.split('\n\n')[0]?.trim()
+    || ''
+  // strip markdown headers, bold/italic markers, inline links
+  const clean = src
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim()
+  const words = clean.split(' ')
+  return words.length <= maxWords ? clean : words.slice(0, maxWords).join(' ') + '…'
+}
+
 const CAT_COLORS: Record<string, { bg: string; text: string }> = {
   'Early History':        { bg: '#eaf3de', text: '#27500a' },
   'Mosques & Places':     { bg: '#e6f1fb', text: '#0c447c' },
@@ -75,11 +94,13 @@ export default function AllArticles() {
       <div style={{ background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
         {loading
           ? Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'stretch', minHeight: '72px', borderBottom: '1px solid var(--border)', gap: 0 }}>
-                <div className="animate-shimmer-light" style={{ width: '90px', flexShrink: 0 }} />
-                <div style={{ flex: 1, padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <div className="animate-shimmer-light" style={{ height: '12px', width: '55%', borderRadius: '2px' }} />
-                  <div className="animate-shimmer-light" style={{ height: '10px', width: '90%', borderRadius: '2px' }} />
+              <div key={i} style={{ display: 'flex', alignItems: 'stretch', minHeight: '88px', borderBottom: '1px solid var(--border)', gap: 0 }}>
+                <div className="animate-shimmer-light" style={{ width: '110px', flexShrink: 0 }} />
+                <div style={{ flex: 1, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div className="animate-shimmer-light" style={{ height: '10px', width: '30%', borderRadius: '2px' }} />
+                  <div className="animate-shimmer-light" style={{ height: '13px', width: '85%', borderRadius: '2px' }} />
+                  <div className="animate-shimmer-light" style={{ height: '10px', width: '95%', borderRadius: '2px' }} />
+                  <div className="animate-shimmer-light" style={{ height: '10px', width: '70%', borderRadius: '2px' }} />
                   <div className="animate-shimmer-light" style={{ height: '9px', width: '40%', borderRadius: '2px', marginTop: 'auto' }} />
                 </div>
               </div>
@@ -87,6 +108,7 @@ export default function AllArticles() {
           : articles.map((article, i) => {
             const c = cat(article.category)
             const isLast = i === articles.length - 1
+            const preview = getExcerpt(article)
             return (
               <Link
                 key={article.id}
@@ -94,7 +116,7 @@ export default function AllArticles() {
                 style={{
                   display: 'flex', alignItems: 'stretch',
                   borderBottom: isLast ? 'none' : '1px solid var(--border)',
-                  minHeight: '72px', textDecoration: 'none',
+                  minHeight: '88px', textDecoration: 'none',
                   transition: 'background .15s',
                 }}
                 onMouseEnter={(e) => {
@@ -108,32 +130,32 @@ export default function AllArticles() {
                   if (t) t.style.color = 'var(--dark)'
                 }}
               >
-                {/* Thumbnail */}
-                <div style={{ width: '90px', flexShrink: 0, alignSelf: 'stretch', position: 'relative', background: 'var(--green-light)' }}>
+                {/* Thumbnail — wider for better visual weight */}
+                <div style={{ width: '110px', flexShrink: 0, alignSelf: 'stretch', position: 'relative', background: 'var(--green-light)' }}>
                   {article.featured_image ? (
-                    <Image src={article.featured_image} alt={article.title} fill sizes="90px" style={{ objectFit: 'cover' }} />
+                    <Image src={article.featured_image} alt={article.title} fill sizes="110px" style={{ objectFit: 'cover' }} />
                   ) : (
                     <div style={{ position: 'absolute', inset: 0, background: BG_FALLBACKS[i % BG_FALLBACKS.length] }} />
                   )}
                 </div>
 
                 {/* Body */}
-                <div style={{ flex: 1, minWidth: 0, padding: '7px 10px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  <div>
-                    <span style={{ display: 'inline-block', marginBottom: '3px', fontSize: '9px', fontWeight: 900, letterSpacing: '.09em', textTransform: 'uppercase', padding: '2px 7px', borderRadius: '2px', background: c.bg, color: c.text }}>
-                      {article.category}
-                    </span>
-                  </div>
+                <div style={{ flex: 1, minWidth: 0, padding: '9px 12px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  <span style={{ display: 'inline-block', fontSize: '9px', fontWeight: 900, letterSpacing: '.09em', textTransform: 'uppercase', padding: '2px 7px', borderRadius: '2px', background: c.bg, color: c.text, alignSelf: 'flex-start' }}>
+                    {article.category}
+                  </span>
                   <p
                     className="art-title"
-                    style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '11px', fontWeight: 700, lineHeight: 1.5, color: 'var(--dark)', transition: 'color .2s', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                    style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '12.5px', fontWeight: 700, lineHeight: 1.5, color: 'var(--dark)', transition: 'color .2s', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
                   >
                     {article.title}
                   </p>
-                  <p style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '10px', color: 'var(--muted)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginTop: '2px' }}>
-                    {article.excerpt}
-                  </p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', fontSize: '9px', color: 'var(--muted)' }}>
+                  {preview && (
+                    <p style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '11px', color: 'var(--muted)', lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {preview}
+                    </p>
+                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: 'auto', paddingTop: '3px', fontSize: '9px', color: 'var(--muted)' }}>
                     <span>👁 {article.views}</span>
                     <span style={{ color: 'var(--border)' }}>·</span>
                     <span>{article.author}</span>
