@@ -3,56 +3,50 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-type Status = 'checking' | 'ok' | 'missing' | 'error'
+type Item = { id: string; title: string; news_type: string; is_featured: boolean | null }
+
+type CheckResult = {
+  column_exists:  boolean
+  total_rows?:    number
+  featured_count?: number
+  featured_items?: Item[]
+  all_items?:     Item[]
+  error?:         string | null
+  message?:       string
+}
 
 const SQL = 'ALTER TABLE news ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE;'
 
 export default function SetupPage() {
-  const [status,  setStatus]  = useState<Status>('checking')
-  const [message, setMessage] = useState('')
+  const [result,  setResult]  = useState<CheckResult | null>(null)
+  const [loading, setLoading] = useState(true)
   const [running, setRunning] = useState(false)
-  const [done,    setDone]    = useState(false)
+  const [migrMsg, setMigrMsg] = useState('')
   const [copied,  setCopied]  = useState(false)
 
-  useEffect(() => { checkColumn() }, [])
+  useEffect(() => { load() }, [])
 
-  async function checkColumn() {
-    setStatus('checking')
+  async function load() {
+    setLoading(true)
     try {
-      const res  = await fetch('/api/run-migration')
-      const json = await res.json()
-      if (json.column_exists) {
-        setStatus('ok')
-        setMessage(json.message)
-      } else {
-        setStatus('missing')
-        setMessage(json.message ?? json.error)
-      }
+      const r = await fetch('/api/run-migration')
+      setResult(await r.json())
     } catch {
-      setStatus('error')
-      setMessage('Could not reach the API — check your network.')
+      setResult({ column_exists: false, error: 'Could not reach the API.' })
     }
+    setLoading(false)
   }
 
   async function runMigration() {
     setRunning(true)
+    setMigrMsg('')
     try {
-      const res  = await fetch('/api/run-migration', { method: 'POST' })
-      const json = await res.json()
-      if (json.ok) {
-        setDone(true)
-        setStatus('ok')
-        setMessage('Column added successfully! Featured Stories will now work.')
-      } else if (json.needs_manual) {
-        setStatus('missing')
-        setMessage('Automatic migration unavailable — follow the manual steps below.')
-      } else {
-        setStatus('error')
-        setMessage(json.message ?? 'Unknown error')
-      }
+      const r    = await fetch('/api/run-migration', { method: 'POST' })
+      const json = await r.json()
+      setMigrMsg(json.message ?? '')
+      if (json.ok) load()
     } catch {
-      setStatus('error')
-      setMessage('Request failed — check your network.')
+      setMigrMsg('Request failed.')
     }
     setRunning(false)
   }
@@ -76,184 +70,214 @@ export default function SetupPage() {
         </div>
         <h2 className="text-lg font-extrabold" style={{ color: '#0f172a' }}>Database Setup</h2>
         <p className="text-sm mt-1" style={{ color: '#64748b' }}>
-          This page checks whether your Supabase database has the <code style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: '4px', fontSize: '12px' }}>is_featured</code> column needed for Featured Stories.
+          Checks the <code style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: '4px', fontSize: '12px' }}>is_featured</code> column and shows exactly which news posts are currently marked as Featured Stories.
         </p>
       </div>
 
-      {/* Status card */}
-      <div
-        className="rounded-2xl p-5"
-        style={{
-          background: status === 'ok'      ? '#f0fdf4'
-                    : status === 'missing'  ? '#fefce8'
-                    : status === 'error'    ? '#fef2f2'
-                    : '#f8fafc',
-          border: `1px solid ${
-            status === 'ok'      ? '#86efac'
-          : status === 'missing'  ? '#fde68a'
-          : status === 'error'    ? '#fecaca'
-          : '#e2e8f0'}`,
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <span style={{ fontSize: '24px' }}>
-            {status === 'checking' ? '🔍'
-           : status === 'ok'       ? '✅'
-           : status === 'missing'  ? '⚠️'
-           : '❌'}
-          </span>
-          <div>
-            <p className="text-sm font-bold" style={{
-              color: status === 'ok'      ? '#166534'
-                   : status === 'missing'  ? '#92400e'
-                   : status === 'error'    ? '#dc2626'
-                   : '#475569',
-            }}>
-              {status === 'checking' ? 'Checking database…'
-             : status === 'ok'       ? 'Database is ready'
-             : status === 'missing'  ? 'Column is missing'
-             : 'Check failed'}
-            </p>
-            {message && <p className="text-xs mt-0.5" style={{ color: '#64748b' }}>{message}</p>}
-          </div>
-          {done && (
-            <span className="ml-auto text-xs font-bold px-3 py-1 rounded-full" style={{ background: '#dcfce7', color: '#166534' }}>
-              Done!
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* ── Already OK ── */}
-      {status === 'ok' && (
-        <div className="rounded-2xl p-5 space-y-3" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
-          <p className="text-sm font-bold" style={{ color: '#0f172a' }}>Everything is set up correctly ✅</p>
-          <p className="text-sm" style={{ color: '#64748b' }}>
-            Go to <strong>Admin → News</strong>, edit any post, scroll to the <strong>Publish</strong> box, and check <strong>"Mark as Featured Story"</strong>, then save.
-            The featured section will appear on <code style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: '4px', fontSize: '12px' }}>/news/janaza</code> or <code style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: '4px', fontSize: '12px' }}>/news/special</code> immediately.
-          </p>
-          <div className="flex gap-3">
-            <Link
-              href="/admin/news"
-              className="px-5 py-2.5 rounded-xl text-sm font-bold text-white"
-              style={{ background: '#4a9e1f' }}
-            >
-              Go to News Posts →
-            </Link>
-            <button
-              onClick={checkColumn}
-              className="px-5 py-2.5 rounded-xl text-sm font-bold"
-              style={{ background: '#f1f5f9', color: '#475569' }}
-            >
-              Re-check
-            </button>
-          </div>
+      {loading && (
+        <div className="rounded-2xl p-5" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+          <p className="text-sm" style={{ color: '#94a3b8' }}>🔍 Checking database…</p>
         </div>
       )}
 
-      {/* ── Missing — try automatic first ── */}
-      {status === 'missing' && !done && (
-        <div className="space-y-4">
+      {!loading && result && (
 
-          {/* Option A: one-click */}
-          <div className="rounded-2xl p-5" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
-            <p className="text-sm font-extrabold mb-1" style={{ color: '#0f172a' }}>Option A — One-click fix</p>
-            <p className="text-sm mb-4" style={{ color: '#64748b' }}>
-              Click the button below. If your Vercel project has a <strong>SUPABASE_SERVICE_ROLE_KEY</strong> environment variable, this will fix the database automatically in one second.
-            </p>
-            <button
-              onClick={runMigration}
-              disabled={running}
-              className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all"
-              style={{ background: running ? '#94a3b8' : '#4a9e1f', cursor: running ? 'wait' : 'pointer' }}
-            >
-              {running ? '⏳ Running migration…' : '🚀 Fix Database Automatically'}
-            </button>
+        <>
+          {/* ── Column status ── */}
+          <div
+            className="rounded-2xl p-5"
+            style={{
+              background: result.column_exists ? '#f0fdf4' : '#fefce8',
+              border: `1px solid ${result.column_exists ? '#86efac' : '#fde68a'}`,
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <span style={{ fontSize: '22px' }}>{result.column_exists ? '✅' : '⚠️'}</span>
+              <div>
+                <p className="text-sm font-bold" style={{ color: result.column_exists ? '#166534' : '#92400e' }}>
+                  {result.column_exists
+                    ? 'is_featured column exists in the database'
+                    : 'is_featured column is MISSING'}
+                </p>
+                {result.column_exists && (
+                  <p className="text-xs mt-0.5" style={{ color: '#64748b' }}>
+                    {result.total_rows ?? 0} total news posts in database
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={load}
+                className="ml-auto px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+                style={{ background: '#f1f5f9', color: '#475569' }}
+              >
+                Refresh
+              </button>
+            </div>
           </div>
 
-          {/* Option B: manual */}
-          <div className="rounded-2xl p-5" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
-            <p className="text-sm font-extrabold mb-1" style={{ color: '#0f172a' }}>Option B — Manual (2 minutes)</p>
-            <p className="text-sm mb-4" style={{ color: '#64748b' }}>
-              If Option A does not work, follow these steps in your Supabase dashboard.
-            </p>
+          {/* ── Column missing — fix options ── */}
+          {!result.column_exists && (
+            <div className="space-y-4">
+              <div className="rounded-2xl p-5" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
+                <p className="text-sm font-extrabold mb-3" style={{ color: '#0f172a' }}>Option A — One-click fix</p>
+                <button
+                  onClick={runMigration}
+                  disabled={running}
+                  className="w-full py-3 rounded-xl text-sm font-bold text-white"
+                  style={{ background: running ? '#94a3b8' : '#4a9e1f', cursor: running ? 'wait' : 'pointer' }}
+                >
+                  {running ? '⏳ Running…' : '🚀 Fix Database Automatically'}
+                </button>
+                {migrMsg && <p className="text-xs mt-2" style={{ color: '#64748b' }}>{migrMsg}</p>}
+              </div>
+              <div className="rounded-2xl p-5" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
+                <p className="text-sm font-extrabold mb-3" style={{ color: '#0f172a' }}>Option B — Manual (2 min)</p>
+                <ol className="space-y-3 text-sm" style={{ color: '#475569' }}>
+                  <li><strong>1.</strong> Go to <strong>supabase.com</strong> → sign in → open your project</li>
+                  <li><strong>2.</strong> Click <strong>SQL Editor</strong> in the left sidebar → <strong>New query</strong></li>
+                  <li>
+                    <strong>3.</strong> Copy this SQL and paste it:
+                    <div className="relative mt-2">
+                      <pre className="rounded-xl p-3 text-xs overflow-x-auto" style={{ background: '#0f172a', color: '#86efac', fontFamily: 'monospace' }}>{SQL}</pre>
+                      <button onClick={copySQL} className="absolute top-2 right-2 px-2.5 py-1 rounded-lg text-xs font-bold" style={{ background: copied ? '#22c55e' : '#1e293b', color: 'white' }}>
+                        {copied ? '✓ Copied!' : 'Copy'}
+                      </button>
+                    </div>
+                  </li>
+                  <li><strong>4.</strong> Click the green <strong>Run</strong> button</li>
+                  <li><strong>5.</strong> Come back and click <strong>Refresh</strong> above</li>
+                </ol>
+              </div>
+            </div>
+          )}
 
-            <ol className="space-y-4">
-              <li className="flex gap-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white" style={{ background: '#4a9e1f' }}>1</span>
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: '#1e293b' }}>Open Supabase</p>
-                  <p className="text-xs mt-0.5" style={{ color: '#64748b' }}>Go to <strong>supabase.com</strong> → sign in → open your project</p>
+          {/* ── Column exists — show featured items ── */}
+          {result.column_exists && (
+            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #e2e8f0', background: 'white' }}>
+              <div className="px-5 py-4" style={{ borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
+                <p className="text-sm font-extrabold" style={{ color: '#0f172a' }}>
+                  Featured Stories in Database
+                  <span
+                    className="ml-2 px-2 py-0.5 rounded-full text-xs font-black"
+                    style={{
+                      background: (result.featured_count ?? 0) > 0 ? '#dcfce7' : '#fef9c3',
+                      color:      (result.featured_count ?? 0) > 0 ? '#166534' : '#92400e',
+                    }}
+                  >
+                    {result.featured_count ?? 0} marked
+                  </span>
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>
+                  {(result.featured_count ?? 0) === 0
+                    ? 'No posts are marked as Featured Story yet. Edit a news post and check the box.'
+                    : 'These posts have is_featured = true in the database.'}
+                </p>
+              </div>
+
+              {(result.featured_count ?? 0) === 0 ? (
+                <div className="px-5 py-8 text-center">
+                  <div className="text-3xl mb-2">📭</div>
+                  <p className="text-sm font-semibold" style={{ color: '#64748b' }}>No featured items yet</p>
+                  <p className="text-xs mt-1 mb-4" style={{ color: '#94a3b8' }}>
+                    Go to Admin → News, open any post, check "Mark as Featured Story" in the Publish box, then save.
+                  </p>
+                  <Link
+                    href="/admin/news"
+                    className="px-5 py-2.5 rounded-xl text-sm font-bold text-white inline-block"
+                    style={{ background: '#4a9e1f' }}
+                  >
+                    Go to News Posts →
+                  </Link>
                 </div>
-              </li>
-
-              <li className="flex gap-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white" style={{ background: '#4a9e1f' }}>2</span>
+              ) : (
                 <div>
-                  <p className="text-sm font-semibold" style={{ color: '#1e293b' }}>Open the SQL Editor</p>
-                  <p className="text-xs mt-0.5" style={{ color: '#64748b' }}>In the left sidebar click <strong>SQL Editor</strong> (looks like a terminal icon), then click <strong>New query</strong></p>
-                </div>
-              </li>
+                  {result.featured_items?.map((item, i) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-3 px-5 py-3"
+                      style={{ borderBottom: i < (result.featured_items!.length - 1) ? '1px solid #f8fafc' : 'none' }}
+                    >
+                      <span style={{ fontSize: '16px' }}>⭐</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{item.title}</p>
+                        <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>
+                          {item.news_type === 'janaza' ? 'Janaza News → /news/janaza' : 'Special News → /news/special'}
+                        </p>
+                      </div>
+                      <span
+                        className="text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0"
+                        style={item.news_type === 'janaza'
+                          ? { background: '#f0f9ff', color: '#0369a1' }
+                          : { background: '#f0fdf4', color: '#166534' }}
+                      >
+                        {item.news_type === 'janaza' ? 'Janaza' : 'சிறப்பு'}
+                      </span>
+                    </div>
+                  ))}
 
-              <li className="flex gap-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white" style={{ background: '#4a9e1f' }}>3</span>
-                <div>
-                  <p className="text-sm font-semibold mb-2" style={{ color: '#1e293b' }}>Copy and paste this SQL</p>
-                  <div className="relative">
-                    <pre
-                      className="rounded-xl p-3 text-xs overflow-x-auto"
-                      style={{ background: '#0f172a', color: '#86efac', fontFamily: 'monospace', lineHeight: '1.6' }}
+                  {/* Links to the actual pages */}
+                  <div className="px-5 py-4 flex gap-3 flex-wrap" style={{ borderTop: '1px solid #f1f5f9', background: '#f8fafc' }}>
+                    <p className="text-xs font-semibold w-full mb-1" style={{ color: '#475569' }}>
+                      If these posts are featured here but the section still doesn't appear on the page, open the link below in a new tab and check the browser Console (F12 → Console tab):
+                    </p>
+                    <a
+                      href="/news/janaza"
+                      target="_blank"
+                      className="px-4 py-2 rounded-xl text-xs font-bold"
+                      style={{ background: '#f0f9ff', color: '#0369a1', border: '1px solid #bae6fd' }}
                     >
-{SQL}
-                    </pre>
-                    <button
-                      onClick={copySQL}
-                      className="absolute top-2 right-2 px-2.5 py-1 rounded-lg text-xs font-bold transition-all"
-                      style={{ background: copied ? '#22c55e' : '#1e293b', color: 'white' }}
+                      Open /news/janaza ↗
+                    </a>
+                    <a
+                      href="/news/special"
+                      target="_blank"
+                      className="px-4 py-2 rounded-xl text-xs font-bold"
+                      style={{ background: '#f0fdf4', color: '#166534', border: '1px solid #86efac' }}
                     >
-                      {copied ? '✓ Copied!' : 'Copy'}
-                    </button>
+                      Open /news/special ↗
+                    </a>
                   </div>
                 </div>
-              </li>
+              )}
+            </div>
+          )}
 
-              <li className="flex gap-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white" style={{ background: '#4a9e1f' }}>4</span>
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: '#1e293b' }}>Click Run</p>
-                  <p className="text-xs mt-0.5" style={{ color: '#64748b' }}>Press the green <strong>Run</strong> button (or Ctrl+Enter). You should see <em>"Success. No rows returned."</em></p>
-                </div>
-              </li>
-
-              <li className="flex gap-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white" style={{ background: '#4a9e1f' }}>5</span>
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: '#1e293b' }}>Come back here and verify</p>
-                  <button
-                    onClick={checkColumn}
-                    className="mt-2 px-4 py-2 rounded-xl text-xs font-bold"
-                    style={{ background: '#f0fdf4', color: '#166534', border: '1px solid #86efac' }}
+          {/* ── All posts table ── */}
+          {result.column_exists && (result.all_items?.length ?? 0) > 0 && (
+            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #e2e8f0', background: 'white' }}>
+              <div className="px-5 py-3" style={{ borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
+                <p className="text-xs font-black uppercase tracking-wider" style={{ color: '#94a3b8' }}>All news posts — is_featured value</p>
+              </div>
+              <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
+                {result.all_items?.map((item, i) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-3 px-5 py-2.5"
+                    style={{
+                      borderBottom: i < (result.all_items!.length - 1) ? '1px solid #f8fafc' : 'none',
+                      background: item.is_featured ? '#f0fdf4' : 'transparent',
+                    }}
                   >
-                    ✓ Check Again
-                  </button>
-                </div>
-              </li>
-            </ol>
-          </div>
-        </div>
-      )}
+                    <span style={{ fontSize: '13px', opacity: item.is_featured ? 1 : 0.3 }}>⭐</span>
+                    <p className="flex-1 text-xs truncate" style={{ color: '#1e293b' }}>{item.title}</p>
+                    <span
+                      className="text-xs font-bold px-2 py-0.5 rounded flex-shrink-0"
+                      style={item.is_featured
+                        ? { background: '#dcfce7', color: '#166534' }
+                        : { background: '#f1f5f9', color: '#94a3b8' }}
+                    >
+                      {item.is_featured === true  ? 'true'
+                     : item.is_featured === false ? 'false'
+                     : 'null'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-      {/* ── Error ── */}
-      {status === 'error' && (
-        <div className="rounded-2xl p-5" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
-          <p className="text-sm font-bold mb-2" style={{ color: '#dc2626' }}>Could not connect to the database</p>
-          <p className="text-sm" style={{ color: '#64748b' }}>Make sure your Supabase URL and anon key are set correctly in Vercel environment variables, then redeploy.</p>
-          <button onClick={checkColumn} className="mt-3 px-4 py-2 rounded-xl text-xs font-bold" style={{ background: '#f1f5f9', color: '#475569' }}>
-            Try Again
-          </button>
-        </div>
+        </>
       )}
-
     </div>
   )
 }

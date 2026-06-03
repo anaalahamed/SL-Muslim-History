@@ -14,15 +14,44 @@ export async function GET() {
   }
 
   const db = createClient(url, anon)
-  const { error } = await db.from('news').select('id, is_featured').limit(1)
 
-  const missing = !!error && error.message.toLowerCase().includes('column')
+  // First check the column exists
+  const { error: colError } = await db.from('news').select('id, is_featured').limit(1)
+  if (colError) {
+    return NextResponse.json({
+      column_exists: false,
+      featured_count: 0,
+      featured_items: [],
+      all_items: [],
+      error: colError.message,
+    })
+  }
+
+  // Fetch all rows with is_featured so we can show the admin exactly what's in the DB
+  const { data, error } = await db
+    .from('news')
+    .select('id, title, news_type, is_featured, published_at')
+    .order('published_at', { ascending: false })
+
+  const all      = data ?? []
+  const featured = all.filter((r) => r.is_featured === true)
 
   return NextResponse.json({
-    column_exists: !error,
-    message: error
-      ? `is_featured column is MISSING — ${error.message}`
-      : 'is_featured column EXISTS — the database is ready.',
+    column_exists:  true,
+    total_rows:     all.length,
+    featured_count: featured.length,
+    featured_items: featured.map((r) => ({
+      id:          r.id,
+      title:       r.title,
+      news_type:   r.news_type,
+      is_featured: r.is_featured,
+    })),
+    all_items: all.map((r) => ({
+      id:          r.id,
+      title:       r.title,
+      news_type:   r.news_type,
+      is_featured: r.is_featured,
+    })),
     error: error?.message ?? null,
   })
 }
