@@ -78,31 +78,31 @@ export default function Header() {
 
       {/* ── Masthead ── */}
       <div
+        className="px-4 sm:px-6 py-2.5 sm:py-3.5"
         style={{
           background: 'var(--white)',
           borderBottom: '1px solid var(--border)',
-          padding: '14px 24px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '16px',
+          gap: '10px',
         }}
       >
-        {/* Logo + site name */}
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        {/* Logo + site name — shrinks on narrow screens */}
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flexShrink: 1 }}>
           <Image
             src="/logo.png"
             alt="SL Muslim History"
             width={52}
             height={52}
-            className="object-contain"
-            style={{ height: '52px', width: 'auto' }}
+            className="object-contain flex-shrink-0"
+            style={{ height: '44px', width: 'auto' }}
             priority
           />
-          <div>
+          <div style={{ minWidth: 0 }}>
             <h1
               className="serif-heading"
-              style={{ fontSize: '22px', fontWeight: 900, color: 'var(--green-dark)', lineHeight: 1, letterSpacing: '-0.3px' }}
+              style={{ fontSize: 'clamp(14px, 4vw, 22px)', fontWeight: 900, color: 'var(--green-dark)', lineHeight: 1.1, letterSpacing: '-0.3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
             >
               இலங்கை முஸ்லிம்களின் வரலாறு
             </h1>
@@ -112,8 +112,8 @@ export default function Header() {
           </div>
         </Link>
 
-        {/* Right: search + donate + mobile toggle */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {/* Right: search + donate + mobile toggle — never shrink below icon size */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
           {/* Donate — desktop */}
           <Link
             href="/donate"
@@ -136,13 +136,18 @@ export default function Header() {
           <button
             onClick={() => setSearchOpen(!searchOpen)}
             style={{
-              padding: '8px 10px',
+              padding: '10px 12px',
               borderRadius: '3px',
               border: '1px solid var(--border)',
               background: searchOpen ? 'var(--green-light)' : 'transparent',
-              color: searchOpen ? 'var(--green-dark)' : 'var(--muted)',
+              color: searchOpen ? 'var(--green-dark)' : 'var(--dark)',
               cursor: 'pointer',
               transition: 'all 0.15s',
+              minWidth: '40px',
+              minHeight: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
             aria-label="Search"
           >
@@ -161,12 +166,17 @@ export default function Header() {
           <button
             className="md:hidden"
             style={{
-              padding: '8px 10px',
+              padding: '10px 12px',
               borderRadius: '3px',
               border: '1px solid var(--border)',
               background: menuOpen ? 'var(--green-light)' : 'transparent',
-              color: menuOpen ? 'var(--green-dark)' : 'var(--text)',
+              color: menuOpen ? 'var(--green-dark)' : 'var(--dark)',
               cursor: 'pointer',
+              minWidth: '40px',
+              minHeight: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menu"

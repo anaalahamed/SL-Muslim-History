@@ -88,11 +88,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* ── Sidebar ── */}
       <aside
-        className="fixed top-0 left-0 h-full z-30 flex flex-col transition-transform duration-300 -translate-x-full md:translate-x-0"
+        className={`fixed top-0 left-0 h-full z-30 flex flex-col transition-transform duration-300 md:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
         style={{
           width: '240px',
           background: 'linear-gradient(180deg, #1a3a0f 0%, #0d2208 100%)',
-          transform: sidebarOpen ? 'translateX(0)' : undefined,
           boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
         }}
       >
