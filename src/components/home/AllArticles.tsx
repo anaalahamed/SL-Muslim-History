@@ -130,8 +130,8 @@ export default function AllArticles() {
                   if (t) t.style.color = 'var(--dark)'
                 }}
               >
-                {/* Thumbnail — wider for better visual weight */}
-                <div style={{ width: '110px', flexShrink: 0, alignSelf: 'stretch', position: 'relative', background: 'var(--green-light)' }}>
+                {/* Thumbnail */}
+                <div className="art-card-thumb" style={{ flexShrink: 0, alignSelf: 'stretch', position: 'relative', background: 'var(--green-light)' }}>
                   {article.featured_image ? (
                     <Image src={article.featured_image} alt={article.title} fill sizes="110px" style={{ objectFit: 'cover' }} />
                   ) : (
@@ -140,22 +140,22 @@ export default function AllArticles() {
                 </div>
 
                 {/* Body */}
-                <div style={{ flex: 1, minWidth: 0, padding: '9px 12px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                <div className="art-card-body" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
                   <span style={{ display: 'inline-block', fontSize: '9px', fontWeight: 900, letterSpacing: '.09em', textTransform: 'uppercase', padding: '2px 7px', borderRadius: '2px', background: c.bg, color: c.text, alignSelf: 'flex-start' }}>
                     {article.category}
                   </span>
                   <p
-                    className="art-title"
-                    style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '12.5px', fontWeight: 700, lineHeight: 1.5, color: 'var(--dark)', transition: 'color .2s', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                    className="art-title line-clamp-none sm:line-clamp-2"
+                    style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '12.5px', fontWeight: 700, lineHeight: 1.5, color: 'var(--dark)', transition: 'color .2s' }}
                   >
                     {article.title}
                   </p>
                   {preview && (
-                    <p style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '11px', color: 'var(--muted)', lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    <p className="art-excerpt line-clamp-1 sm:line-clamp-2 md:line-clamp-3" style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '11px', color: 'var(--muted)', lineHeight: 1.55 }}>
                       {preview}
                     </p>
                   )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: 'auto', paddingTop: '3px', fontSize: '9px', color: 'var(--muted)' }}>
+                  <div className="art-meta" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: 'auto', paddingTop: '3px', fontSize: '9px', color: 'var(--muted)' }}>
                     <span>👁 {article.views}</span>
                     <span style={{ color: 'var(--border)' }}>·</span>
                     <span>{article.author}</span>

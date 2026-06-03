@@ -249,6 +249,13 @@ img, video, iframe, embed, object {
 .thumb-52  { width: 52px;  min-height: 54px; }
 
 /* ════════════════════════════════
+   ARTICLE CARD (AllArticles component)
+   Width and spacing are owned by these classes — NOT inline styles.
+════════════════════════════════ */
+.art-card-thumb { width: 110px; }
+.art-card-body  { padding: 9px 12px; gap: 3px; }
+
+/* ════════════════════════════════
    PORTAL LAYOUT — Boxed news portal
 ════════════════════════════════ */
 
@@ -406,6 +413,14 @@ footer {
     grid-template-columns: repeat(2, 1fr) !important;
   }
 
+  /* ── AllArticles card: tablet/mobile structural fixes ── */
+  /* Narrower thumbnail frees up text area */
+  .art-card-thumb { width: 90px; }
+  /* Tighter body padding */
+  .art-card-body  { padding: 8px 10px; gap: 4px; }
+  /* Meta row wraps so long author/date don't overflow */
+  .art-meta       { flex-wrap: wrap; row-gap: 2px; }
+
   /* ── Admin: table scroll ── */
   .admin-table-scroll {
     overflow-x: auto;
@@ -472,6 +487,18 @@ footer {
   .news-detail-title {
     font-size: 1.25rem !important;
   }
+
+  /* ── AllArticles card: phone (≤480px) ── */
+  /* excerpt is already limited by Tailwind sm:line-clamp-2; thumb narrows */
+  .art-card-thumb { width: 85px; }
+}
+
+@media (max-width: 375px) {
+
+  /* ── AllArticles card: small phones (≤375px) ── */
+  /* excerpt is already 1 line via Tailwind line-clamp-1 default */
+  .art-card-thumb { width: 80px; }
+  .art-card-body  { padding: 7px 9px; }
 }
 
 /* ════════════════════════════════
