@@ -26,16 +26,20 @@ type RlsResult = {
 const SQL     = 'ALTER TABLE news ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE;'
 const RLS_SQL = `ALTER TABLE reactions ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "reactions_select" ON reactions
+DROP POLICY IF EXISTS "reactions_select" ON reactions;
+CREATE POLICY "reactions_select" ON reactions
   FOR SELECT USING (true);
 
-CREATE POLICY IF NOT EXISTS "reactions_insert" ON reactions
+DROP POLICY IF EXISTS "reactions_insert" ON reactions;
+CREATE POLICY "reactions_insert" ON reactions
   FOR INSERT WITH CHECK (true);
 
-CREATE POLICY IF NOT EXISTS "reactions_update" ON reactions
+DROP POLICY IF EXISTS "reactions_update" ON reactions;
+CREATE POLICY "reactions_update" ON reactions
   FOR UPDATE USING (true) WITH CHECK (true);
 
-CREATE POLICY IF NOT EXISTS "reactions_delete" ON reactions
+DROP POLICY IF EXISTS "reactions_delete" ON reactions;
+CREATE POLICY "reactions_delete" ON reactions
   FOR DELETE USING (true);`
 
 export default function SetupPage() {
