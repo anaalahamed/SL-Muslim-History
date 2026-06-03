@@ -172,6 +172,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               href="/"
               target="_blank"
               rel="noopener noreferrer"
+              prefetch={false}
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150"
               style={{ color: 'rgba(255,255,255,0.4)' }}
               onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
