@@ -26,12 +26,29 @@ export default function NewsTypeClient({ newsType, badge, title, subtitle }: Pro
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getAllNewsByType(newsType).then((d) => { setNews(d); setLoading(false) })
+    getAllNewsByType(newsType).then((d) => {
+      // ── DEBUG: remove after confirming is_featured works end-to-end ────────
+      console.log(`[NewsTypeClient/${newsType}] total loaded:`, d.length)
+      console.log(`[NewsTypeClient/${newsType}] is_featured counts:`, {
+        true:      d.filter((n) => n.is_featured === true).length,
+        false:     d.filter((n) => n.is_featured === false).length,
+        undefined: d.filter((n) => n.is_featured === undefined).length,
+        null:      d.filter((n) => n.is_featured === null).length,
+      })
+      const pick = d.find((n) => n.is_featured === true) ?? null
+      console.log(`[NewsTypeClient/${newsType}] featured item chosen:`, pick
+        ? `"${pick.title.slice(0, 50)}" (id: ${pick.id}, is_featured: ${pick.is_featured})`
+        : 'none — featured section will be hidden')
+      // ──────────────────────────────────────────────────────────────────────
+      setNews(d)
+      setLoading(false)
+    })
   }, [newsType])
 
   // Only show a featured story when the admin explicitly marks one (is_featured === true).
+  // Strict === true guards against null/undefined returned by Supabase when the column is new.
   // Items are ordered by published_at desc so find() returns the newest featured item.
-  const featured = news.find((n) => n.is_featured) ?? null
+  const featured = news.find((n) => n.is_featured === true) ?? null
   const list     = featured ? news.filter((n) => n.id !== featured.id) : news
 
   const totalPages = Math.ceil(list.length / PER_PAGE)

@@ -26,8 +26,9 @@ export default function NewsClient() {
   const filtered = allNews.filter((n) => filterType === 'all' || n.news_type === filterType)
 
   // Only show a featured story when the admin explicitly marks one (is_featured === true).
+  // Strict === true guards against null/undefined returned by Supabase when the column is new.
   // Items are ordered by published_at desc so find() returns the newest featured item.
-  const featured = filtered.find((n) => n.is_featured) ?? null
+  const featured = filtered.find((n) => n.is_featured === true) ?? null
   const list     = featured ? filtered.filter((n) => n.id !== featured.id) : filtered
 
   const totalPages = Math.ceil(list.length / PER_PAGE)

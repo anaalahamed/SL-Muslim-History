@@ -71,21 +71,28 @@ export async function getNewsById(id: string): Promise<NewsPost | null> {
 
 export async function saveNews(post: Partial<NewsPost>): Promise<{ data: NewsPost | null; error: string | null }> {
   if (!supabase) return { data: null, error: 'Supabase not configured' }
-  if (post.id) {
-    const { id, ...rest } = post
+
+  // Explicitly cast is_featured to boolean so it is never undefined/null in the payload.
+  // This also surfaces a Supabase error immediately if the column doesn't exist yet.
+  const payload = { ...post, is_featured: post.is_featured === true }
+
+  if (payload.id) {
+    const { id, ...rest } = payload
     const { data, error } = await supabase
       .from('news')
       .update(rest)
       .eq('id', id)
       .select()
       .single()
+    if (error) console.error('[saveNews] update error:', error.message, error)
     return { data: data as NewsPost | null, error: error?.message ?? null }
   }
   const { data, error } = await supabase
     .from('news')
-    .insert(post)
+    .insert(payload)
     .select()
     .single()
+  if (error) console.error('[saveNews] insert error:', error.message, error)
   return { data: data as NewsPost | null, error: error?.message ?? null }
 }
 
