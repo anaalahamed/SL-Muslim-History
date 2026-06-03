@@ -47,15 +47,30 @@ DROP POLICY IF EXISTS "reactions_delete" ON reactions;
 CREATE POLICY "reactions_delete" ON reactions
   FOR DELETE USING (true);`
 
+const SITE_SETTINGS_SQL = `-- Fix 401 "No API key found" on site_settings requests.
+-- Grants read/write access and enables permissive RLS policies.
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE site_settings TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE site_settings TO authenticated;
+
+ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "site_settings_select" ON site_settings;
+CREATE POLICY "site_settings_select" ON site_settings FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "site_settings_upsert" ON site_settings;
+CREATE POLICY "site_settings_upsert" ON site_settings
+  FOR ALL USING (true) WITH CHECK (true);`
+
 export default function SetupPage() {
-  const [result,     setResult]     = useState<CheckResult | null>(null)
-  const [loading,    setLoading]    = useState(true)
-  const [running,    setRunning]    = useState(false)
-  const [migrMsg,    setMigrMsg]    = useState('')
-  const [copied,     setCopied]     = useState(false)
-  const [rlsResult,  setRlsResult]  = useState<RlsResult | null>(null)
-  const [rlsLoading, setRlsLoading] = useState(false)
-  const [rlsCopied,  setRlsCopied]  = useState(false)
+  const [result,       setResult]       = useState<CheckResult | null>(null)
+  const [loading,      setLoading]      = useState(true)
+  const [running,      setRunning]      = useState(false)
+  const [migrMsg,      setMigrMsg]      = useState('')
+  const [copied,       setCopied]       = useState(false)
+  const [rlsResult,    setRlsResult]    = useState<RlsResult | null>(null)
+  const [rlsLoading,   setRlsLoading]   = useState(false)
+  const [rlsCopied,    setRlsCopied]    = useState(false)
+  const [ssCopied,     setSsCopied]     = useState(false)
 
   async function testRls() {
     setRlsLoading(true)
@@ -72,6 +87,13 @@ export default function SetupPage() {
     navigator.clipboard.writeText(RLS_SQL).then(() => {
       setRlsCopied(true)
       setTimeout(() => setRlsCopied(false), 2500)
+    })
+  }
+
+  function copySsSql() {
+    navigator.clipboard.writeText(SITE_SETTINGS_SQL).then(() => {
+      setSsCopied(true)
+      setTimeout(() => setSsCopied(false), 2500)
     })
   }
 
@@ -331,7 +353,44 @@ export default function SetupPage() {
       )}
 
       {/* ══════════════════════════════════════════════════════════════════
-          SECTION 2 — Reactions RLS Check
+          SECTION 2 — site_settings 401 Fix
+      ══════════════════════════════════════════════════════════════════ */}
+      <div style={{ borderTop: '2px solid #e2e8f0', paddingTop: '24px', marginTop: '8px' }}>
+        <h3 className="text-base font-extrabold mb-1" style={{ color: '#0f172a' }}>
+          site_settings — 401 Fix
+        </h3>
+        <p className="text-sm mb-4" style={{ color: '#64748b' }}>
+          If your browser Network tab shows a 401 <code style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: 4, fontSize: 12 }}>site_settings?select=config&amp;id=eq.1</code> request
+          with <em>"No API key found"</em>, the table is missing GRANT permissions for the anon role.
+          Run this SQL once in your Supabase SQL Editor to fix it permanently.
+        </p>
+        <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #e2e8f0', background: 'white' }}>
+          <div className="px-5 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
+            <p className="text-xs font-black uppercase tracking-wider" style={{ color: '#94a3b8' }}>
+              SQL — run once in Supabase SQL Editor
+            </p>
+            <button
+              onClick={copySsSql}
+              className="px-3 py-1.5 rounded-lg text-xs font-bold"
+              style={{ background: ssCopied ? '#22c55e' : '#1e293b', color: 'white' }}
+            >
+              {ssCopied ? '✓ Copied!' : 'Copy'}
+            </button>
+          </div>
+          <pre
+            className="px-5 py-4 text-xs overflow-x-auto"
+            style={{ background: '#0f172a', color: '#86efac', fontFamily: 'monospace', lineHeight: 1.7, margin: 0 }}
+          >
+{SITE_SETTINGS_SQL}
+          </pre>
+        </div>
+        <p className="text-xs mt-3" style={{ color: '#94a3b8' }}>
+          After running, refresh the page — the 401 in the Network tab will be gone.
+        </p>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          SECTION 3 — Reactions RLS Check
       ══════════════════════════════════════════════════════════════════ */}
       <div style={{ borderTop: '2px solid #e2e8f0', paddingTop: '24px', marginTop: '8px' }}>
         <h3 className="text-base font-extrabold mb-1" style={{ color: '#0f172a' }}>Reactions — RLS Check</h3>

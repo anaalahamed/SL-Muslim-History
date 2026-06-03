@@ -1,7 +1,9 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const url  = process.env.NEXT_PUBLIC_SUPABASE_URL  ?? ''
-const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
+// Trim both values so a stray whitespace in the Vercel env var never produces
+// a client whose apikey header is a blank string (which causes 401 "No API key found").
+const url  = (process.env.NEXT_PUBLIC_SUPABASE_URL  ?? '').trim()
+const anon = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '').trim()
 
 // Returns null when env vars are not configured — db functions fall back to mock data
 export const supabase: SupabaseClient | null =

@@ -100,24 +100,16 @@ export const defaultConfig: AdminConfig = {
 }
 
 // Persist social links to Supabase so they appear on all devices/browsers.
-// Requires a `site_settings` table (run the migration SQL in Supabase):
-//   CREATE TABLE IF NOT EXISTS site_settings (
-//     id integer PRIMARY KEY DEFAULT 1,
-//     config jsonb NOT NULL DEFAULT '{}'
-//   );
-//   INSERT INTO site_settings (id, config) VALUES (1, '{}') ON CONFLICT (id) DO NOTHING;
 export async function saveSocialLinksToSupabase(config: AdminConfig): Promise<void> {
   try {
-    const { supabase } = await import('./supabase')
-    if (!supabase) return
-    const payload = {
+    const { saveSiteSettings } = await import('./db/siteSettings')
+    await saveSiteSettings({
       facebook:  config.facebook  || '',
       youtube:   config.youtube   || '',
       whatsapp:  config.whatsapp  || '',
       twitter:   config.twitter   || '',
       instagram: config.instagram || '',
-    }
-    await supabase.from('site_settings').upsert({ id: 1, config: payload })
+    })
   } catch {
     // non-critical — localStorage still works for local admin
   }

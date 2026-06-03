@@ -5,7 +5,7 @@ import Link from 'next/link'
 import AnimateIn from '@/components/ui/AnimateIn'
 import PageHero from '@/components/ui/PageHero'
 import { getAdminConfig, defaultConfig, AdminConfig } from '@/lib/adminConfig'
-import { supabase } from '@/lib/supabase'
+import { getSiteSettings } from '@/lib/db/siteSettings'
 import { saveMessage } from '@/lib/db/contact'
 
 const faqs = [
@@ -85,14 +85,10 @@ export default function ContactClient() {
 
   useEffect(() => {
     async function load() {
-      if (supabase) {
-        try {
-          const { data } = await supabase.from('site_settings').select('config').eq('id', 1).maybeSingle()
-          if (data?.config && typeof data.config === 'object') {
-            const sc = data.config as Record<string, string>
-            if (Object.values(sc).some(Boolean)) { setConfig((prev) => ({ ...prev, ...sc })); return }
-          }
-        } catch { /* fall through */ }
+      const sc = await getSiteSettings()
+      if (sc && Object.values(sc).some(Boolean)) {
+        setConfig((prev) => ({ ...prev, ...sc }))
+        return
       }
       setConfig(getAdminConfig())
     }

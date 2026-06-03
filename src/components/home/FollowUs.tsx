@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { getAdminConfig } from '@/lib/adminConfig'
-import { supabase } from '@/lib/supabase'
+import { getSiteSettings } from '@/lib/db/siteSettings'
 
 const PLATFORMS = [
   {
@@ -68,20 +68,8 @@ export default function FollowUs() {
       let cfg: Record<string, string> = {}
 
       // Try Supabase first (works across all devices)
-      if (supabase) {
-        try {
-          const { data } = await supabase
-            .from('site_settings')
-            .select('config')
-            .eq('id', 1)
-            .maybeSingle()
-          if (data?.config && typeof data.config === 'object') {
-            cfg = data.config as Record<string, string>
-          }
-        } catch {
-          // ignore — fall through to localStorage
-        }
-      }
+      const sc = await getSiteSettings()
+      if (sc) cfg = sc as Record<string, string>
 
       // Fallback to localStorage (admin's own device)
       if (!Object.values(cfg).some(Boolean)) {
