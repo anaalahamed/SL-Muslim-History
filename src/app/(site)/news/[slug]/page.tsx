@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from 'next'
 import { getNewsBySlug } from '@/lib/db/news'
 import { newsMetadata, newsJsonLd, breadcrumbJsonLd, BASE_URL, SITE_NAME } from '@/lib/seo'

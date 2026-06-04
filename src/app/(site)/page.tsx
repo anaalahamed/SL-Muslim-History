@@ -1,7 +1,13 @@
 import type { Metadata } from 'next'
-import dynamic from 'next/dynamic'
+import lazyLoad from 'next/dynamic'
 import HeroSlider from '@/components/home/HeroSlider'
+import SpecialNews from '@/components/home/SpecialNews'
+import FeaturedArticle from '@/components/home/FeaturedArticle'
+import AllArticles from '@/components/home/AllArticles'
+import SidebarAd from '@/components/home/SidebarAd'
 import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: { absolute: `Sri Lanka Muslim History | இலங்கை முஸ்லிம்களின் வரலாறு` },
@@ -23,17 +29,13 @@ export const metadata: Metadata = {
     images: [`${BASE_URL}/og-image.jpg`],
   },
 }
-import SpecialNews from '@/components/home/SpecialNews'
-import FeaturedArticle from '@/components/home/FeaturedArticle'
-import AllArticles from '@/components/home/AllArticles'
-import SidebarAd from '@/components/home/SidebarAd'
 
 // Below-fold components lazy-loaded to reduce initial JS bundle size
-const JanazaNews   = dynamic(() => import('@/components/home/JanazaNews'))
-const MostRead     = dynamic(() => import('@/components/home/MostRead'))
-const FollowUs     = dynamic(() => import('@/components/home/FollowUs'))
-const CategoryGrid = dynamic(() => import('@/components/home/CategoryGrid'))
-const DonationCTA  = dynamic(() => import('@/components/home/DonationCTA'))
+const JanazaNews   = lazyLoad(() => import('@/components/home/JanazaNews'))
+const MostRead     = lazyLoad(() => import('@/components/home/MostRead'))
+const FollowUs     = lazyLoad(() => import('@/components/home/FollowUs'))
+const CategoryGrid = lazyLoad(() => import('@/components/home/CategoryGrid'))
+const DonationCTA  = lazyLoad(() => import('@/components/home/DonationCTA'))
 
 export default function HomePage() {
   return (

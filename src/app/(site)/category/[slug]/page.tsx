@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from 'next'
 import { getCategories, getCategoryBySlug } from '@/lib/db/categories'
 import { categoryMetadata } from '@/lib/seo'

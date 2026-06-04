@@ -20,6 +20,15 @@ const nextConfig: NextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         ],
       },
+      {
+        // Prevent browsers and Vercel's CDN from caching HTML page responses.
+        // /_next/static/* files have content-hash filenames and are served with
+        // immutable headers by Next.js itself, so they are excluded here.
+        source: '/((?!_next/static|_next/image|favicon\\.ico).*)',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store' },
+        ],
+      },
     ]
   },
   experimental: {

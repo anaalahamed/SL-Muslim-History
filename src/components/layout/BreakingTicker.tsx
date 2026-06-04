@@ -2,11 +2,12 @@ import { unstable_cache } from 'next/cache'
 import { getSpecialNews } from '@/lib/db/news'
 import TickerTrack from './TickerTrack'
 
-// Cache the ticker content for 5 minutes — avoids a Supabase round-trip on every page view
+// Cache the ticker content for 60 seconds — limits Supabase round-trips while
+// keeping breaking news fresh within a minute of publishing.
 const getCachedTicker = unstable_cache(
   () => getSpecialNews(6),
   ['breaking-ticker'],
-  { revalidate: 300 },
+  { revalidate: 60 },
 )
 
 export default async function BreakingTicker() {
