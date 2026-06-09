@@ -36,7 +36,10 @@ export default function FeaturedArticle() {
 
   const cat = (name: string) => CAT_COLORS[name] ?? { bg: '#f1f5f9', text: '#475569' }
 
-  if (!loading && articles.length === 0) return null
+  // Return null while loading so the section header never flashes when
+  // no articles are pinned as featured. The section appears only once we
+  // have confirmed there is at least one featured article to display.
+  if (loading || articles.length === 0) return null
 
   return (
     <div>

@@ -6,12 +6,14 @@ import { useState, useEffect } from 'react'
 import { getSpecialNews } from '@/lib/db/news'
 import { NewsPost } from '@/lib/types'
 
+const LIMIT = 6
+
 export default function SpecialNews() {
   const [items, setItems]     = useState<NewsPost[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getSpecialNews(6).then((items) => { setItems(items); setLoading(false) })
+    getSpecialNews(LIMIT).then((items) => { setItems(items); setLoading(false) })
   }, [])
 
   return (
@@ -31,7 +33,7 @@ export default function SpecialNews() {
         </div>
 
         {loading
-          ? Array.from({ length: 5 }).map((_, i) => (
+          ? Array.from({ length: LIMIT }).map((_, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'stretch', minHeight: '60px', borderBottom: '1px solid var(--border)', padding: '8px 10px', gap: '8px' }}>
                 <div className="animate-shimmer-light" style={{ flex: 1, borderRadius: '2px' }} />
                 <div className="animate-shimmer-light" style={{ width: '76px', borderRadius: '2px' }} />
