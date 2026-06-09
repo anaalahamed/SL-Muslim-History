@@ -26,7 +26,7 @@ const quickLinks = [
 
 export default function Footer() {
   const [showTop,     setShowTop]     = useState(false)
-  const [year,        setYear]        = useState(0)
+  const [year,        setYear]        = useState(new Date().getFullYear())
   const [socialLinks, setSocialLinks] = useState<{ label: string; href: string; color: string; icon: React.ReactNode; active: boolean }[]>([])
   const [stats,       setStats]       = useState(defaultConfig.stats)
   const [email,       setEmail]       = useState('')
@@ -236,7 +236,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.28)' }}>
-              © {year || ''} SL Muslim History · Designed by{' '}
+              © {year} SL Muslim History · Designed by{' '}
               <a
                 href="https://www.akitaent.com/"
                 target="_blank"
