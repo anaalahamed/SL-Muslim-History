@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(New-Item -ItemType Directory -Force \"d:\\\\muslim history website\\\\SL-Muslim-History\\\\src\\\\app\\\\admin\\\\setup\")"
+    ]
+  }
+}
