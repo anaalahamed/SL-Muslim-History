@@ -163,7 +163,7 @@ export default function NewsClient() {
         {/* News feed */}
         {loading ? (
           <div className="flex flex-col gap-4">
-            {Array.from({ length: 6 }).map((_, i) => <NewsListSkeleton key={i} />)}
+            {Array.from({ length: PER_PAGE }).map((_, i) => <NewsListSkeleton key={i} />)}
           </div>
         ) : filtered.length === 0 ? (
           <AnimateIn direction="up" className="text-center py-24">

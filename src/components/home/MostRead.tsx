@@ -21,12 +21,14 @@ const BG_FALLBACKS = [
   'linear-gradient(135deg,#1a2d3d,#2a4060)',
 ]
 
+const LIMIT = 5
+
 export default function MostRead() {
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading]   = useState(true)
 
   useEffect(() => {
-    getMostReadArticles(5).then((top) => {
+    getMostReadArticles(LIMIT).then((top) => {
       setArticles(top)
       setLoading(false)
     })
@@ -43,7 +45,7 @@ export default function MostRead() {
 
       <div style={{ background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
         {loading
-          ? Array.from({ length: 4 }).map((_, i) => (
+          ? Array.from({ length: LIMIT }).map((_, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'stretch', minHeight: '54px', borderBottom: '1px solid var(--border)', gap: 0 }}>
                 <div className="animate-shimmer-light" style={{ width: '22px', flexShrink: 0 }} />
                 <div className="animate-shimmer-light" style={{ width: '52px', flexShrink: 0 }} />

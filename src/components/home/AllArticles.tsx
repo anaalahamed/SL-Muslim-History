@@ -93,7 +93,7 @@ export default function AllArticles() {
       {/* Article list */}
       <div style={{ background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
         {loading
-          ? Array.from({ length: 5 }).map((_, i) => (
+          ? Array.from({ length: ITEMS_PER_PAGE }).map((_, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'stretch', minHeight: '88px', borderBottom: '1px solid var(--border)', gap: 0 }}>
                 <div className="animate-shimmer-light" style={{ width: '110px', flexShrink: 0 }} />
                 <div style={{ flex: 1, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>

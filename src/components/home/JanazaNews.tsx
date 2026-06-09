@@ -14,12 +14,14 @@ const BG_FALLBACKS = [
   'linear-gradient(135deg,#1a2d3d,#2a4060)',
 ]
 
+const LIMIT = 5
+
 export default function JanazaNews() {
   const [items, setItems]     = useState<NewsPost[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getJanazaNews(5).then((items) => { setItems(items); setLoading(false) })
+    getJanazaNews(LIMIT).then((items) => { setItems(items); setLoading(false) })
   }, [])
 
   return (
@@ -34,7 +36,7 @@ export default function JanazaNews() {
 
       <div style={{ background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
         {loading
-          ? Array.from({ length: 4 }).map((_, i) => (
+          ? Array.from({ length: LIMIT }).map((_, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'stretch', minHeight: '54px', borderBottom: '1px solid var(--border)', gap: 0 }}>
                 <div className="animate-shimmer-light" style={{ width: '60px', flexShrink: 0 }} />
                 <div style={{ flex: 1, padding: '8px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
