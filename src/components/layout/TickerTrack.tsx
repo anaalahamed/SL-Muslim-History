@@ -19,25 +19,10 @@ export default function TickerTrack({ items }: Props) {
     const el = trackRef.current
     if (!el) return
 
-    // ── Runtime measurements (visible in browser DevTools console) ────────
     const scrollW  = el.scrollWidth
-    const parentW  = el.parentElement?.clientWidth ?? 0
-    const cs       = getComputedStyle(el)
     const oneSetPx = scrollW / REPEAT
 
-    console.log('[Ticker] headlines loaded      :', items.length)
-    console.log('[Ticker] headlines rendered    :', items.length * REPEAT)
-    console.log('[Ticker] el.scrollWidth        :', scrollW, 'px')
-    console.log('[Ticker] oneSetPx (scrollW/6)  :', oneSetPx, 'px')
-    console.log('[Ticker] container.clientWidth :', parentW, 'px')
-    console.log('[Ticker] animationDuration     :', cs.animationDuration)
-    console.log('[Ticker] animationPlayState    :', cs.animationPlayState)
-    console.log('[Ticker] animationName         :', cs.animationName)
-
-    if (oneSetPx <= 0) {
-      console.warn('[Ticker] oneSetPx is 0 — element not laid out yet, aborting')
-      return
-    }
+    if (oneSetPx <= 0) return
 
     // ── Disable CSS animation — rAF owns all movement from here ──────────
     el.style.animation = 'none'

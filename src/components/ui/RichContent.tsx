@@ -34,16 +34,20 @@ export default function RichContent({ content }: Props) {
         em: ({ children }) => (
           <em style={{ color: 'var(--text)', fontStyle: 'italic' }}>{children}</em>
         ),
-        a: ({ href, children }) => (
-          <a
-            href={href}
-            target={href?.startsWith('http') ? '_blank' : undefined}
-            rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
-            style={{ color: 'var(--green)', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: '3px' }}
-          >
-            {children}
-          </a>
-        ),
+        a: ({ href, children }) => {
+          // Block javascript: and data: URIs that could execute code in the reader's browser
+          const safe = href && !href.startsWith('javascript:') && !href.startsWith('data:') ? href : '#'
+          return (
+            <a
+              href={safe}
+              target={safe.startsWith('http') ? '_blank' : undefined}
+              rel={safe.startsWith('http') ? 'noopener noreferrer' : undefined}
+              style={{ color: 'var(--green)', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: '3px' }}
+            >
+              {children}
+            </a>
+          )
+        },
         ul: ({ children }) => (
           <ul className="space-y-1.5 mb-5 pl-5" style={{ listStyleType: 'disc', color: 'var(--text)' }}>
             {children}

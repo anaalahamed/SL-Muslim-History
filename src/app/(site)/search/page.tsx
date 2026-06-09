@@ -15,6 +15,12 @@ export const metadata: Metadata = {
     description: 'Search articles and news about Sri Lankan Muslim history.',
     images: [{ url: `${BASE_URL}/og-image.jpg`, width: 1200, height: 630, alt: SITE_NAME }],
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: `Search | ${SITE_NAME}`,
+    description: 'Search articles and news about Sri Lankan Muslim history.',
+    images: [`${BASE_URL}/og-image.jpg`],
+  },
 }
 
 export default function SearchPage() {
