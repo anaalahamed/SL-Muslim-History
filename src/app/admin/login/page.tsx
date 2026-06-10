@@ -3,36 +3,32 @@
 import Image from 'next/image'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-
-const ADMIN_PASSWORD_KEY = 'slmh_admin_password'
-const ADMIN_USERNAME_KEY = 'slmh_admin_username'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 export default function AdminLoginPage() {
   const router = useRouter()
-  const [username, setUsername] = useState('')
+  const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [error,    setError]    = useState('')
   const [loading,  setLoading]  = useState(false)
   const [showPwd,  setShowPwd]  = useState(false)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
 
-    setTimeout(() => {
-      const storedPwd  = localStorage.getItem(ADMIN_PASSWORD_KEY) ?? 'admin123'
-      const storedUser = localStorage.getItem(ADMIN_USERNAME_KEY) ?? 'admin'
+    const supabase = getAuthClient()
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
 
-      if (username === storedUser && password === storedPwd) {
-        document.cookie = `slmh_admin_session=1; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-        router.push('/admin')
-      } else {
-        setError('Incorrect username or password.')
-        setLoading(false)
-        setPassword('')
-      }
-    }, 600)
+    if (authError) {
+      setError('Incorrect email or password.')
+      setLoading(false)
+      setPassword('')
+    } else {
+      router.push('/admin')
+      router.refresh()
+    }
   }
 
   const inputBase = {
@@ -93,17 +89,17 @@ export default function AdminLoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
 
-              {/* Username */}
+              {/* Email */}
               <div>
-                <label className="block text-xs font-bold mb-1.5" style={{ color: '#334155' }}>Username</label>
+                <label className="block text-xs font-bold mb-1.5" style={{ color: '#334155' }}>Email</label>
                 <input
-                  type="text"
+                  type="email"
                   required
                   autoFocus
-                  autoComplete="username"
-                  value={username}
-                  onChange={(e) => { setUsername(e.target.value); setError('') }}
-                  placeholder="Enter your username"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setError('') }}
+                  placeholder="Enter your email"
                   className="w-full px-4 py-3 rounded-xl text-sm outline-none"
                   style={error ? inputError : inputBase}
                   onFocus={(e) => Object.assign(e.currentTarget.style, inputFocus)}
@@ -165,23 +161,23 @@ export default function AdminLoginPage() {
               {/* Submit */}
               <button
                 type="submit"
-                disabled={loading || !username || !password}
+                disabled={loading || !email || !password}
                 className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200"
                 style={{
-                  background: loading || !username || !password ? '#cbd5e1' : '#4a9e1f',
+                  background: loading || !email || !password ? '#cbd5e1' : '#4a9e1f',
                   color: 'white',
-                  cursor: loading || !username || !password ? 'not-allowed' : 'pointer',
-                  boxShadow: loading || !username || !password ? 'none' : '0 4px 16px rgba(74,158,31,0.35)',
+                  cursor: loading || !email || !password ? 'not-allowed' : 'pointer',
+                  boxShadow: loading || !email || !password ? 'none' : '0 4px 16px rgba(74,158,31,0.35)',
                 }}
                 onMouseEnter={(e) => {
-                  if (!loading && username && password) {
+                  if (!loading && email && password) {
                     e.currentTarget.style.transform = 'translateY(-1px)'
                     e.currentTarget.style.boxShadow = '0 8px 24px rgba(74,158,31,0.45)'
                   }
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = loading || !username || !password ? 'none' : '0 4px 16px rgba(74,158,31,0.35)'
+                  e.currentTarget.style.boxShadow = loading || !email || !password ? 'none' : '0 4px 16px rgba(74,158,31,0.35)'
                 }}
               >
                 {loading ? (

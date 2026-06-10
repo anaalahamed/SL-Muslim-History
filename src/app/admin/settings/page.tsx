@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { getAdminConfig, saveAdminConfig, saveSocialLinksToSupabase, defaultConfig, AdminConfig, TeamMember, Stat } from '@/lib/adminConfig'
-
-const ADMIN_PASSWORD_KEY = 'slmh_admin_password'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 export default function SettingsPage() {
   const [config,    setConfig]    = useState<AdminConfig>(defaultConfig)
@@ -11,12 +10,9 @@ export default function SettingsPage() {
   const [tab,       setTab]       = useState<'general' | 'social' | 'content' | 'seo' | 'announcement' | 'account'>('general')
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null)
   const [showMemberForm, setShowMemberForm] = useState(false)
-  const [curPwd,    setCurPwd]    = useState('')
   const [newPwd,    setNewPwd]    = useState('')
   const [confirmPwd,setConfirmPwd]= useState('')
   const [pwdMsg,    setPwdMsg]    = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  const [newUsername,  setNewUsername]  = useState('')
-  const [usernameMsg,  setUsernameMsg]  = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => { setConfig(getAdminConfig()) }, [])
 
@@ -29,13 +25,8 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 2500)
   }
 
-  function handlePasswordChange(e: React.FormEvent) {
+  async function handlePasswordChange(e: React.FormEvent) {
     e.preventDefault()
-    const stored = localStorage.getItem(ADMIN_PASSWORD_KEY) ?? 'admin123'
-    if (curPwd !== stored) {
-      setPwdMsg({ type: 'error', text: 'Current password is incorrect.' })
-      return
-    }
     if (newPwd.length < 6) {
       setPwdMsg({ type: 'error', text: 'New password must be at least 6 characters.' })
       return
@@ -44,22 +35,14 @@ export default function SettingsPage() {
       setPwdMsg({ type: 'error', text: 'Passwords do not match.' })
       return
     }
-    localStorage.setItem(ADMIN_PASSWORD_KEY, newPwd)
-    setPwdMsg({ type: 'success', text: 'Password updated successfully.' })
-    setCurPwd(''); setNewPwd(''); setConfirmPwd('')
-    setTimeout(() => setPwdMsg(null), 3000)
-  }
-
-  function handleUsernameChange(e: React.FormEvent) {
-    e.preventDefault()
-    if (newUsername.trim().length < 3) {
-      setUsernameMsg({ type: 'error', text: 'Username must be at least 3 characters.' })
-      return
+    const { error } = await getAuthClient().auth.updateUser({ password: newPwd })
+    if (error) {
+      setPwdMsg({ type: 'error', text: error.message })
+    } else {
+      setPwdMsg({ type: 'success', text: 'Password updated successfully.' })
+      setNewPwd(''); setConfirmPwd('')
+      setTimeout(() => setPwdMsg(null), 3000)
     }
-    localStorage.setItem('slmh_admin_username', newUsername.trim())
-    setUsernameMsg({ type: 'success', text: 'Username updated successfully.' })
-    setNewUsername('')
-    setTimeout(() => setUsernameMsg(null), 3000)
   }
 
   const tabs = [
@@ -681,51 +664,6 @@ export default function SettingsPage() {
 
       {/* ── Account tab ── */}
       {tab === 'account' && (
-        <>
-        {/* Change username */}
-        <form onSubmit={handleUsernameChange}>
-          <div
-            className="rounded-2xl overflow-hidden mb-5"
-            style={{ background: 'white', border: '1px solid #e2e8f0' }}
-          >
-            <div className="px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
-              <h2 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Change Username</h2>
-              <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>Update your admin login username.</p>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-bold mb-1.5" style={{ color: '#334155' }}>New Username</label>
-                <input
-                  type="text"
-                  required
-                  value={newUsername}
-                  onChange={(e) => setNewUsername(e.target.value)}
-                  placeholder="Enter new username"
-                  className={inputClass} style={inputStyle}
-                  onFocus={(e) => Object.assign(e.currentTarget.style, focusStyle)}
-                  onBlur={(e) => Object.assign(e.currentTarget.style, inputStyle)}
-                />
-              </div>
-              {usernameMsg && (
-                <p
-                  className="text-xs font-semibold flex items-center gap-1.5 px-3 py-2 rounded-lg"
-                  style={{
-                    background: usernameMsg.type === 'success' ? '#f0fdf4' : '#fef2f2',
-                    color:      usernameMsg.type === 'success' ? '#15803d' : '#dc2626',
-                  }}
-                >
-                  {usernameMsg.type === 'success' ? '✅' : '⚠️'} {usernameMsg.text}
-                </p>
-              )}
-            </div>
-            <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
-              <button type="submit" className="px-6 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: '#4a9e1f' }}>
-                Update Username
-              </button>
-            </div>
-          </div>
-        </form>
-
         <form onSubmit={handlePasswordChange}>
           <div
             className="rounded-2xl overflow-hidden"
@@ -733,12 +671,11 @@ export default function SettingsPage() {
           >
             <div className="px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
               <h2 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Change Password</h2>
-              <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>Update your admin login password.</p>
+              <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>Update your admin account password.</p>
             </div>
             <div className="p-6 space-y-4">
               {[
-                { label: 'Current Password', value: curPwd, setter: setCurPwd },
-                { label: 'New Password',     value: newPwd, setter: setNewPwd },
+                { label: 'New Password',         value: newPwd,     setter: setNewPwd },
                 { label: 'Confirm New Password', value: confirmPwd, setter: setConfirmPwd },
               ].map((f) => (
                 <div key={f.label}>
@@ -777,7 +714,6 @@ export default function SettingsPage() {
             </div>
           </div>
         </form>
-        </>
       )}
 
     </div>

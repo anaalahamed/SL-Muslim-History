@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react'
 import { getAdminConfig } from '@/lib/adminConfig'
 import { getUnreadCount } from '@/lib/db/contact'
 import { supabase } from '@/lib/supabase'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 const navItems = [
   { label: 'Dashboard',   href: '/admin',              icon: '📊' },
@@ -31,11 +32,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [unreadMsgs,    setUnreadMsgs]    = useState(0)
   const [newSubs,       setNewSubs]       = useState(0)
 
-  // Load owner name from config (fall back to login username if display name not set)
+  // Load owner name from config (fall back to authenticated user's email)
   useEffect(() => {
     const config = getAdminConfig()
-    const loginUsername = localStorage.getItem('slmh_admin_username') ?? 'admin'
-    setOwnerName(config.ownerName || loginUsername)
+    if (config.ownerName) {
+      setOwnerName(config.ownerName)
+      return
+    }
+    getAuthClient().auth.getUser().then(({ data: { user } }) => {
+      setOwnerName(user?.email?.split('@')[0] ?? 'Admin')
+    })
   }, [pathname]) // re-read on every nav so Settings changes reflect immediately
 
   // Poll unread message count
@@ -201,8 +207,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.35)' }}>Administrator</div>
           </div>
           <button
-            onClick={() => {
-              document.cookie = 'slmh_admin_session=; path=/; max-age=0'
+            onClick={async () => {
+              await getAuthClient().auth.signOut()
               router.push('/admin/login')
             }}
             title="Sign out"
