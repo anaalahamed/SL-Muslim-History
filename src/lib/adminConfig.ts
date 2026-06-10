@@ -100,7 +100,7 @@ export const defaultConfig: AdminConfig = {
 }
 
 // Persist social links to Supabase so they appear on all devices/browsers.
-export async function saveSocialLinksToSupabase(config: AdminConfig): Promise<void> {
+export async function saveSocialLinksToSupabase(config: AdminConfig, client?: import('@supabase/supabase-js').SupabaseClient): Promise<void> {
   try {
     const { saveSiteSettings } = await import('./db/siteSettings')
     await saveSiteSettings({
@@ -109,7 +109,7 @@ export async function saveSocialLinksToSupabase(config: AdminConfig): Promise<vo
       whatsapp:  config.whatsapp  || '',
       twitter:   config.twitter   || '',
       instagram: config.instagram || '',
-    })
+    }, client)
   } catch {
     // non-critical — localStorage still works for local admin
   }

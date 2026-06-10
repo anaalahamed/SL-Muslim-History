@@ -1,5 +1,6 @@
 import { supabase } from '../supabase'
 import { ContactMessage } from '../types'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export async function getMessages(): Promise<ContactMessage[]> {
   if (!supabase) return []
@@ -22,19 +23,22 @@ export async function saveMessage(data: Omit<ContactMessage, 'id' | 'received_at
   return saved as ContactMessage
 }
 
-export async function markRead(id: string): Promise<void> {
-  if (!supabase) return
-  await supabase.from('contact_messages').update({ read: true }).eq('id', id)
+export async function markRead(id: string, client?: SupabaseClient): Promise<void> {
+  const db = client ?? supabase
+  if (!db) return
+  await db.from('contact_messages').update({ read: true }).eq('id', id)
 }
 
-export async function markAllRead(): Promise<void> {
-  if (!supabase) return
-  await supabase.from('contact_messages').update({ read: true }).eq('read', false)
+export async function markAllRead(client?: SupabaseClient): Promise<void> {
+  const db = client ?? supabase
+  if (!db) return
+  await db.from('contact_messages').update({ read: true }).eq('read', false)
 }
 
-export async function deleteMessage(id: string): Promise<void> {
-  if (!supabase) return
-  await supabase.from('contact_messages').delete().eq('id', id)
+export async function deleteMessage(id: string, client?: SupabaseClient): Promise<void> {
+  const db = client ?? supabase
+  if (!db) return
+  await db.from('contact_messages').delete().eq('id', id)
 }
 
 export async function getUnreadCount(): Promise<number> {

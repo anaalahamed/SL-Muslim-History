@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import ArticleForm from '@/components/admin/ArticleForm'
 import { getArticleById, saveArticle } from '@/lib/db/articles'
 import { Article } from '@/lib/types'
+import { getAuthClient } from '@/lib/supabase-auth'
 export default function PageClient() {
   const { id } = useParams<{ id: string }>()
   const router  = useRouter()
@@ -19,7 +20,7 @@ export default function PageClient() {
   if (!article) notFound()
   async function handleSave(data: Partial<Article>) {
     setSaving(true)
-    const { error } = await saveArticle({ ...data, id: article!.id })
+    const { error } = await saveArticle({ ...data, id: article!.id }, getAuthClient())
     setSaving(false)
     if (!error) {
       setSaved(true)

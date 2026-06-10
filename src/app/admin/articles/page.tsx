@@ -7,6 +7,7 @@ import { getArticles, deleteArticle, toggleArticleFeatured } from '@/lib/db/arti
 import { getCategories } from '@/lib/db/categories'
 import { Article } from '@/lib/types'
 import { Category } from '@/lib/types'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 export default function AdminArticlesPage() {
   const [search,      setSearch]      = useState('')
@@ -33,14 +34,14 @@ export default function AdminArticlesPage() {
   async function toggleFeatured(id: string) {
     const article = articles.find((a) => a.id === id)
     if (!article) return
-    await toggleArticleFeatured(id, !article.is_featured)
+    await toggleArticleFeatured(id, !article.is_featured, getAuthClient())
     setArticles((prev) => prev.map((a) => a.id === id ? { ...a, is_featured: !a.is_featured } : a))
   }
 
   function confirmDelete(id: string) { setDeleteId(id) }
   async function doDelete() {
     if (deleteId) {
-      await deleteArticle(deleteId)
+      await deleteArticle(deleteId, getAuthClient())
       setArticles((prev) => prev.filter((a) => a.id !== deleteId))
     }
     setDeleteId(null)

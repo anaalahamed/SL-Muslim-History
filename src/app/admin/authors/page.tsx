@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getAuthors, saveAuthor, deleteAuthor } from '@/lib/db/authors'
 import { Author } from '@/lib/types'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 export default function AdminAuthorsPage() {
   const [authors,  setAuthors]  = useState<Author[]>([])
@@ -24,7 +25,7 @@ export default function AdminAuthorsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setSaving(true)
     const payload: Partial<Author> = { name, name_ta: nameTa, bio, profile_link: link, avatar_url: '', ...(editId ? { id: editId } : {}) }
-    const { data, error } = await saveAuthor(payload)
+    const { data, error } = await saveAuthor(payload, getAuthClient())
     setSaving(false)
     if (!error && data) {
       setAuthors((prev) => editId ? prev.map((a) => a.id === editId ? data : a) : [...prev, data])
@@ -33,7 +34,7 @@ export default function AdminAuthorsPage() {
   }
 
   async function doDelete() {
-    if (deleteId) { await deleteAuthor(deleteId); setAuthors((prev) => prev.filter((a) => a.id !== deleteId)) }
+    if (deleteId) { await deleteAuthor(deleteId, getAuthClient()); setAuthors((prev) => prev.filter((a) => a.id !== deleteId)) }
     setDeleteId(null)
   }
 

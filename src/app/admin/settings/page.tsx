@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { getAdminConfig, saveAdminConfig, saveSocialLinksToSupabase, defaultConfig, AdminConfig, TeamMember, Stat } from '@/lib/adminConfig'
 import { getAuthClient } from '@/lib/supabase-auth'
 
+
 export default function SettingsPage() {
   const [config,    setConfig]    = useState<AdminConfig>(defaultConfig)
   const [saved,     setSaved]     = useState(false)
@@ -20,7 +21,7 @@ export default function SettingsPage() {
     e.preventDefault()
     saveAdminConfig(config)
     // Also persist social links to Supabase so all devices/browsers can read them
-    saveSocialLinksToSupabase(config)
+    saveSocialLinksToSupabase(config, getAuthClient())
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
   }

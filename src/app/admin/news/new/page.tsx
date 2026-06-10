@@ -5,6 +5,7 @@ import Link from 'next/link'
 import NewsForm from '@/components/admin/NewsForm'
 import { saveNews } from '@/lib/db/news'
 import { NewsPost } from '@/lib/types'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 export default function NewNewsPage() {
   const [saving, setSaving] = useState(false)
@@ -14,7 +15,7 @@ export default function NewNewsPage() {
   async function handleSave(data: Partial<NewsPost>) {
     setSaving(true)
     setError(null)
-    const { data: saved, error } = await saveNews(data)
+    const { data: saved, error } = await saveNews(data, getAuthClient())
     setSaving(false)
     if (error) { setError(error); return }
     if (saved) setDone(true)

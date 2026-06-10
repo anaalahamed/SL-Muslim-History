@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { ContactMessage } from '@/lib/types'
 import { getMessages, markRead, markAllRead, deleteMessage } from '@/lib/db/contact'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 const reasonColors: Record<string, { bg: string; color: string }> = {
   'Submit an Article':         { bg: '#dbeafe', color: '#1d4ed8' },
@@ -32,21 +33,21 @@ export default function MessagesPage() {
   async function openMessage(msg: ContactMessage) {
     setSelected(msg)
     if (!msg.read) {
-      await markRead(msg.id)
+      await markRead(msg.id, getAuthClient())
       load()
     }
   }
 
   async function handleDelete(id: string) {
     setDeleting(id)
-    await deleteMessage(id)
+    await deleteMessage(id, getAuthClient())
     if (selected?.id === id) setSelected(null)
     load()
     setDeleting(null)
   }
 
   async function handleMarkAllRead() {
-    await markAllRead()
+    await markAllRead(getAuthClient())
     load()
   }
 

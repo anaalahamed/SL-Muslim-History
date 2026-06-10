@@ -7,6 +7,7 @@ import { Article } from '@/lib/types'
 import MediaPicker from '@/components/admin/MediaPicker'
 import { fileToMediaItem, addMediaItem, getMediaItemById } from '@/lib/mediaStore'
 import { supabase } from '@/lib/supabase'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 const MAX_FEATURED = 3
 
@@ -56,11 +57,12 @@ export default function AdminHomepagePage() {
     let storageUrl: string | undefined
 
     if (supabase) {
+      const authClient = getAuthClient()
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
       const path = `${Date.now()}-${safeName}`
-      const { data, error } = await supabase.storage.from('media').upload(path, file, { upsert: false })
+      const { data, error } = await authClient.storage.from('media').upload(path, file, { upsert: false })
       if (!error && data) {
-        const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(data.path)
+        const { data: { publicUrl } } = authClient.storage.from('media').getPublicUrl(data.path)
         storageUrl = publicUrl
       }
     }

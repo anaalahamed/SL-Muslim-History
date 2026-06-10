@@ -1,6 +1,7 @@
 import { supabase } from '../supabase'
 import { mockNews } from '../mockData'
 import { NewsPost } from '../types'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export async function getNews(): Promise<NewsPost[]> {
   if (!supabase) return mockNews
@@ -69,35 +70,26 @@ export async function getNewsById(id: string): Promise<NewsPost | null> {
   return data as NewsPost
 }
 
-export async function saveNews(post: Partial<NewsPost>): Promise<{ data: NewsPost | null; error: string | null }> {
-  if (!supabase) return { data: null, error: 'Supabase not configured' }
+export async function saveNews(post: Partial<NewsPost>, client?: SupabaseClient): Promise<{ data: NewsPost | null; error: string | null }> {
+  const db = client ?? supabase
+  if (!db) return { data: null, error: 'Supabase not configured' }
 
-  // Explicitly cast is_featured to boolean so it is never undefined/null in the payload.
-  // This also surfaces a Supabase error immediately if the column doesn't exist yet.
   const payload = { ...post, is_featured: post.is_featured === true }
 
   if (payload.id) {
     const { id, ...rest } = payload
-    const { data, error } = await supabase
-      .from('news')
-      .update(rest)
-      .eq('id', id)
-      .select()
-      .single()
+    const { data, error } = await db.from('news').update(rest).eq('id', id).select().single()
     if (error) console.error('[saveNews] update error:', error.message, error)
     return { data: data as NewsPost | null, error: error?.message ?? null }
   }
-  const { data, error } = await supabase
-    .from('news')
-    .insert(payload)
-    .select()
-    .single()
+  const { data, error } = await db.from('news').insert(payload).select().single()
   if (error) console.error('[saveNews] insert error:', error.message, error)
   return { data: data as NewsPost | null, error: error?.message ?? null }
 }
 
-export async function deleteNews(id: string): Promise<string | null> {
-  if (!supabase) return 'Supabase not configured'
-  const { error } = await supabase.from('news').delete().eq('id', id)
+export async function deleteNews(id: string, client?: SupabaseClient): Promise<string | null> {
+  const db = client ?? supabase
+  if (!db) return 'Supabase not configured'
+  const { error } = await db.from('news').delete().eq('id', id)
   return error?.message ?? null
 }

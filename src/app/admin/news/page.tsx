@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { formatDate } from '@/lib/utils'
 import { getNews, deleteNews } from '@/lib/db/news'
 import { NewsPost } from '@/lib/types'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 export default function AdminNewsPage() {
   const [search,     setSearch]     = useState('')
@@ -25,7 +26,7 @@ export default function AdminNewsPage() {
 
   async function doDelete() {
     if (deleteId) {
-      await deleteNews(deleteId)
+      await deleteNews(deleteId, getAuthClient())
       setNews((prev) => prev.filter((n) => n.id !== deleteId))
     }
     setDeleteId(null)

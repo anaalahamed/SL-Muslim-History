@@ -1,6 +1,7 @@
 import { supabase } from '../supabase'
 import { mockArticles } from '../mockData'
 import { Article } from '../types'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export async function getArticles(): Promise<Article[]> {
   if (!supabase) return mockArticles
@@ -98,26 +99,29 @@ export async function getRelatedArticles(id: string, category: string): Promise<
   return data as Article[]
 }
 
-export async function saveArticle(article: Partial<Article>): Promise<{ data: Article | null; error: string | null }> {
-  if (!supabase) return { data: null, error: 'Supabase not configured' }
+export async function saveArticle(article: Partial<Article>, client?: SupabaseClient): Promise<{ data: Article | null; error: string | null }> {
+  const db = client ?? supabase
+  if (!db) return { data: null, error: 'Supabase not configured' }
   if (article.id) {
     const { id, ...rest } = article
-    const { data, error } = await supabase.from('articles').update(rest).eq('id', id).select().single()
+    const { data, error } = await db.from('articles').update(rest).eq('id', id).select().single()
     return { data: data as Article | null, error: error?.message ?? null }
   }
-  const { data, error } = await supabase.from('articles').insert(article).select().single()
+  const { data, error } = await db.from('articles').insert(article).select().single()
   return { data: data as Article | null, error: error?.message ?? null }
 }
 
-export async function deleteArticle(id: string): Promise<string | null> {
-  if (!supabase) return 'Supabase not configured'
-  const { error } = await supabase.from('articles').delete().eq('id', id)
+export async function deleteArticle(id: string, client?: SupabaseClient): Promise<string | null> {
+  const db = client ?? supabase
+  if (!db) return 'Supabase not configured'
+  const { error } = await db.from('articles').delete().eq('id', id)
   return error?.message ?? null
 }
 
-export async function toggleArticleFeatured(id: string, is_featured: boolean): Promise<string | null> {
-  if (!supabase) return 'Supabase not configured'
-  const { error } = await supabase.from('articles').update({ is_featured }).eq('id', id)
+export async function toggleArticleFeatured(id: string, is_featured: boolean, client?: SupabaseClient): Promise<string | null> {
+  const db = client ?? supabase
+  if (!db) return 'Supabase not configured'
+  const { error } = await db.from('articles').update({ is_featured }).eq('id', id)
   return error?.message ?? null
 }
 

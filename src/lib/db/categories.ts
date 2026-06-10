@@ -1,6 +1,7 @@
 import { supabase } from '../supabase'
 import { mockCategories } from '../mockData'
 import { Category } from '../types'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export async function getCategories(): Promise<Category[]> {
   if (!supabase) return mockCategories.map((c) => ({ ...c, parent_id: null }))
@@ -41,19 +42,21 @@ export async function getSubcategories(parentId: string): Promise<Category[]> {
   return all.filter((c) => c.parent_id === parentId)
 }
 
-export async function saveCategory(cat: Partial<Category>): Promise<{ data: Category | null; error: string | null }> {
-  if (!supabase) return { data: null, error: 'Supabase not configured' }
+export async function saveCategory(cat: Partial<Category>, client?: SupabaseClient): Promise<{ data: Category | null; error: string | null }> {
+  const db = client ?? supabase
+  if (!db) return { data: null, error: 'Supabase not configured' }
   if (cat.id) {
     const { id, ...rest } = cat
-    const { data, error } = await supabase.from('categories').update(rest).eq('id', id).select().single()
+    const { data, error } = await db.from('categories').update(rest).eq('id', id).select().single()
     return { data: data as Category | null, error: error?.message ?? null }
   }
-  const { data, error } = await supabase.from('categories').insert(cat).select().single()
+  const { data, error } = await db.from('categories').insert(cat).select().single()
   return { data: data as Category | null, error: error?.message ?? null }
 }
 
-export async function deleteCategory(id: string): Promise<string | null> {
-  if (!supabase) return 'Supabase not configured'
-  const { error } = await supabase.from('categories').delete().eq('id', id)
+export async function deleteCategory(id: string, client?: SupabaseClient): Promise<string | null> {
+  const db = client ?? supabase
+  if (!db) return 'Supabase not configured'
+  const { error } = await db.from('categories').delete().eq('id', id)
   return error?.message ?? null
 }

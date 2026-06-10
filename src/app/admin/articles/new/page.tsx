@@ -5,6 +5,7 @@ import Link from 'next/link'
 import ArticleForm from '@/components/admin/ArticleForm'
 import { saveArticle } from '@/lib/db/articles'
 import { Article } from '@/lib/types'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 export default function NewArticlePage() {
   const [saving, setSaving] = useState(false)
@@ -14,7 +15,7 @@ export default function NewArticlePage() {
   async function handleSave(data: Partial<Article>) {
     setSaving(true)
     setError(null)
-    const { data: saved, error } = await saveArticle(data)
+    const { data: saved, error } = await saveArticle(data, getAuthClient())
     setSaving(false)
     if (error) { setError(error); return }
     if (saved) setDone(true)

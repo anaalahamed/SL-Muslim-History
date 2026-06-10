@@ -5,6 +5,7 @@ import { notFound, useParams } from 'next/navigation'
 import NewsForm from '@/components/admin/NewsForm'
 import { getNewsById, saveNews } from '@/lib/db/news'
 import { NewsPost } from '@/lib/types'
+import { getAuthClient } from '@/lib/supabase-auth'
 export default function PageClient() {
   const { id } = useParams<{ id: string }>()
   const [post,   setPost]   = useState<NewsPost | null | undefined>(undefined)
@@ -17,7 +18,7 @@ export default function PageClient() {
   if (!post) notFound()
   async function handleSave(data: Partial<NewsPost>) {
     setSaving(true)
-    const { error } = await saveNews({ ...data, id: post!.id })
+    const { error } = await saveNews({ ...data, id: post!.id }, getAuthClient())
     setSaving(false)
     if (!error) {
       setSaved(true)

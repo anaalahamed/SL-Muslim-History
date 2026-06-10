@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { getAllAds, deleteAd, toggleAdActive } from '@/lib/db/ads'
 import { Advertisement } from '@/lib/types'
 import { formatDate } from '@/lib/utils'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 export default function AdminAdsPage() {
   const [ads,        setAds]      = useState<Advertisement[]>([])
@@ -15,13 +16,13 @@ export default function AdminAdsPage() {
   useEffect(() => { getAllAds().then(setAds) }, [])
 
   async function handleToggle(id: string, current: boolean) {
-    await toggleAdActive(id, !current)
+    await toggleAdActive(id, !current, getAuthClient())
     setAds((prev) => prev.map((a) => a.id === id ? { ...a, is_active: !current } : a))
   }
 
   async function doDelete() {
     if (!deleteId) return
-    const err = await deleteAd(deleteId)
+    const err = await deleteAd(deleteId, getAuthClient())
     if (err) { setDeleteError(err); return }
     setAds((prev) => prev.filter((a) => a.id !== deleteId))
     setDeleteId(null)

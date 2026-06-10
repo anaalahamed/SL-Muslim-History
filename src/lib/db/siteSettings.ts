@@ -1,4 +1,5 @@
 import { supabase } from '../supabase'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export interface SiteSettingsConfig {
   facebook?:  string
@@ -36,12 +37,11 @@ export async function getSiteSettings(): Promise<SiteSettingsConfig | null> {
   }
 }
 
-export async function saveSiteSettings(config: SiteSettingsConfig): Promise<void> {
-  if (!supabase) return
+export async function saveSiteSettings(config: SiteSettingsConfig, client?: SupabaseClient): Promise<void> {
+  const db = client ?? supabase
+  if (!db) return
   try {
-    const { error } = await supabase
-      .from('site_settings')
-      .upsert({ id: 1, config })
+    const { error } = await db.from('site_settings').upsert({ id: 1, config })
     if (error) console.error('[siteSettings] write error:', error.message)
   } catch (err) {
     console.error('[siteSettings] unexpected write error:', err)

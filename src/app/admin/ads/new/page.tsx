@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import AdForm from '@/components/admin/AdForm'
 import { saveAd } from '@/lib/db/ads'
 import { Advertisement } from '@/lib/types'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 export default function NewAdPage() {
   const router = useRouter()
@@ -14,7 +15,7 @@ export default function NewAdPage() {
   async function handleSave(data: Partial<Advertisement>) {
     setSaving(true)
     setError(null)
-    const { error } = await saveAd(data)
+    const { error } = await saveAd(data, getAuthClient())
     setSaving(false)
     if (error) { setError(error); return }
     router.push('/admin/ads')

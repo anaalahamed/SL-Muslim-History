@@ -10,6 +10,7 @@ import {
 } from '@/lib/mediaStore'
 import ImageCropModal from '@/components/ui/ImageCropModal'
 import { supabase } from '@/lib/supabase'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25 MB
 
@@ -94,13 +95,14 @@ export default function AdminMediaPage() {
     try {
       const croppedFile = new File([blob], fileName, { type: blob.type })
       if (supabase) {
+        const authClient = getAuthClient()
         const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
         const path = `${Date.now()}-${safeName}`
-        const { data, error } = await supabase.storage.from('media').upload(path, croppedFile, { upsert: false })
+        const { data, error } = await authClient.storage.from('media').upload(path, croppedFile, { upsert: false })
         if (error) {
           errors.push(`${fileName}: ${error.message}`)
         } else {
-          const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(data.path)
+          const { data: { publicUrl } } = authClient.storage.from('media').getPublicUrl(data.path)
           const item = await fileToMediaItem(croppedFile, publicUrl)
           addMediaItem(item)
         }

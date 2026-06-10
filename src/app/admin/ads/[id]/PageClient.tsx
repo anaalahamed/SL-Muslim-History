@@ -4,6 +4,7 @@ import { useRouter, useParams } from 'next/navigation'
 import AdForm from '@/components/admin/AdForm'
 import { saveAd, getAllAds } from '@/lib/db/ads'
 import { Advertisement } from '@/lib/types'
+import { getAuthClient } from '@/lib/supabase-auth'
 export default function EditAdPage() {
   const router = useRouter()
   const { id } = useParams<{ id: string }>()
@@ -19,7 +20,7 @@ export default function EditAdPage() {
   async function handleSave(data: Partial<Advertisement>) {
     setSaving(true)
     setError(null)
-    const { error } = await saveAd({ ...data, id })
+    const { error } = await saveAd({ ...data, id }, getAuthClient())
     setSaving(false)
     if (error) { setError(error); return }
     router.push('/admin/ads')

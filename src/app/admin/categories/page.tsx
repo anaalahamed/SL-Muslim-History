@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getCategories, saveCategory, deleteCategory } from '@/lib/db/categories'
 import { Category } from '@/lib/types'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 const ICON_OPTIONS = ['📜','🕌','🎨','👑','📖','🤝','🌙','⭐','📚','🏛️','🗺️','✍️','🎭','🔬','🕋','🌿','🏆','🎵']
 
@@ -45,7 +46,7 @@ export default function AdminCategoriesPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setSaving(true)
     const payload: Partial<Category> = { name_en: nameEn, name_ta: nameTa, slug, icon, article_count: 0, parent_id: parentId || null, ...(editId ? { id: editId } : {}) }
-    const { data, error } = await saveCategory(payload)
+    const { data, error } = await saveCategory(payload, getAuthClient())
     setSaving(false)
     if (!error && data) {
       setCategories((prev) => editId ? prev.map((c) => c.id === editId ? data : c) : [...prev, data])
@@ -54,7 +55,7 @@ export default function AdminCategoriesPage() {
   }
 
   async function doDelete() {
-    if (deleteId) { await deleteCategory(deleteId); setCategories((prev) => prev.filter((c) => c.id !== deleteId)) }
+    if (deleteId) { await deleteCategory(deleteId, getAuthClient()); setCategories((prev) => prev.filter((c) => c.id !== deleteId)) }
     setDeleteId(null)
   }
 

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { formatDate } from '@/lib/utils'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 type Status = 'pending' | 'approved' | 'hidden' | 'spam'
 
@@ -63,20 +64,20 @@ export default function AdminCommentsPage() {
 
   async function setStatus(ids: string[], status: Status) {
     if (!supabase) return
-    await supabase.from('comments').update({ status }).in('id', ids)
+    await getAuthClient().from('comments').update({ status }).in('id', ids)
     load()
   }
 
   async function deleteComments(ids: string[]) {
     if (!supabase || !confirm(`Delete ${ids.length} comment(s)?`)) return
-    await supabase.from('comments').delete().in('id', ids)
+    await getAuthClient().from('comments').delete().in('id', ids)
     load()
   }
 
   async function blockVisitor(visitorId: string, commentId: string) {
     if (!supabase || !confirm('Block this visitor? They will be unable to post comments.')) return
     setBlocking(visitorId)
-    await supabase.from('comment_blocks').upsert({ visitor_id: visitorId, reason: 'Admin blocked' })
+    await getAuthClient().from('comment_blocks').upsert({ visitor_id: visitorId, reason: 'Admin blocked' })
     await setStatus([commentId], 'spam')
     setBlocking(null)
   }
