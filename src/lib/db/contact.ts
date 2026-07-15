@@ -2,9 +2,10 @@ import { supabase } from '../supabase'
 import { ContactMessage } from '../types'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-export async function getMessages(): Promise<ContactMessage[]> {
-  if (!supabase) return []
-  const { data, error } = await supabase
+export async function getMessages(client?: SupabaseClient): Promise<ContactMessage[]> {
+  const db = client ?? supabase
+  if (!db) return []
+  const { data, error } = await db
     .from('contact_messages')
     .select('*')
     .order('received_at', { ascending: false })
@@ -41,9 +42,10 @@ export async function deleteMessage(id: string, client?: SupabaseClient): Promis
   await db.from('contact_messages').delete().eq('id', id)
 }
 
-export async function getUnreadCount(): Promise<number> {
-  if (!supabase) return 0
-  const { count } = await supabase
+export async function getUnreadCount(client?: SupabaseClient): Promise<number> {
+  const db = client ?? supabase
+  if (!db) return 0
+  const { count } = await db
     .from('contact_messages')
     .select('*', { count: 'exact', head: true })
     .eq('read', false)

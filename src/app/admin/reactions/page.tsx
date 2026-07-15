@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
 import { formatDate } from '@/lib/utils'
 import { REACTIONS } from '@/lib/reactions'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 const EMOJIS = [...REACTIONS]
 
@@ -22,9 +22,9 @@ export default function AdminReactionsPage() {
   const [resetting,   setResetting]   = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    if (!supabase) return
     setLoading(true)
-    const q = supabase.from('reactions').select('content_type, content_id, emoji, created_at')
+    const authClient = getAuthClient()
+    const q = authClient.from('reactions').select('content_type, content_id, emoji, created_at')
       .order('created_at', { ascending: false })
     const { data } = filterType === 'all' ? await q : await q.eq('content_type', filterType)
 
@@ -47,9 +47,9 @@ export default function AdminReactionsPage() {
   useEffect(() => { load() }, [load])
 
   async function resetReactions(contentType: string, contentId: string) {
-    if (!supabase || !confirm(`Delete all reactions for this ${contentType}?`)) return
+    if (!confirm(`Delete all reactions for this ${contentType}?`)) return
     setResetting(contentId)
-    await supabase.from('reactions').delete().eq('content_type', contentType).eq('content_id', contentId)
+    await getAuthClient().from('reactions').delete().eq('content_type', contentType).eq('content_id', contentId)
     setResetting(null)
     load()
   }

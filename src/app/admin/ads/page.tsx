@@ -13,7 +13,7 @@ export default function AdminAdsPage() {
   const [deleteId,   setDeleteId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
-  useEffect(() => { getAllAds().then(setAds) }, [])
+  useEffect(() => { getAllAds(getAuthClient()).then(setAds) }, [])
 
   async function handleToggle(id: string, current: boolean) {
     await toggleAdActive(id, !current, getAuthClient())

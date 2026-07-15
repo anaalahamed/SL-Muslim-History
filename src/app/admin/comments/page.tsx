@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
 import { formatDate } from '@/lib/utils'
 import { getAuthClient } from '@/lib/supabase-auth'
 
@@ -44,17 +43,18 @@ export default function AdminCommentsPage() {
   const [blocking,  setBlocking]  = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    if (!supabase) return
     setLoading(true)
     setSelected(new Set())
 
+    const authClient = getAuthClient()
+
     // Load counts
     for (const t of ['pending', 'approved', 'hidden', 'spam'] as Status[]) {
-      supabase.from('comments').select('id', { count: 'exact', head: true }).eq('status', t)
+      authClient.from('comments').select('id', { count: 'exact', head: true }).eq('status', t)
         .then(({ count }) => setCounts((prev) => ({ ...prev, [t]: count ?? 0 })))
     }
 
-    const q = supabase.from('comments').select('*').order('created_at', { ascending: false })
+    const q = authClient.from('comments').select('*').order('created_at', { ascending: false })
     const { data } = tab === 'all' ? await q : await q.eq('status', tab)
     setComments(data ?? [])
     setLoading(false)
@@ -63,19 +63,18 @@ export default function AdminCommentsPage() {
   useEffect(() => { load() }, [load])
 
   async function setStatus(ids: string[], status: Status) {
-    if (!supabase) return
     await getAuthClient().from('comments').update({ status }).in('id', ids)
     load()
   }
 
   async function deleteComments(ids: string[]) {
-    if (!supabase || !confirm(`Delete ${ids.length} comment(s)?`)) return
+    if (!confirm(`Delete ${ids.length} comment(s)?`)) return
     await getAuthClient().from('comments').delete().in('id', ids)
     load()
   }
 
   async function blockVisitor(visitorId: string, commentId: string) {
-    if (!supabase || !confirm('Block this visitor? They will be unable to post comments.')) return
+    if (!confirm('Block this visitor? They will be unable to post comments.')) return
     setBlocking(visitorId)
     await getAuthClient().from('comment_blocks').upsert({ visitor_id: visitorId, reason: 'Admin blocked' })
     await setStatus([commentId], 'spam')

@@ -16,9 +16,10 @@ export async function getSidebarAd(): Promise<Advertisement | null> {
   return ads[0] ?? null
 }
 
-export async function getAllAds(): Promise<Advertisement[]> {
-  if (!supabase) return []
-  const { data, error } = await supabase.from('advertisements').select('*').order('created_at', { ascending: false })
+export async function getAllAds(client?: SupabaseClient): Promise<Advertisement[]> {
+  const db = client ?? supabase
+  if (!db) return []
+  const { data, error } = await db.from('advertisements').select('*').order('created_at', { ascending: false })
   if (error || !data) return []
   return data as Advertisement[]
 }

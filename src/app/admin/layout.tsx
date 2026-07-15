@@ -6,7 +6,6 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { getAdminConfig } from '@/lib/adminConfig'
 import { getUnreadCount } from '@/lib/db/contact'
-import { supabase } from '@/lib/supabase'
 import { getAuthClient } from '@/lib/supabase-auth'
 
 const navItems = [
@@ -46,24 +45,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // Poll unread message count
   useEffect(() => {
-    getUnreadCount().then(setUnreadMsgs)
-    const interval = setInterval(() => getUnreadCount().then(setUnreadMsgs), 5000)
+    getUnreadCount(getAuthClient()).then(setUnreadMsgs)
+    const interval = setInterval(() => getUnreadCount(getAuthClient()).then(setUnreadMsgs), 5000)
     return () => clearInterval(interval)
   }, [pathname])
 
   // Poll new newsletter subscribers since last viewed
   useEffect(() => {
     async function checkNewSubs() {
-      if (!supabase) return
+      const authClient = getAuthClient()
       const lastViewed = localStorage.getItem('slmh_newsletter_last_viewed')
       if (!lastViewed) {
-        const { count } = await supabase
+        const { count } = await authClient
           .from('newsletter_subscribers')
           .select('*', { count: 'exact', head: true })
         setNewSubs(count ?? 0)
         return
       }
-      const { count } = await supabase
+      const { count } = await authClient
         .from('newsletter_subscribers')
         .select('*', { count: 'exact', head: true })
         .gt('subscribed_at', lastViewed)

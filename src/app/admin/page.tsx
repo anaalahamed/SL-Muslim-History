@@ -9,7 +9,7 @@ import { Article } from '@/lib/types'
 import { NewsPost } from '@/lib/types'
 import { formatDate, formatViews } from '@/lib/utils'
 import { getAdminConfig } from '@/lib/adminConfig'
-import { supabase } from '@/lib/supabase'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 const quickActions = [
   { label: 'Write New Article', href: '/admin/articles/new',  icon: '📝', color: '#4a9e1f' },
@@ -34,10 +34,8 @@ export default function AdminDashboard() {
     getArticles().then(setArticles)
     getNews().then(setNews)
     getCategories().then((cats) => { setCategoryCount(cats.length); setCategories(cats) })
-    if (supabase) {
-      supabase.from('newsletter_subscribers').select('*', { count: 'exact', head: true })
+    getAuthClient().from('newsletter_subscribers').select('*', { count: 'exact', head: true })
         .then(({ count }) => setSubCount(count ?? 0))
-    }
   }, [])
 
   const totalViews     = articles.reduce((s, a) => s + a.views, 0)

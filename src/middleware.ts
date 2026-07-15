@@ -5,9 +5,18 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const adminUUID = process.env.ADMIN_UUID
 
   // Fail secure: block all admin routes if Supabase is not configured
   if (!supabaseUrl || !supabaseKey) {
+    if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
+      return NextResponse.redirect(new URL('/admin/login', request.url))
+    }
+    return NextResponse.next()
+  }
+
+  // Fail secure: block all admin routes if admin UUID is not configured
+  if (!adminUUID) {
     if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
       return NextResponse.redirect(new URL('/admin/login', request.url))
     }
@@ -33,7 +42,8 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
-    if (!user) {
+    // Only the designated admin UUID can access /admin routes
+    if (!user || user.id !== adminUUID) {
       return NextResponse.redirect(new URL('/admin/login', request.url))
     }
   }

@@ -14,6 +14,16 @@ function db() {
   )
 }
 
+// Service-role client — used only for POST mutations (INSERT/UPDATE/DELETE).
+// Bypasses RLS so ownership cannot be forged via the request body.
+function serviceDb() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+}
+
 // Returns null when SELECT fails (e.g. RLS blocks reads) so callers can return a proper error.
 async function getCounts(
   supabase: ReturnType<typeof db>,
@@ -86,10 +96,11 @@ export async function POST(request: NextRequest) {
 
     console.log('[reactions] POST', { content_type, content_id, emoji, visitor_id_len: visitor_id.length })
 
-    const supabase = db()
+    const anonDb    = db()
+    const mutationDb = serviceDb()
 
-    // ── Check for existing reaction ────────────────────────────────────────
-    const { data: existing, error: selectErr } = await supabase
+    // ── Check for existing reaction (anon read — covered by reactions_anon_select) ──
+    const { data: existing, error: selectErr } = await anonDb
       .from('reactions')
       .select('id, emoji')
       .eq('content_type', content_type)
@@ -98,19 +109,18 @@ export async function POST(request: NextRequest) {
       .maybeSingle()
 
     if (selectErr) {
-      console.error('[reactions] SELECT existing error:', selectErr.message,
-        '— likely RLS SELECT policy missing on reactions table')
+      console.error('[reactions] SELECT existing error:', selectErr.message)
       return NextResponse.json(
-        { error: 'Could not check existing reaction — RLS SELECT policy needed.', detail: selectErr.message },
+        { error: 'Could not check existing reaction.', detail: selectErr.message },
         { status: 500 },
       )
     }
 
-    // ── Mutate ─────────────────────────────────────────────────────────────
+    // ── Mutate (service role — bypasses RLS for UPDATE/DELETE) ─────────────
     if (existing) {
       if (existing.emoji === emoji) {
         // Toggle off — delete
-        const { error: delErr } = await supabase
+        const { error: delErr } = await mutationDb
           .from('reactions')
           .delete()
           .eq('id', existing.id)
@@ -118,14 +128,14 @@ export async function POST(request: NextRequest) {
         if (delErr) {
           console.error('[reactions] DELETE error:', delErr.message)
           return NextResponse.json(
-            { error: 'Could not remove reaction — RLS DELETE policy needed.', detail: delErr.message },
+            { error: 'Could not remove reaction.', detail: delErr.message },
             { status: 500 },
           )
         }
         console.log('[reactions] deleted reaction', { id: existing.id })
       } else {
         // Change emoji
-        const { error: updErr } = await supabase
+        const { error: updErr } = await mutationDb
           .from('reactions')
           .update({ emoji })
           .eq('id', existing.id)
@@ -133,31 +143,30 @@ export async function POST(request: NextRequest) {
         if (updErr) {
           console.error('[reactions] UPDATE error:', updErr.message)
           return NextResponse.json(
-            { error: 'Could not update reaction — RLS UPDATE policy needed.', detail: updErr.message },
+            { error: 'Could not update reaction.', detail: updErr.message },
             { status: 500 },
           )
         }
         console.log('[reactions] updated reaction', { id: existing.id, from: existing.emoji, to: emoji })
       }
     } else {
-      // New reaction
-      const { error: insErr } = await supabase
+      // New reaction (service role for consistency; INSERT is also safe via anon)
+      const { error: insErr } = await mutationDb
         .from('reactions')
         .insert({ content_type, content_id, emoji, visitor_id })
 
       if (insErr) {
-        console.error('[reactions] INSERT error:', insErr.message,
-          '— likely RLS INSERT policy missing on reactions table')
+        console.error('[reactions] INSERT error:', insErr.message)
         return NextResponse.json(
-          { error: 'Could not save reaction — RLS INSERT policy needed.', detail: insErr.message },
+          { error: 'Could not save reaction.', detail: insErr.message },
           { status: 500 },
         )
       }
       console.log('[reactions] inserted reaction', { content_type, content_id, emoji })
     }
 
-    // ── Return updated counts ──────────────────────────────────────────────
-    const reactions = await getCounts(supabase, content_type, content_id)
+    // ── Return updated counts (anon read) ──────────────────────────────────
+    const reactions = await getCounts(anonDb, content_type, content_id)
 
     if (reactions === null) {
       // Write succeeded but we can't read back. Return optimistic success

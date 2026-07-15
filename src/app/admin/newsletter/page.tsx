@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 import { getAuthClient } from '@/lib/supabase-auth'
 
 interface Subscriber {
@@ -31,8 +30,7 @@ export default function AdminNewsletterPage() {
 
   async function loadSubscribers() {
     setLoading(true)
-    if (!supabase) { setLoading(false); return }
-    const { data } = await supabase
+    const { data } = await getAuthClient()
       .from('newsletter_subscribers')
       .select('*')
       .order('subscribed_at', { ascending: false })
@@ -41,7 +39,7 @@ export default function AdminNewsletterPage() {
   }
 
   async function doDelete() {
-    if (!deleteId || !supabase) return
+    if (!deleteId) return
     setDeleting(true)
     await getAuthClient().from('newsletter_subscribers').delete().eq('id', deleteId)
     setSubscribers((prev) => prev.filter((s) => s.id !== deleteId))
