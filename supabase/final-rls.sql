@@ -288,7 +288,10 @@ GRANT EXECUTE ON FUNCTION increment_article_views(uuid) TO anon;
 -- 15. STORAGE — media bucket
 -- ============================================================
 
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+-- NOTE: ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY is intentionally
+-- omitted. Supabase manages RLS on storage.objects internally; running that
+-- statement as a non-owner raises ERROR 42501 and is not required.
+-- RLS on storage.objects is already enabled by Supabase on all projects.
 
 -- Ensure bucket exists and is public
 INSERT INTO storage.buckets (id, name, public)
