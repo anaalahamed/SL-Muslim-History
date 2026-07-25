@@ -26,8 +26,8 @@ export default function AdminLoginPage() {
       setLoading(false)
       setPassword('')
     } else {
-      router.push('/admin')
       router.refresh()
+      router.push('/admin')
     }
   }
 
