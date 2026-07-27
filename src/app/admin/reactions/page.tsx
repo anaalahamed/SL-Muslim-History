@@ -17,6 +17,7 @@ interface ReactionSummary {
 
 export default function AdminReactionsPage() {
   const [rows,        setRows]        = useState<ReactionSummary[]>([])
+  const [titles,      setTitles]      = useState<Record<string, string>>({})
   const [loading,     setLoading]     = useState(true)
   const [filterType,  setFilterType]  = useState<'all' | 'article' | 'news'>('all')
   const [resetting,   setResetting]   = useState<string | null>(null)
@@ -44,6 +45,19 @@ export default function AdminReactionsPage() {
     // Most recently reacted-to post first, matching the sidebar notification order.
     setRows([...map.values()].sort((a, b) => new Date(b.latest).getTime() - new Date(a.latest).getTime()))
     setLoading(false)
+
+    // Look up post titles so entries show "which post" instead of just a raw id.
+    const articleIds = [...new Set(data.filter((r) => r.content_type === 'article').map((r) => r.content_id))]
+    const newsIds     = [...new Set(data.filter((r) => r.content_type === 'news').map((r) => r.content_id))]
+    const [{ data: articles }, { data: news }] = await Promise.all([
+      articleIds.length > 0 ? authClient.from('articles').select('id, title').in('id', articleIds) : Promise.resolve({ data: [] as { id: string; title: string }[] }),
+      newsIds.length > 0     ? authClient.from('news').select('id, title').in('id', newsIds)         : Promise.resolve({ data: [] as { id: string; title: string }[] }),
+    ])
+    setTitles((prev) => ({
+      ...prev,
+      ...Object.fromEntries((articles ?? []).map((a) => [a.id, a.title])),
+      ...Object.fromEntries((news ?? []).map((n) => [n.id, n.title])),
+    }))
   }, [filterType])
 
   useEffect(() => {
@@ -96,9 +110,9 @@ export default function AdminReactionsPage() {
                   }}>
                     {row.content_type.toUpperCase()}
                   </span>
-                  <code style={{ fontSize: 11, color: '#94a3b8', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 280 }}>
-                    {row.content_id}
-                  </code>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 320 }}>
+                    {titles[row.content_id] ?? <code style={{ fontSize: 11, color: '#94a3b8', fontFamily: 'monospace' }}>{row.content_id}</code>}
+                  </span>
                   <span style={{ fontSize: 11, fontWeight: 800, color: '#4a9e1f' }}>{row.total} reactions</span>
                   <span style={{ fontSize: 10, color: '#94a3b8' }}>Latest: {formatDate(row.latest)}</span>
                 </div>
