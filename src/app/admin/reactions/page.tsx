@@ -25,8 +25,8 @@ export default function AdminReactionsPage() {
   const load = useCallback(async () => {
     setLoading(true)
     const authClient = getAuthClient()
-    const q = authClient.from('reactions').select('content_type, content_id, emoji, created_at')
-      .order('created_at', { ascending: false })
+    const q = authClient.from('reactions').select('content_type, content_id, emoji, updated_at')
+      .order('updated_at', { ascending: false })
     const { data } = filterType === 'all' ? await q : await q.eq('content_type', filterType)
 
     if (!data) { setLoading(false); return }
@@ -36,7 +36,7 @@ export default function AdminReactionsPage() {
       if (!r.emoji) continue // visitor removed their reaction — row kept only for change-limit tracking
       const key = `${r.content_type}::${r.content_id}`
       if (!map.has(key)) {
-        map.set(key, { content_type: r.content_type, content_id: r.content_id, total: 0, breakdown: {}, latest: r.created_at })
+        map.set(key, { content_type: r.content_type, content_id: r.content_id, total: 0, breakdown: {}, latest: r.updated_at })
       }
       const s = map.get(key)!
       s.total++

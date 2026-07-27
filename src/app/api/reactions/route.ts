@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
         const nextEmoji = existing.emoji === emoji ? null : emoji // toggle off if same, else switch
         const { error: updErr } = await mutationDb
           .from('reactions')
-          .update({ emoji: nextEmoji, change_count: existing.change_count + 1 })
+          .update({ emoji: nextEmoji, change_count: existing.change_count + 1, updated_at: new Date().toISOString() })
           .eq('id', existing.id)
 
         if (updErr) {

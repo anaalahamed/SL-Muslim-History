@@ -104,7 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       const { count } = await authClient
         .from('reactions')
         .select('*', { count: 'exact', head: true })
-        .gt('created_at', lastViewed)
+        .gt('updated_at', lastViewed)
       setNewReactions(count ?? 0)
     }
     checkNewReactions()
