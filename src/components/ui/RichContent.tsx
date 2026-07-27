@@ -9,22 +9,22 @@ export default function RichContent({ content }: Props) {
     <ReactMarkdown
       components={{
         h1: ({ children }) => (
-          <h1 className="tamil-heading font-extrabold text-2xl mt-10 mb-3" style={{ color: 'var(--green-dark)', lineHeight: 1.4 }}>
+          <h1 className="tamil-heading font-extrabold text-2xl mt-10 mb-3" style={{ color: 'var(--green-dark)', lineHeight: 1.4, breakInside: 'avoid', pageBreakInside: 'avoid' }}>
             {children}
           </h1>
         ),
         h2: ({ children }) => (
-          <h2 className="tamil-heading font-extrabold text-xl mt-8 mb-2" style={{ color: 'var(--green-dark)', lineHeight: 1.4 }}>
+          <h2 className="tamil-heading font-extrabold text-xl mt-8 mb-2" style={{ color: 'var(--green-dark)', lineHeight: 1.4, breakInside: 'avoid', pageBreakInside: 'avoid' }}>
             {children}
           </h2>
         ),
         h3: ({ children }) => (
-          <h3 className="tamil-heading font-bold text-lg mt-6 mb-2" style={{ color: 'var(--dark)', lineHeight: 1.4 }}>
+          <h3 className="tamil-heading font-bold text-lg mt-6 mb-2" style={{ color: 'var(--dark)', lineHeight: 1.4, breakInside: 'avoid', pageBreakInside: 'avoid' }}>
             {children}
           </h3>
         ),
         p: ({ children }) => (
-          <p className="tamil-text mb-5" style={{ color: 'var(--text)', lineHeight: '2', fontSize: '1rem' }}>
+          <p className="tamil-text mb-5" style={{ color: 'var(--text)', lineHeight: '2', fontSize: '1rem', breakInside: 'avoid', pageBreakInside: 'avoid' }}>
             {children}
           </p>
         ),
@@ -59,7 +59,7 @@ export default function RichContent({ content }: Props) {
           </ol>
         ),
         li: ({ children }) => (
-          <li className="tamil-text" style={{ lineHeight: '1.85', fontSize: '1rem' }}>
+          <li className="tamil-text" style={{ lineHeight: '1.85', fontSize: '1rem', breakInside: 'avoid', pageBreakInside: 'avoid' }}>
             {children}
           </li>
         ),
@@ -73,6 +73,8 @@ export default function RichContent({ content }: Props) {
               padding: '16px 20px',
               color: 'var(--dark)',
               fontStyle: 'italic',
+              breakInside: 'avoid',
+              pageBreakInside: 'avoid',
             }}
           >
             {children}
@@ -82,7 +84,7 @@ export default function RichContent({ content }: Props) {
           <hr className="my-8" style={{ border: 'none', borderTop: '2px solid var(--border)' }} />
         ),
         img: ({ src, alt }) => (
-          <span className="block my-6 rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+          <span className="block my-6 rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)', breakInside: 'avoid', pageBreakInside: 'avoid' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={src} alt={alt ?? ''} style={{ width: '100%', display: 'block', objectFit: 'cover' }} />
             {alt && (
