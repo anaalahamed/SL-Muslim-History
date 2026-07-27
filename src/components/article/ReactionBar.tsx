@@ -216,11 +216,6 @@ export default function ReactionBar({ contentType, contentId, order = 'default' 
           Click a reaction to respond · One reaction per person
         </p>
       )}
-      {loaded && !limitMsg && myReaction && changesRemaining < MAX_CHANGES && (
-        <p style={{ fontSize: 10, color: 'var(--muted)', marginTop: 10 }} aria-live="polite">
-          You can change your reaction {changesRemaining} more time{changesRemaining === 1 ? '' : 's'}
-        </p>
-      )}
     </div>
   )
 }

@@ -97,19 +97,8 @@ export async function POST(request: NextRequest) {
 
     const supabase = db()
 
-    // Rate limit: max 3 comments per visitor per hour
-    const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
-    const { count } = await supabase
-      .from('comments')
-      .select('id', { count: 'exact', head: true })
-      .eq('visitor_id', visitor_id)
-      .gte('created_at', hourAgo)
-
-    if ((count ?? 0) >= 3) {
-      return NextResponse.json({ error: 'Too many comments. Please wait before submitting again.', code: 'RATE_LIMIT' }, { status: 429 })
-    }
-
     // Per-post limit: max MAX_COMMENTS_PER_POST comments per visitor per article
+    // (the only comment-count rule — no separate hourly rate limit)
     const { count: postCount } = await supabase
       .from('comments')
       .select('id', { count: 'exact', head: true })

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { getVisitorId } from '@/lib/fingerprint'
 import { formatDate } from '@/lib/utils'
 
@@ -12,7 +12,6 @@ interface Comment {
   created_at: string
 }
 
-const COOLDOWN_MS = 60_000 // 60 s between submissions
 const MAX_COMMENTS_PER_POST = 2
 
 export default function CommentSection({ articleId }: { articleId: string }) {
@@ -22,11 +21,9 @@ export default function CommentSection({ articleId }: { articleId: string }) {
   const [content,    setContent]    = useState('')
   const [website,    setWebsite]    = useState('')
   const [hp,         setHp]         = useState('')     // honeypot
-  const [status,     setStatus]     = useState<'idle' | 'submitting' | 'success' | 'error' | 'rate' | 'limit'>('idle')
+  const [status,     setStatus]     = useState<'idle' | 'submitting' | 'success' | 'error' | 'limit'>('idle')
   const [errMsg,     setErrMsg]     = useState('')
-  const [cooldown,   setCooldown]   = useState(0)
   const [myCount,    setMyCount]    = useState(0)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     const vid = getVisitorId()
@@ -38,26 +35,11 @@ export default function CommentSection({ articleId }: { articleId: string }) {
         setLoading(false)
       })
       .catch(() => setLoading(false))
-
-    const last = parseInt(localStorage.getItem('slmh_last_comment') ?? '0', 10)
-    const remaining = COOLDOWN_MS - (Date.now() - last)
-    if (remaining > 0) startCooldown(Math.ceil(remaining / 1000))
   }, [articleId])
-
-  function startCooldown(seconds: number) {
-    setCooldown(seconds)
-    if (timerRef.current) clearInterval(timerRef.current)
-    timerRef.current = setInterval(() => {
-      setCooldown((prev) => {
-        if (prev <= 1) { clearInterval(timerRef.current!); return 0 }
-        return prev - 1
-      })
-    }, 1000)
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (status === 'submitting' || cooldown > 0 || myCount >= MAX_COMMENTS_PER_POST) return
+    if (status === 'submitting' || myCount >= MAX_COMMENTS_PER_POST) return
 
     setStatus('submitting')
     setErrMsg('')
@@ -81,15 +63,10 @@ export default function CommentSection({ articleId }: { articleId: string }) {
         setStatus('success')
         setName(''); setContent(''); setWebsite('')
         setMyCount((n) => n + 1)
-        localStorage.setItem('slmh_last_comment', Date.now().toString())
-        startCooldown(60)
       } else if (data.code === 'POST_LIMIT') {
         setStatus('limit')
         setErrMsg(data.error ?? `You've reached the maximum of ${MAX_COMMENTS_PER_POST} comments on this post.`)
         setMyCount(MAX_COMMENTS_PER_POST)
-      } else if (res.status === 429) {
-        setStatus('rate')
-        setErrMsg(data.error ?? 'Too many comments. Please wait.')
       } else {
         setStatus('error')
         setErrMsg(data.error ?? 'Failed to submit. Please try again.')
@@ -229,7 +206,7 @@ export default function CommentSection({ articleId }: { articleId: string }) {
               </div>
             </div>
 
-            {(status === 'error' || status === 'rate' || status === 'limit') && (
+            {(status === 'error' || status === 'limit') && (
               <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, fontSize: 12, color: '#dc2626', marginBottom: 12 }}>
                 {errMsg}
               </div>
@@ -237,19 +214,15 @@ export default function CommentSection({ articleId }: { articleId: string }) {
 
             <button
               type="submit"
-              disabled={status === 'submitting' || cooldown > 0}
+              disabled={status === 'submitting'}
               style={{
                 padding: '10px 24px', borderRadius: 10, fontSize: 13, fontWeight: 800,
-                background: cooldown > 0 ? 'var(--muted)' : 'var(--green)',
-                color: 'white', border: 'none', cursor: cooldown > 0 ? 'not-allowed' : 'pointer',
+                background: 'var(--green)',
+                color: 'white', border: 'none', cursor: 'pointer',
                 transition: 'all 0.2s', opacity: status === 'submitting' ? 0.7 : 1,
               }}
             >
-              {status === 'submitting'
-                ? 'Submitting…'
-                : cooldown > 0
-                ? `Wait ${cooldown}s`
-                : 'Submit Comment'}
+              {status === 'submitting' ? 'Submitting…' : 'Submit Comment'}
             </button>
             <p style={{ fontSize: 10, color: 'var(--muted)', marginTop: 8 }}>
               Comments are reviewed before appearing · No account required
