@@ -30,10 +30,13 @@ function isValidUrl(url: string): boolean {
   }
 }
 
-// GET /api/comments?article_id=xxx
+const MAX_COMMENTS_PER_POST = 2
+
+// GET /api/comments?article_id=xxx&visitor_id=yyy
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const articleId = searchParams.get('article_id')
+  const visitorId = searchParams.get('visitor_id')
 
   if (!articleId) return NextResponse.json({ error: 'Missing article_id' }, { status: 400 })
 
@@ -45,8 +48,20 @@ export async function GET(request: NextRequest) {
     .eq('status', 'approved')
     .order('created_at', { ascending: true })
 
-  if (error) return NextResponse.json([], { status: 200 })
-  return NextResponse.json(data ?? [], { headers: { 'Cache-Control': 'no-store' } })
+  // Count this visitor's own comments on this post (any status) so the
+  // client can show/hide the form without waiting for a rejected submit.
+  let myCount = 0
+  if (visitorId) {
+    const { count } = await supabase
+      .from('comments')
+      .select('id', { count: 'exact', head: true })
+      .eq('article_id', articleId)
+      .eq('visitor_id', visitorId)
+    myCount = count ?? 0
+  }
+
+  if (error) return NextResponse.json({ comments: [], myCount }, { status: 200 })
+  return NextResponse.json({ comments: data ?? [], myCount }, { headers: { 'Cache-Control': 'no-store' } })
 }
 
 // POST /api/comments
@@ -92,6 +107,20 @@ export async function POST(request: NextRequest) {
 
     if ((count ?? 0) >= 3) {
       return NextResponse.json({ error: 'Too many comments. Please wait before submitting again.', code: 'RATE_LIMIT' }, { status: 429 })
+    }
+
+    // Per-post limit: max MAX_COMMENTS_PER_POST comments per visitor per article
+    const { count: postCount } = await supabase
+      .from('comments')
+      .select('id', { count: 'exact', head: true })
+      .eq('article_id', article_id)
+      .eq('visitor_id', visitor_id)
+
+    if ((postCount ?? 0) >= MAX_COMMENTS_PER_POST) {
+      return NextResponse.json(
+        { error: `You've already posted the maximum of ${MAX_COMMENTS_PER_POST} comments on this post.`, code: 'POST_LIMIT' },
+        { status: 429 },
+      )
     }
 
     // Block check

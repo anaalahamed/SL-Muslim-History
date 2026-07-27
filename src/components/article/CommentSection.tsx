@@ -13,6 +13,7 @@ interface Comment {
 }
 
 const COOLDOWN_MS = 60_000 // 60 s between submissions
+const MAX_COMMENTS_PER_POST = 2
 
 export default function CommentSection({ articleId }: { articleId: string }) {
   const [comments,   setComments]   = useState<Comment[]>([])
@@ -21,15 +22,21 @@ export default function CommentSection({ articleId }: { articleId: string }) {
   const [content,    setContent]    = useState('')
   const [website,    setWebsite]    = useState('')
   const [hp,         setHp]         = useState('')     // honeypot
-  const [status,     setStatus]     = useState<'idle' | 'submitting' | 'success' | 'error' | 'rate'>('idle')
+  const [status,     setStatus]     = useState<'idle' | 'submitting' | 'success' | 'error' | 'rate' | 'limit'>('idle')
   const [errMsg,     setErrMsg]     = useState('')
   const [cooldown,   setCooldown]   = useState(0)
+  const [myCount,    setMyCount]    = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    fetch(`/api/comments?article_id=${articleId}`)
+    const vid = getVisitorId()
+    fetch(`/api/comments?article_id=${articleId}&visitor_id=${vid}`)
       .then((r) => r.json())
-      .then((d) => { setComments(Array.isArray(d) ? d : []); setLoading(false) })
+      .then((d: { comments: Comment[]; myCount: number }) => {
+        setComments(Array.isArray(d.comments) ? d.comments : [])
+        setMyCount(d.myCount ?? 0)
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
 
     const last = parseInt(localStorage.getItem('slmh_last_comment') ?? '0', 10)
@@ -50,7 +57,7 @@ export default function CommentSection({ articleId }: { articleId: string }) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (status === 'submitting' || cooldown > 0) return
+    if (status === 'submitting' || cooldown > 0 || myCount >= MAX_COMMENTS_PER_POST) return
 
     setStatus('submitting')
     setErrMsg('')
@@ -73,8 +80,13 @@ export default function CommentSection({ articleId }: { articleId: string }) {
       if (res.ok) {
         setStatus('success')
         setName(''); setContent(''); setWebsite('')
+        setMyCount((n) => n + 1)
         localStorage.setItem('slmh_last_comment', Date.now().toString())
         startCooldown(60)
+      } else if (data.code === 'POST_LIMIT') {
+        setStatus('limit')
+        setErrMsg(data.error ?? `You've reached the maximum of ${MAX_COMMENTS_PER_POST} comments on this post.`)
+        setMyCount(MAX_COMMENTS_PER_POST)
       } else if (res.status === 429) {
         setStatus('rate')
         setErrMsg(data.error ?? 'Too many comments. Please wait.')
@@ -161,6 +173,10 @@ export default function CommentSection({ articleId }: { articleId: string }) {
           <div style={{ padding: '14px 16px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, fontSize: 13, color: '#15803d', fontWeight: 600 }}>
             ✅ Your comment has been submitted for review. It will appear once approved.
           </div>
+        ) : myCount >= MAX_COMMENTS_PER_POST ? (
+          <div style={{ padding: '14px 16px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, fontSize: 13, color: '#dc2626', fontWeight: 600 }}>
+            You've already posted the maximum of {MAX_COMMENTS_PER_POST} comments on this post.
+          </div>
         ) : (
           <form onSubmit={handleSubmit} noValidate>
             {/* Honeypot — visually hidden, bots fill it */}
@@ -213,7 +229,7 @@ export default function CommentSection({ articleId }: { articleId: string }) {
               </div>
             </div>
 
-            {(status === 'error' || status === 'rate') && (
+            {(status === 'error' || status === 'rate' || status === 'limit') && (
               <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, fontSize: 12, color: '#dc2626', marginBottom: 12 }}>
                 {errMsg}
               </div>

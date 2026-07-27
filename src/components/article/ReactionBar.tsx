@@ -13,35 +13,56 @@ interface Props {
   order?:      'janaza' | 'default'
 }
 
-const STORE_KEY = (type: string, id: string) => `slmh_reaction_${type}_${id}`
+const MAX_CHANGES = 4
 
 export default function ReactionBar({ contentType, contentId, order = 'default' }: Props) {
   const REACTIONS = order === 'janaza' ? JANAZA_REACTIONS : DEFAULT_REACTIONS
-  const [counts,     setCounts]     = useState<Count[]>(REACTIONS.map((e) => ({ emoji: e, count: 0 })))
-  const [myReaction, setMyReaction] = useState<string | null>(null)
-  const [loaded,     setLoaded]     = useState(false)
-  const [busy,       setBusy]       = useState(false)
+  const [counts,           setCounts]           = useState<Count[]>(REACTIONS.map((e) => ({ emoji: e, count: 0 })))
+  const [myReaction,       setMyReaction]       = useState<string | null>(null)
+  const [changesRemaining, setChangesRemaining] = useState(MAX_CHANGES)
+  const [loaded,           setLoaded]           = useState(false)
+  const [busy,             setBusy]             = useState(false)
+  const [limitMsg,         setLimitMsg]         = useState(false)
 
   useEffect(() => {
-    const key = STORE_KEY(contentType, contentId)
-    setMyReaction(localStorage.getItem(key))
+    let cancelled = false
 
-    fetch(`/api/reactions?type=${contentType}&id=${contentId}`)
-      .then((r) => r.json())
-      .then((data: Count[]) => {
-        setCounts(REACTIONS.map((e) => ({ emoji: e, count: data.find((r) => r.emoji === e)?.count ?? 0 })))
-        setLoaded(true)
-      })
-      .catch(() => setLoaded(true))
+    ;(async () => {
+      const vid = getVisitorId()
+      const hid = await hashVisitorId(vid)
+      if (cancelled) return
+
+      fetch(`/api/reactions?type=${contentType}&id=${contentId}&visitor_id=${hid}`)
+        .then((r) => r.json())
+        .then((data: { reactions: Count[]; myReaction: string | null; changesRemaining: number }) => {
+          if (cancelled) return
+          setCounts(REACTIONS.map((e) => ({ emoji: e, count: data.reactions.find((r) => r.emoji === e)?.count ?? 0 })))
+          setMyReaction(data.myReaction)
+          setChangesRemaining(data.changesRemaining)
+          setLoaded(true)
+        })
+        .catch(() => setLoaded(true))
+    })()
+
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contentType, contentId])
 
   const react = useCallback(async (emoji: string) => {
     if (busy) return
+
+    // Out of changes — this click would be a no-op on the server too, so
+    // just show a message instead of making a wasted network call.
+    if (changesRemaining <= 0) {
+      setLimitMsg(true)
+      return
+    }
+    setLimitMsg(false)
     setBusy(true)
 
-    const key    = STORE_KEY(contentType, contentId)
     const prevR  = myReaction
     const prevC  = counts.map((c) => ({ ...c }))
+    const prevChanges = changesRemaining
     const toggle = myReaction === emoji
 
     // Optimistic UI — instant visual update before the network call returns
@@ -54,8 +75,7 @@ export default function ReactionBar({ contentType, contentId, order = 'default' 
     )
     const next = toggle ? null : emoji
     setMyReaction(next)
-    if (next) localStorage.setItem(key, next)
-    else localStorage.removeItem(key)
+    setChangesRemaining((n) => Math.max(0, n - 1))
 
     try {
       const vid = getVisitorId()
@@ -73,18 +93,22 @@ export default function ReactionBar({ contentType, contentId, order = 'default' 
           const reactions: Count[] = body.reactions
           setCounts(REACTIONS.map((e) => ({ emoji: e, count: reactions.find((r) => r.emoji === e)?.count ?? 0 })))
         }
+        setMyReaction(body.myReaction ?? null)
+        setChangesRemaining(body.changesRemaining ?? 0)
+        if ((body.changesRemaining ?? 0) <= 0) setLimitMsg(true)
       } else {
         // Revert optimistic update on server error (INSERT/UPDATE/DELETE failed)
         setCounts(prevC)
         setMyReaction(prevR)
-        if (prevR) localStorage.setItem(key, prevR); else localStorage.removeItem(key)
+        setChangesRemaining(prevChanges)
       }
     } catch {
       setCounts(prevC)
       setMyReaction(prevR)
+      setChangesRemaining(prevChanges)
     }
     setBusy(false)
-  }, [busy, contentType, contentId, myReaction, counts])
+  }, [busy, contentType, contentId, myReaction, counts, changesRemaining])
 
   const total = counts.reduce((s, c) => s + c.count, 0)
 
@@ -182,9 +206,19 @@ export default function ReactionBar({ contentType, contentId, order = 'default' 
         })}
       </div>
 
-      {!myReaction && loaded && (
+      {loaded && limitMsg && (
+        <p style={{ fontSize: 10, color: '#dc2626', marginTop: 10 }} aria-live="polite">
+          You've reached the limit of {MAX_CHANGES} reaction changes for this post.
+        </p>
+      )}
+      {loaded && !limitMsg && !myReaction && (
         <p style={{ fontSize: 10, color: 'var(--muted)', marginTop: 10 }} aria-live="polite">
           Click a reaction to respond · One reaction per person
+        </p>
+      )}
+      {loaded && !limitMsg && myReaction && changesRemaining < MAX_CHANGES && (
+        <p style={{ fontSize: 10, color: 'var(--muted)', marginTop: 10 }} aria-live="polite">
+          You can change your reaction {changesRemaining} more time{changesRemaining === 1 ? '' : 's'}
         </p>
       )}
     </div>

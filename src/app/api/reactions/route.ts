@@ -24,7 +24,13 @@ function serviceDb() {
   )
 }
 
+// Max number of times a visitor may change their reaction on a single post.
+// The very first reaction is free (not a change); switching or removing it
+// after that counts against this limit.
+const MAX_CHANGES = 4
+
 // Returns null when SELECT fails (e.g. RLS blocks reads) so callers can return a proper error.
+// Rows with emoji = null (a removed reaction, kept only to preserve change_count) are excluded.
 async function getCounts(
   supabase: ReturnType<typeof db>,
   type: string,
@@ -43,16 +49,18 @@ async function getCounts(
 
   const map: Record<string, number> = {}
   for (const row of (data ?? [])) {
+    if (!row.emoji) continue
     map[row.emoji] = (map[row.emoji] ?? 0) + 1
   }
   return Object.entries(map).map(([emoji, count]) => ({ emoji, count }))
 }
 
-// GET /api/reactions?type=article&id=xxx
+// GET /api/reactions?type=article&id=xxx&visitor_id=yyy
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const type = searchParams.get('type')
-  const id   = searchParams.get('id')
+  const type       = searchParams.get('type')
+  const id         = searchParams.get('id')
+  const visitorId  = searchParams.get('visitor_id')
 
   if (!type || !id || !VALID_TYPES.includes(type)) {
     return NextResponse.json({ error: 'Invalid params' }, { status: 400 })
@@ -69,7 +77,24 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  return NextResponse.json(counts, {
+  let myReaction: string | null = null
+  let changesRemaining = MAX_CHANGES
+  if (visitorId) {
+    const { data: mine } = await supabase
+      .from('reactions')
+      .select('emoji, change_count')
+      .eq('content_type', type)
+      .eq('content_id', id)
+      .eq('visitor_id', visitorId)
+      .maybeSingle()
+
+    if (mine) {
+      myReaction = mine.emoji
+      changesRemaining = Math.max(0, MAX_CHANGES - mine.change_count)
+    }
+  }
+
+  return NextResponse.json({ reactions: counts, myReaction, changesRemaining }, {
     headers: { 'Cache-Control': 'no-store' },
   })
 }
@@ -102,7 +127,7 @@ export async function POST(request: NextRequest) {
     // ── Check for existing reaction (anon read — covered by reactions_anon_select) ──
     const { data: existing, error: selectErr } = await anonDb
       .from('reactions')
-      .select('id, emoji')
+      .select('id, emoji, change_count')
       .eq('content_type', content_type)
       .eq('content_id', content_id)
       .eq('visitor_id', visitor_id)
@@ -116,28 +141,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    let myReaction: string | null
+    let changesRemaining: number
+
     // ── Mutate (service role — bypasses RLS for UPDATE/DELETE) ─────────────
     if (existing) {
-      if (existing.emoji === emoji) {
-        // Toggle off — delete
-        const { error: delErr } = await mutationDb
-          .from('reactions')
-          .delete()
-          .eq('id', existing.id)
-
-        if (delErr) {
-          console.error('[reactions] DELETE error:', delErr.message)
-          return NextResponse.json(
-            { error: 'Could not remove reaction.', detail: delErr.message },
-            { status: 500 },
-          )
-        }
-        console.log('[reactions] deleted reaction', { id: existing.id })
+      // The visitor already has a row for this post. Any further change —
+      // switching emoji, or toggling the same one off — costs one of their
+      // MAX_CHANGES changes. Once used up, the request is a no-op: we return
+      // their current (unchanged) state instead of erroring.
+      if (existing.change_count >= MAX_CHANGES) {
+        console.log('[reactions] change limit reached — ignoring', { id: existing.id, change_count: existing.change_count })
+        myReaction = existing.emoji
+        changesRemaining = 0
       } else {
-        // Change emoji
+        const nextEmoji = existing.emoji === emoji ? null : emoji // toggle off if same, else switch
         const { error: updErr } = await mutationDb
           .from('reactions')
-          .update({ emoji })
+          .update({ emoji: nextEmoji, change_count: existing.change_count + 1 })
           .eq('id', existing.id)
 
         if (updErr) {
@@ -147,13 +168,15 @@ export async function POST(request: NextRequest) {
             { status: 500 },
           )
         }
-        console.log('[reactions] updated reaction', { id: existing.id, from: existing.emoji, to: emoji })
+        console.log('[reactions] updated reaction', { id: existing.id, from: existing.emoji, to: nextEmoji })
+        myReaction = nextEmoji
+        changesRemaining = MAX_CHANGES - (existing.change_count + 1)
       }
     } else {
-      // New reaction (service role for consistency; INSERT is also safe via anon)
+      // First-ever reaction on this post — free, doesn't count as a change.
       const { error: insErr } = await mutationDb
         .from('reactions')
-        .insert({ content_type, content_id, emoji, visitor_id })
+        .insert({ content_type, content_id, emoji, visitor_id, change_count: 0 })
 
       if (insErr) {
         console.error('[reactions] INSERT error:', insErr.message)
@@ -163,6 +186,8 @@ export async function POST(request: NextRequest) {
         )
       }
       console.log('[reactions] inserted reaction', { content_type, content_id, emoji })
+      myReaction = emoji
+      changesRemaining = MAX_CHANGES
     }
 
     // ── Return updated counts (anon read) ──────────────────────────────────
@@ -172,11 +197,11 @@ export async function POST(request: NextRequest) {
       // Write succeeded but we can't read back. Return optimistic success
       // so the client keeps its optimistic count rather than resetting to 0.
       console.error('[reactions] write OK but getCounts failed — RLS SELECT policy needed')
-      return NextResponse.json({ success: true, reactions: 'recount_failed' })
+      return NextResponse.json({ success: true, reactions: 'recount_failed', myReaction, changesRemaining })
     }
 
     console.log('[reactions] returning counts', reactions)
-    return NextResponse.json({ success: true, reactions })
+    return NextResponse.json({ success: true, reactions, myReaction, changesRemaining })
 
   } catch (err) {
     console.error('[reactions] unhandled error:', err)

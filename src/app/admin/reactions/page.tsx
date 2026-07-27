@@ -32,6 +32,7 @@ export default function AdminReactionsPage() {
 
     const map = new Map<string, ReactionSummary>()
     for (const r of data) {
+      if (!r.emoji) continue // visitor removed their reaction — row kept only for change-limit tracking
       const key = `${r.content_type}::${r.content_id}`
       if (!map.has(key)) {
         map.set(key, { content_type: r.content_type, content_id: r.content_id, total: 0, breakdown: {}, latest: r.created_at })
