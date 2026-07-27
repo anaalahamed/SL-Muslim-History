@@ -41,11 +41,15 @@ export default function AdminReactionsPage() {
       s.total++
       s.breakdown[r.emoji] = (s.breakdown[r.emoji] ?? 0) + 1
     }
-    setRows([...map.values()].sort((a, b) => b.total - a.total))
+    // Most recently reacted-to post first, matching the sidebar notification order.
+    setRows([...map.values()].sort((a, b) => new Date(b.latest).getTime() - new Date(a.latest).getTime()))
     setLoading(false)
   }, [filterType])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+    localStorage.setItem('slmh_reactions_last_viewed', new Date().toISOString())
+  }, [load])
 
   async function resetReactions(contentType: string, contentId: string) {
     if (!confirm(`Delete all reactions for this ${contentType}?`)) return

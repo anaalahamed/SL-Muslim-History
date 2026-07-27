@@ -31,6 +31,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [unreadMsgs,    setUnreadMsgs]    = useState(0)
   const [newSubs,       setNewSubs]       = useState(0)
   const [pendingComments, setPendingComments] = useState(0)
+  const [newReactions,  setNewReactions]  = useState(0)
 
   // Load owner name from config (fall back to authenticated user's email)
   useEffect(() => {
@@ -85,6 +86,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
     checkNewSubs()
     const interval = setInterval(checkNewSubs, 30000)
+    return () => clearInterval(interval)
+  }, [pathname])
+
+  // Poll new reactions since last viewed
+  useEffect(() => {
+    async function checkNewReactions() {
+      const authClient = getAuthClient()
+      const lastViewed = localStorage.getItem('slmh_reactions_last_viewed')
+      if (!lastViewed) {
+        const { count } = await authClient
+          .from('reactions')
+          .select('*', { count: 'exact', head: true })
+        setNewReactions(count ?? 0)
+        return
+      }
+      const { count } = await authClient
+        .from('reactions')
+        .select('*', { count: 'exact', head: true })
+        .gt('created_at', lastViewed)
+      setNewReactions(count ?? 0)
+    }
+    checkNewReactions()
+    const interval = setInterval(checkNewReactions, 10000)
     return () => clearInterval(interval)
   }, [pathname])
 
@@ -169,6 +193,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       style={{ background: '#dc2626', color: 'white', fontSize: '10px', minWidth: '18px', textAlign: 'center' }}
                     >
                       {pendingComments}
+                    </span>
+                  )}
+                  {item.label === 'Reactions' && newReactions > 0 && (
+                    <span
+                      className="text-xs font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
+                      style={{ background: '#dc2626', color: 'white', fontSize: '10px', minWidth: '18px', textAlign: 'center' }}
+                    >
+                      {newReactions}
                     </span>
                   )}
                   {item.label === 'Messages' && unreadMsgs > 0 && (
