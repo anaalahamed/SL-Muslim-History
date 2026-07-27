@@ -20,14 +20,9 @@ function stripHtml(str: string): string {
     .trim()
 }
 
-function isValidUrl(url: string): boolean {
-  if (!url) return true
-  try {
-    const u = new URL(url.startsWith('http') ? url : `https://${url}`)
-    return ['http:', 'https:'].includes(u.protocol)
-  } catch {
-    return false
-  }
+function isValidEmail(email: string): boolean {
+  if (!email) return true
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
 const MAX_COMMENTS_PER_POST = 2
@@ -41,9 +36,11 @@ export async function GET(request: NextRequest) {
   if (!articleId) return NextResponse.json({ error: 'Missing article_id' }, { status: 400 })
 
   const supabase = db()
+  // Email is intentionally not selected here — it's for admin use only,
+  // never shown to the public.
   const { data, error } = await supabase
     .from('comments')
-    .select('id, name, website, content, created_at')
+    .select('id, name, content, created_at')
     .eq('article_id', articleId)
     .eq('status', 'approved')
     .order('created_at', { ascending: true })
@@ -68,7 +65,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { article_id, name, content, website, visitor_id, hp } = body
+    const { article_id, name, content, email, visitor_id, hp } = body
 
     // Honeypot — bots fill hidden field
     if (hp) return NextResponse.json({ error: 'Spam detected', code: 'SPAM' }, { status: 400 })
@@ -80,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     const cleanName    = stripHtml(String(name)).slice(0, 60)
     const cleanContent = stripHtml(String(content)).slice(0, 1000)
-    const cleanWebsite = website ? String(website).trim().slice(0, 200) : null
+    const cleanEmail   = email ? String(email).trim().slice(0, 200) : null
 
     if (cleanName.length < 2) {
       return NextResponse.json({ error: 'Name too short' }, { status: 400 })
@@ -88,8 +85,8 @@ export async function POST(request: NextRequest) {
     if (cleanContent.length < 10) {
       return NextResponse.json({ error: 'Comment too short (min 10 characters)' }, { status: 400 })
     }
-    if (cleanWebsite && !isValidUrl(cleanWebsite)) {
-      return NextResponse.json({ error: 'Invalid website URL' }, { status: 400 })
+    if (cleanEmail && !isValidEmail(cleanEmail)) {
+      return NextResponse.json({ error: 'Invalid email address' }, { status: 400 })
     }
     if (typeof visitor_id !== 'string' || visitor_id.length > 200) {
       return NextResponse.json({ error: 'Invalid visitor_id' }, { status: 400 })
@@ -136,7 +133,7 @@ export async function POST(request: NextRequest) {
     const { error } = await supabase.from('comments').insert({
       article_id: String(article_id).slice(0, 200),
       name:       cleanName,
-      website:    cleanWebsite,
+      website:    cleanEmail, // column is named "website" but now stores the commenter's email (admin-only)
       content:    cleanContent,
       visitor_id: String(visitor_id).slice(0, 200),
       ip_hash:    ipHash,

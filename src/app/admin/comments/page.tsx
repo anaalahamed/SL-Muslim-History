@@ -181,7 +181,8 @@ export default function AdminCommentsPage() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
                     <span style={{ fontWeight: 700, fontSize: 13, color: '#0f172a' }}>{c.name}</span>
-                    {c.website && <a href={c.website} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: '#4a9e1f' }}>{c.website}</a>}
+                    {/* "website" column now stores the commenter's optional email — admin-only, never shown publicly */}
+                    {c.website && <a href={`mailto:${c.website}`} style={{ fontSize: 11, color: '#4a9e1f' }}>{c.website}</a>}
                     <span style={badge(c.status)}>{c.status}</span>
                     <span style={{ fontSize: 11, color: '#94a3b8' }}>{formatDate(c.created_at)}</span>
                   </div>

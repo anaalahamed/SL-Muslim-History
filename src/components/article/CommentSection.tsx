@@ -7,7 +7,6 @@ import { formatDate } from '@/lib/utils'
 interface Comment {
   id: string
   name: string
-  website?: string | null
   content: string
   created_at: string
 }
@@ -19,7 +18,7 @@ export default function CommentSection({ articleId }: { articleId: string }) {
   const [loading,    setLoading]    = useState(true)
   const [name,       setName]       = useState('')
   const [content,    setContent]    = useState('')
-  const [website,    setWebsite]    = useState('')
+  const [email,      setEmail]      = useState('')
   const [hp,         setHp]         = useState('')     // honeypot
   const [status,     setStatus]     = useState<'idle' | 'submitting' | 'success' | 'error' | 'limit'>('idle')
   const [errMsg,     setErrMsg]     = useState('')
@@ -52,7 +51,7 @@ export default function CommentSection({ articleId }: { articleId: string }) {
           article_id: articleId,
           name:       name.trim(),
           content:    content.trim(),
-          website:    website.trim() || null,
+          email:      email.trim() || null,
           visitor_id: getVisitorId(),
           hp,
         }),
@@ -61,7 +60,7 @@ export default function CommentSection({ articleId }: { articleId: string }) {
       const data = await res.json()
       if (res.ok) {
         setStatus('success')
-        setName(''); setContent(''); setWebsite('')
+        setName(''); setContent(''); setEmail('')
         setMyCount((n) => n + 1)
       } else if (data.code === 'POST_LIMIT') {
         setStatus('limit')
@@ -121,15 +120,7 @@ export default function CommentSection({ articleId }: { articleId: string }) {
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {c.website ? (
-                      <a href={c.website.startsWith('http') ? c.website : `https://${c.website}`}
-                        target="_blank" rel="noopener noreferrer nofollow"
-                        style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)', textDecoration: 'none' }}>
-                        {c.name}
-                      </a>
-                    ) : (
-                      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--dark)' }}>{c.name}</span>
-                    )}
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--dark)' }}>{c.name}</span>
                   </div>
                   <span style={{ fontSize: 11, color: 'var(--muted)' }}>{formatDate(c.created_at)}</span>
                 </div>
@@ -179,11 +170,11 @@ export default function CommentSection({ articleId }: { articleId: string }) {
               </div>
               <div>
                 <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: 4 }}>
-                  Website <span style={{ color: 'var(--muted)' }}>(optional)</span>
+                  Email <span style={{ color: 'var(--muted)' }}>(optional)</span>
                 </label>
                 <input
-                  type="url" value={website} onChange={(e) => setWebsite(e.target.value)}
-                  placeholder="https://yoursite.com" maxLength={200} style={inputStyle}
+                  type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com" maxLength={200} style={inputStyle}
                   onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--green)' }}
                   onBlur={(e)  => { e.currentTarget.style.borderColor = 'var(--border)' }}
                 />
