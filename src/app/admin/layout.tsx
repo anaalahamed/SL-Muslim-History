@@ -30,6 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [ownerName,     setOwnerName]     = useState('Admin')
   const [unreadMsgs,    setUnreadMsgs]    = useState(0)
   const [newSubs,       setNewSubs]       = useState(0)
+  const [pendingComments, setPendingComments] = useState(0)
 
   // Load owner name from config (fall back to authenticated user's email)
   useEffect(() => {
@@ -47,6 +48,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     getUnreadCount(getAuthClient()).then(setUnreadMsgs)
     const interval = setInterval(() => getUnreadCount(getAuthClient()).then(setUnreadMsgs), 5000)
+    return () => clearInterval(interval)
+  }, [pathname])
+
+  // Poll pending comment count
+  useEffect(() => {
+    async function checkPendingComments() {
+      const { count } = await getAuthClient()
+        .from('comments')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'pending')
+      setPendingComments(count ?? 0)
+    }
+    checkPendingComments()
+    const interval = setInterval(checkPendingComments, 5000)
     return () => clearInterval(interval)
   }, [pathname])
 
@@ -148,6 +163,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 >
                   <span className="text-base w-5 text-center flex-shrink-0">{item.icon}</span>
                   <span className="flex-1">{item.label}</span>
+                  {item.label === 'Comments' && pendingComments > 0 && (
+                    <span
+                      className="text-xs font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
+                      style={{ background: '#dc2626', color: 'white', fontSize: '10px', minWidth: '18px', textAlign: 'center' }}
+                    >
+                      {pendingComments}
+                    </span>
+                  )}
                   {item.label === 'Messages' && unreadMsgs > 0 && (
                     <span
                       className="text-xs font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
