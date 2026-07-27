@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('[comments] INSERT error:', error.message, error.details, error.hint)
-      return NextResponse.json({ error: 'Failed to submit comment', detail: error.message }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to submit comment' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, message: 'Comment submitted for moderation' })

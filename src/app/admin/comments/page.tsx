@@ -36,6 +36,7 @@ const STATUS_ACTIONS: { action: Status; label: string; bg: string }[] = [
 export default function AdminCommentsPage() {
   const [tab,       setTab]       = useState<Status | 'all'>('pending')
   const [comments,  setComments]  = useState<Comment[]>([])
+  const [titles,    setTitles]    = useState<Record<string, string>>({})
   const [loading,   setLoading]   = useState(true)
   const [counts,    setCounts]    = useState<Record<string, number>>({})
   const [selected,  setSelected]  = useState<Set<string>>(new Set())
@@ -58,6 +59,16 @@ export default function AdminCommentsPage() {
     const { data } = tab === 'all' ? await q : await q.eq('status', tab)
     setComments(data ?? [])
     setLoading(false)
+
+    // Look up article titles for the article_ids shown, so comments can
+    // display "Article: <title>" instead of just the raw id.
+    const articleIds = [...new Set((data ?? []).map((c) => c.article_id))]
+    if (articleIds.length > 0) {
+      const { data: articles } = await authClient.from('articles').select('id, title').in('id', articleIds)
+      if (articles) {
+        setTitles((prev) => ({ ...prev, ...Object.fromEntries(articles.map((a) => [a.id, a.title])) }))
+      }
+    }
   }, [tab])
 
   useEffect(() => { load() }, [load])
@@ -176,7 +187,7 @@ export default function AdminCommentsPage() {
                   </div>
                   <p style={{ fontSize: 13, color: '#334155', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{c.content}</p>
                   <div style={{ marginTop: 6, fontSize: 10, color: '#94a3b8' }}>
-                    Article: <code style={{ fontFamily: 'monospace' }}>{c.article_id}</code>
+                    Article: {titles[c.article_id] ?? <code style={{ fontFamily: 'monospace' }}>{c.article_id}</code>}
                     {c.ip_hash && <> · IP hash: <code style={{ fontFamily: 'monospace' }}>{c.ip_hash.slice(0, 12)}…</code></>}
                   </div>
                 </div>
