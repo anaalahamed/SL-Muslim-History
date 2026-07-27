@@ -8,6 +8,7 @@ import { getCategories } from '@/lib/db/categories'
 import { Article } from '@/lib/types'
 import { Category } from '@/lib/types'
 import { getAuthClient } from '@/lib/supabase-auth'
+import { downloadArticleAsPdf } from '@/lib/downloadArticlePdf'
 
 export default function AdminArticlesPage() {
   const [search,      setSearch]      = useState('')
@@ -16,6 +17,7 @@ export default function AdminArticlesPage() {
   const [articles,    setArticles]    = useState<Article[]>([])
   const [categories,  setCategories]  = useState<Category[]>([])
   const [deleteId,    setDeleteId]    = useState<string | null>(null)
+  const [downloadingId, setDownloadingId] = useState<string | null>(null)
 
   useEffect(() => {
     getArticles().then(setArticles)
@@ -36,6 +38,18 @@ export default function AdminArticlesPage() {
     if (!article) return
     await toggleArticleFeatured(id, !article.is_featured, getAuthClient())
     setArticles((prev) => prev.map((a) => a.id === id ? { ...a, is_featured: !a.is_featured } : a))
+  }
+
+  async function handleDownload(article: Article) {
+    setDownloadingId(article.id)
+    try {
+      await downloadArticleAsPdf(article)
+    } catch (err) {
+      console.error('[articles] PDF download failed:', err)
+      alert('Could not generate the PDF. Please try again.')
+    } finally {
+      setDownloadingId(null)
+    }
   }
 
   function confirmDelete(id: string) { setDeleteId(id) }
@@ -191,6 +205,16 @@ export default function AdminArticlesPage() {
                 >
                   Edit
                 </Link>
+                <button
+                  onClick={() => handleDownload(article)}
+                  disabled={downloadingId === article.id}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                  style={{ background: '#eff6ff', color: '#1d4ed8' }}
+                  onMouseEnter={(e) => { if (downloadingId !== article.id) { e.currentTarget.style.background = '#1d4ed8'; e.currentTarget.style.color = 'white' } }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.color = '#1d4ed8' }}
+                >
+                  {downloadingId === article.id ? 'Preparing…' : '⬇ PDF'}
+                </button>
                 <button
                   onClick={() => confirmDelete(article.id)}
                   className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
