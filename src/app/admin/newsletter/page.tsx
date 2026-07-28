@@ -3,16 +3,33 @@
 import { useState, useEffect } from 'react'
 import { getAuthClient } from '@/lib/supabase-auth'
 
+type SubStatus = 'pending' | 'accepted' | 'declined'
+
 interface Subscriber {
   id: string
   email: string
   subscribed_at: string
+  status: SubStatus
+}
+
+const STATUS_FILTERS: { key: SubStatus | 'all'; label: string }[] = [
+  { key: 'all',      label: 'All' },
+  { key: 'pending',  label: 'Pending' },
+  { key: 'accepted', label: 'Accepted' },
+  { key: 'declined', label: 'Declined' },
+]
+
+const STATUS_BADGE: Record<SubStatus, { bg: string; color: string; label: string }> = {
+  pending:  { bg: '#fef9c3', color: '#92400e', label: 'Pending' },
+  accepted: { bg: '#dcfce7', color: '#15803d', label: 'Accepted' },
+  declined: { bg: '#fee2e2', color: '#dc2626', label: 'Declined' },
 }
 
 export default function AdminNewsletterPage() {
   const [subscribers,  setSubscribers]  = useState<Subscriber[]>([])
   const [loading,      setLoading]      = useState(true)
   const [tab,          setTab]          = useState<'subscribers' | 'compose'>('subscribers')
+  const [statusFilter, setStatusFilter] = useState<SubStatus | 'all'>('all')
   const [search,       setSearch]       = useState('')
   const [deleteId,     setDeleteId]     = useState<string | null>(null)
   const [deleting,     setDeleting]     = useState(false)
@@ -47,15 +64,23 @@ export default function AdminNewsletterPage() {
     setDeleting(false)
   }
 
+  async function setSubscriberStatus(id: string, status: SubStatus) {
+    setSubscribers((prev) => prev.map((s) => s.id === id ? { ...s, status } : s)) // optimistic
+    const { error } = await getAuthClient().from('newsletter_subscribers').update({ status }).eq('id', id)
+    if (error) loadSubscribers() // revert to server state on failure
+  }
+
   function handleSend(e: React.FormEvent) {
     e.preventDefault()
     setSending(true)
     setTimeout(() => { setSending(false); setSent(true) }, 1000)
   }
 
-  const filtered = subscribers.filter((s) =>
-    search.trim() === '' || s.email.toLowerCase().includes(search.toLowerCase())
-  )
+  const acceptedSubscribers = subscribers.filter((s) => s.status === 'accepted')
+
+  const filtered = subscribers
+    .filter((s) => statusFilter === 'all' || s.status === statusFilter)
+    .filter((s) => search.trim() === '' || s.email.toLowerCase().includes(search.toLowerCase()))
 
   const inputClass = "w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all"
   const inputStyle = { border: '1px solid #e2e8f0', background: '#f8fafc', color: '#1e293b' }
@@ -123,6 +148,28 @@ export default function AdminNewsletterPage() {
       {/* ── Subscribers tab ── */}
       {tab === 'subscribers' && (
         <div className="space-y-4">
+          {/* Status filter */}
+          <div className="flex gap-2 flex-wrap">
+            {STATUS_FILTERS.map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setStatusFilter(f.key)}
+                className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+                style={{
+                  background: statusFilter === f.key ? '#4a9e1f' : '#f1f5f9',
+                  color:      statusFilter === f.key ? 'white' : '#64748b',
+                }}
+              >
+                {f.label}
+                {f.key !== 'all' && (
+                  <span className="ml-1.5">
+                    ({subscribers.filter((s) => s.status === f.key).length})
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
           {/* Toolbar */}
           <div className="rounded-2xl p-3 flex flex-col sm:flex-row gap-3" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
             <div className="relative flex-1">
@@ -145,9 +192,10 @@ export default function AdminNewsletterPage() {
 
           {/* Table */}
           <div className="rounded-2xl overflow-hidden" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
+            <div className="overflow-x-auto">
             <div
               className="grid gap-4 px-5 py-3 text-xs font-black uppercase tracking-wider"
-              style={{ gridTemplateColumns: 'auto 1fr auto auto', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', color: '#94a3b8' }}
+              style={{ gridTemplateColumns: 'auto 1fr auto auto', minWidth: '640px', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', color: '#94a3b8' }}
             >
               <span></span>
               <span>Email</span>
@@ -156,9 +204,9 @@ export default function AdminNewsletterPage() {
             </div>
 
             {loading ? (
-              <div className="py-12 text-center text-sm" style={{ color: '#94a3b8' }}>Loading...</div>
+              <div className="py-12 text-center text-sm" style={{ color: '#94a3b8', minWidth: '640px' }}>Loading...</div>
             ) : filtered.length === 0 ? (
-              <div className="py-12 text-center">
+              <div className="py-12 text-center" style={{ minWidth: '640px' }}>
                 <div className="text-4xl mb-3">📭</div>
                 <p className="font-semibold" style={{ color: '#64748b' }}>
                   {subscribers.length === 0 ? 'No subscribers yet' : 'No results found'}
@@ -169,7 +217,7 @@ export default function AdminNewsletterPage() {
                 <div
                   key={sub.id}
                   className="grid gap-4 px-5 py-3.5 items-center transition-colors"
-                  style={{ gridTemplateColumns: 'auto 1fr auto auto', borderBottom: i < filtered.length - 1 ? '1px solid #f8fafc' : 'none' }}
+                  style={{ gridTemplateColumns: 'auto 1fr auto auto', minWidth: '640px', borderBottom: i < filtered.length - 1 ? '1px solid #f8fafc' : 'none' }}
                   onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc' }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
                 >
@@ -179,22 +227,55 @@ export default function AdminNewsletterPage() {
                   >
                     {sub.email[0].toUpperCase()}
                   </div>
-                  <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{sub.email}</p>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{sub.email}</p>
+                    <span
+                      className="inline-block mt-1 text-xs font-bold px-2 py-0.5 rounded-full"
+                      style={{ background: STATUS_BADGE[sub.status].bg, color: STATUS_BADGE[sub.status].color }}
+                    >
+                      {STATUS_BADGE[sub.status].label}
+                    </span>
+                  </div>
                   <p className="text-xs" style={{ color: '#94a3b8' }}>
                     {new Date(sub.subscribed_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </p>
-                  <button
-                    onClick={() => setDeleteId(sub.id)}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-all"
-                    style={{ background: '#fef2f2', color: '#dc2626' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.color = 'white' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.color = '#dc2626' }}
-                  >
-                    🗑
-                  </button>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {sub.status !== 'accepted' && (
+                      <button
+                        onClick={() => setSubscriberStatus(sub.id, 'accepted')}
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all"
+                        style={{ background: '#dcfce7', color: '#15803d' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#15803d'; e.currentTarget.style.color = 'white' }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = '#dcfce7'; e.currentTarget.style.color = '#15803d' }}
+                      >
+                        Accept
+                      </button>
+                    )}
+                    {sub.status !== 'declined' && (
+                      <button
+                        onClick={() => setSubscriberStatus(sub.id, 'declined')}
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all"
+                        style={{ background: '#f1f5f9', color: '#64748b' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#64748b'; e.currentTarget.style.color = 'white' }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#64748b' }}
+                      >
+                        Decline
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setDeleteId(sub.id)}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-all flex-shrink-0"
+                      style={{ background: '#fef2f2', color: '#dc2626' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.color = 'white' }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.color = '#dc2626' }}
+                    >
+                      🗑
+                    </button>
+                  </div>
                 </div>
               ))
             )}
+            </div>{/* end overflow-x-auto */}
           </div>
         </div>
       )}
@@ -204,7 +285,7 @@ export default function AdminNewsletterPage() {
         <div className="rounded-2xl overflow-hidden" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
           <div className="px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
             <h3 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Send Newsletter</h3>
-            <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>Will be sent to {subscribers.length} subscriber{subscribers.length !== 1 ? 's' : ''}</p>
+            <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>Will be sent to {acceptedSubscribers.length} accepted subscriber{acceptedSubscribers.length !== 1 ? 's' : ''}</p>
           </div>
 
           {sent ? (
@@ -220,7 +301,7 @@ export default function AdminNewsletterPage() {
             <form onSubmit={handleSend} className="p-6 space-y-5">
               <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
                 <span className="text-xl">👥</span>
-                <p className="text-sm font-bold" style={{ color: '#15803d' }}>{subscribers.length} subscribers will receive this</p>
+                <p className="text-sm font-bold" style={{ color: '#15803d' }}>{acceptedSubscribers.length} accepted subscribers will receive this</p>
               </div>
 
               <div>
@@ -239,7 +320,7 @@ export default function AdminNewsletterPage() {
               </div>
 
               <button type="submit" disabled={sending} className="px-6 py-2.5 rounded-xl text-sm font-bold text-white transition-all" style={{ background: sending ? '#94a3b8' : '#4a9e1f' }}>
-                {sending ? 'Sending...' : `📨 Send to ${subscribers.length} Subscribers`}
+                {sending ? 'Sending...' : `📨 Send to ${acceptedSubscribers.length} Accepted Subscribers`}
               </button>
             </form>
           )}
