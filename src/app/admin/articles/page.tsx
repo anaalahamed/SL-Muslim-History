@@ -9,6 +9,7 @@ import { Article } from '@/lib/types'
 import { Category } from '@/lib/types'
 import { getAuthClient } from '@/lib/supabase-auth'
 import { downloadArticleAsPdf } from '@/lib/downloadArticlePdf'
+import { downloadArticleAsText } from '@/lib/downloadArticleText'
 
 export default function AdminArticlesPage() {
   const [search,      setSearch]      = useState('')
@@ -51,6 +52,15 @@ export default function AdminArticlesPage() {
       alert('Could not generate the PDF. Please try again.')
     } finally {
       setDownloadingId(null)
+    }
+  }
+
+  function handleDownloadText(article: Article) {
+    try {
+      downloadArticleAsText(article)
+    } catch (err) {
+      console.error('[articles] Text download failed:', err)
+      alert('Could not generate the text file. Please try again.')
     }
   }
 
@@ -233,6 +243,15 @@ export default function AdminArticlesPage() {
                   onMouseLeave={(e) => { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.color = '#1d4ed8' }}
                 >
                   {downloadingId === article.id ? 'Preparing…' : '⬇ PDF'}
+                </button>
+                <button
+                  onClick={() => handleDownloadText(article)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                  style={{ background: '#f0fdf4', color: '#15803d' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#15803d'; e.currentTarget.style.color = 'white' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = '#f0fdf4'; e.currentTarget.style.color = '#15803d' }}
+                >
+                  ⬇ Text
                 </button>
                 <button
                   onClick={() => confirmDelete(article.id)}
