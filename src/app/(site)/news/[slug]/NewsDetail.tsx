@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { useState, useEffect, use } from 'react'
-import { getNewsBySlug, getNews } from '@/lib/db/news'
+import { getNewsBySlug, getNews, incrementNewsViews } from '@/lib/db/news'
 import { NewsPost } from '@/lib/types'
 import Image from 'next/image'
 import { formatDate } from '@/lib/utils'
@@ -30,6 +30,7 @@ export default function NewsDetail({ params }: { params: Promise<{ slug: string 
           setRelated(all.filter((n) => n.id !== data.id && n.news_type === data.news_type).slice(0, 3))
           setRecent(all.filter((n) => n.id !== data.id && n.news_type === data.news_type).slice(0, 4))
         })
+        incrementNewsViews(data.id)
       }
     })
   }, [slug])

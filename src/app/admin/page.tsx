@@ -292,7 +292,9 @@ export default function AdminDashboard() {
                       )}
                       {item.title}
                     </p>
-                    <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>{formatDate(item.published_at)}</p>
+                    <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>
+                      {formatDate(item.published_at)} · 👁 {formatViews(item.views ?? 0)}
+                    </p>
                   </div>
                 </div>
               ))}

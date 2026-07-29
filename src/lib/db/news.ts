@@ -99,3 +99,8 @@ export async function deleteNews(id: string, client?: SupabaseClient): Promise<s
   const { error } = await db.from('news').delete().eq('id', id)
   return error?.message ?? null
 }
+
+export async function incrementNewsViews(id: string): Promise<void> {
+  if (!supabase) return
+  await supabase.rpc('increment_news_views', { news_id: id })
+}

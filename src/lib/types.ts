@@ -49,6 +49,7 @@ export interface NewsPost {
   category?: string
   published_at: string
   status?: 'draft' | 'published'
+  views?: number
 }
 
 export interface Category {

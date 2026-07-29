@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatViews } from '@/lib/utils'
 import { getNews, deleteNews } from '@/lib/db/news'
 import { NewsPost } from '@/lib/types'
 import { getAuthClient } from '@/lib/supabase-auth'
@@ -101,16 +101,17 @@ export default function AdminNewsPage() {
         {/* Table head */}
         <div
           className="grid gap-4 px-5 py-3 text-xs font-black uppercase tracking-wider"
-          style={{ gridTemplateColumns: '2fr 1fr 1fr auto', minWidth: '560px', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', color: '#94a3b8' }}
+          style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', minWidth: '620px', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', color: '#94a3b8' }}
         >
           <span>Title</span>
           <span>Type</span>
           <span>Date</span>
+          <span>Views</span>
           <span>Actions</span>
         </div>
 
         {filtered.length === 0 ? (
-          <div className="py-16 text-center" style={{ minWidth: '560px' }}>
+          <div className="py-16 text-center" style={{ minWidth: '620px' }}>
             <div className="text-4xl mb-3">📭</div>
             <p className="font-semibold" style={{ color: '#64748b' }}>No posts found</p>
             <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>Try adjusting your search or filters.</p>
@@ -121,8 +122,8 @@ export default function AdminNewsPage() {
               key={post.id}
               className="grid gap-4 px-5 py-4 items-center transition-colors"
               style={{
-                gridTemplateColumns: '2fr 1fr 1fr auto',
-                minWidth: '560px',
+                gridTemplateColumns: '2fr 1fr 1fr auto auto',
+                minWidth: '620px',
                 borderBottom: i < filtered.length - 1 ? '1px solid #f8fafc' : 'none',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc' }}
@@ -156,6 +157,11 @@ export default function AdminNewsPage() {
 
               {/* Date */}
               <p className="text-xs" style={{ color: '#94a3b8' }}>{formatDate(post.published_at)}</p>
+
+              {/* Views */}
+              <span className="text-sm font-bold" style={{ color: '#64748b' }}>
+                👁 {formatViews(post.views ?? 0)}
+              </span>
 
               {/* Actions */}
               <div className="flex items-center gap-2">
