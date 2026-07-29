@@ -30,17 +30,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const upstream = await fetch(`https://codeload.github.com/${REPO}/zip/refs/heads/${BRANCH}`)
-  if (!upstream.ok || !upstream.body) {
-    return NextResponse.json({ error: 'Could not fetch the source code from GitHub. Please try again.' }, { status: 502 })
-  }
-
-  const dateStamp = new Date().toISOString().slice(0, 10)
-  return new NextResponse(upstream.body, {
-    headers: {
-      'Content-Type': 'application/zip',
-      'Content-Disposition': `attachment; filename="sl-muslim-history-code-${dateStamp}.zip"`,
-      'Cache-Control': 'no-store',
-    },
-  })
+  // Relaying the whole zip through this function (fetch it here, then stream
+  // it back) hit serverless function limits and silently hung. GitHub's own
+  // codeload endpoint already serves a proper file download, so once the
+  // admin check passes, just send the browser straight there.
+  return NextResponse.redirect(`https://codeload.github.com/${REPO}/zip/refs/heads/${BRANCH}`)
 }
