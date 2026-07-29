@@ -314,11 +314,11 @@ export default function AdminDashboard() {
           <h3 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Category Overview</h3>
           <Link href="/admin/categories" className="text-xs font-bold" style={{ color: '#4a9e1f' }}>Manage →</Link>
         </div>
-        <div className="p-4 flex gap-2.5 overflow-x-auto">
+        <div className="p-4 flex flex-wrap gap-2.5">
           {categories.map((cat) => (
             <div
               key={cat.id}
-              className="flex items-center gap-2 rounded-xl px-3 py-2 flex-shrink-0"
+              className="flex items-center gap-2 rounded-xl px-3 py-2"
               style={{ background: '#f8fafc', border: '1px solid #f1f5f9' }}
             >
               <span className="text-base">{cat.icon}</span>
