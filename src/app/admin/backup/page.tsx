@@ -53,8 +53,7 @@ export default function AdminBackupPage() {
         <h3 className="text-base font-extrabold mb-2" style={{ color: '#0f172a' }}>Download Full Backup</h3>
         <p className="text-sm mb-5" style={{ color: '#64748b', lineHeight: 1.6 }}>
           This saves one file to your computer containing every article, news post, comment, category,
-          author, ad, and setting on your site — everything stored in your database. Your website&apos;s
-          code is already safely kept on GitHub; this covers the part that isn&apos;t: your actual content.
+          author, ad, and setting on your site — everything stored in your database.
         </p>
 
         <button
@@ -95,6 +94,23 @@ export default function AdminBackupPage() {
             ⚠ Everything else saved fine, but these couldn&apos;t be read and were left out: {result.failedTables.map((t) => TABLE_LABELS[t] ?? t).join(', ')}. Tell me if you see this and I&apos;ll take a look.
           </div>
         )}
+      </div>
+
+      <div className="rounded-2xl p-6" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
+        <div className="text-3xl mb-3">💻</div>
+        <h3 className="text-base font-extrabold mb-2" style={{ color: '#0f172a' }}>Download Website Code</h3>
+        <p className="text-sm mb-5" style={{ color: '#64748b', lineHeight: 1.6 }}>
+          This saves the actual website itself — every page, design, and feature — as one file to your
+          computer. It&apos;s always safely stored online too, but this gives you your own personal copy
+          without needing to visit GitHub separately.
+        </p>
+        <a
+          href="/api/admin/download-source"
+          className="inline-block px-6 py-3 rounded-xl text-sm font-bold text-white transition-all"
+          style={{ background: '#0369a1', boxShadow: '0 2px 8px rgba(3,105,161,0.3)' }}
+        >
+          ⬇ Download Website Code
+        </a>
       </div>
 
       <div className="rounded-2xl p-5" style={{ background: '#fffbeb', border: '1px solid #fde68a' }}>
