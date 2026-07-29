@@ -30,9 +30,24 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Relaying the whole zip through this function (fetch it here, then stream
-  // it back) hit serverless function limits and silently hung. GitHub's own
-  // codeload endpoint already serves a proper file download, so once the
-  // admin check passes, just send the browser straight there.
-  return NextResponse.redirect(`https://codeload.github.com/${REPO}/zip/refs/heads/${BRANCH}`)
+  const upstream = await fetch(`https://codeload.github.com/${REPO}/zip/refs/heads/${BRANCH}`)
+  if (!upstream.ok) {
+    return NextResponse.json({ error: 'Could not fetch the source code from GitHub. Please try again.' }, { status: 502 })
+  }
+
+  // The repo is small (well under 1MB zipped), so fetching it fully here
+  // before responding — rather than trying to stream the response straight
+  // through, which previously hung with no error — is fast and reliable,
+  // and lets the browser report real download progress via Content-Length.
+  const buffer = await upstream.arrayBuffer()
+  const dateStamp = new Date().toISOString().slice(0, 10)
+
+  return new NextResponse(buffer, {
+    headers: {
+      'Content-Type': 'application/zip',
+      'Content-Disposition': `attachment; filename="sl-muslim-history-code-${dateStamp}.zip"`,
+      'Content-Length': String(buffer.byteLength),
+      'Cache-Control': 'no-store',
+    },
+  })
 }

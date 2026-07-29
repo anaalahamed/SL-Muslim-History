@@ -24,6 +24,10 @@ export default function AdminBackupPage() {
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<{ filename: string; countsByTable: Record<string, number>; failedTables: string[] } | null>(null)
 
+  const [codeDownloading, setCodeDownloading] = useState(false)
+  const [codeProgress, setCodeProgress] = useState<number | null>(null) // 0-100, or null if unknown
+  const [codeError, setCodeError] = useState<string | null>(null)
+
   async function handleBackup() {
     setWorking(true)
     setError(null)
@@ -35,6 +39,51 @@ export default function AdminBackupPage() {
       setError(err instanceof Error ? err.message : 'Something went wrong while creating the backup.')
     } finally {
       setWorking(false)
+    }
+  }
+
+  async function handleDownloadCode() {
+    setCodeDownloading(true)
+    setCodeError(null)
+    setCodeProgress(0)
+    try {
+      const res = await fetch('/api/admin/download-source')
+      if (!res.ok || !res.body) {
+        const body = await res.json().catch(() => null)
+        throw new Error(body?.error ?? 'Could not download the website code. Please try again.')
+      }
+
+      const total = Number(res.headers.get('content-length') ?? 0)
+      const reader = res.body.getReader()
+      const chunks: Uint8Array[] = []
+      let received = 0
+
+      for (;;) {
+        const { done, value } = await reader.read()
+        if (done) break
+        if (value) {
+          chunks.push(value)
+          received += value.length
+          setCodeProgress(total > 0 ? Math.min(99, Math.round((received / total) * 100)) : null)
+        }
+      }
+
+      const blob = new Blob(chunks as BlobPart[], { type: 'application/zip' })
+      const dateStamp = new Date().toISOString().slice(0, 10)
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `sl-muslim-history-code-${dateStamp}.zip`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      setCodeProgress(100)
+    } catch (err) {
+      setCodeError(err instanceof Error ? err.message : 'Something went wrong while downloading the code.')
+      setCodeProgress(null)
+    } finally {
+      setCodeDownloading(false)
     }
   }
 
@@ -104,13 +153,34 @@ export default function AdminBackupPage() {
           computer. It&apos;s always safely stored online too, but this gives you your own personal copy
           without needing to visit GitHub separately.
         </p>
-        <a
-          href="/api/admin/download-source"
-          className="inline-block px-6 py-3 rounded-xl text-sm font-bold text-white transition-all"
-          style={{ background: '#0369a1', boxShadow: '0 2px 8px rgba(3,105,161,0.3)' }}
+        <button
+          onClick={handleDownloadCode}
+          disabled={codeDownloading}
+          className="px-6 py-3 rounded-xl text-sm font-bold text-white transition-all"
+          style={{ background: codeDownloading ? '#94a3b8' : '#0369a1', boxShadow: codeDownloading ? 'none' : '0 2px 8px rgba(3,105,161,0.3)' }}
         >
-          ⬇ Download Website Code
-        </a>
+          {codeDownloading
+            ? (codeProgress !== null ? `Downloading… ${codeProgress}%` : 'Downloading…')
+            : '⬇ Download Website Code'}
+        </button>
+
+        {codeDownloading && (
+          <div className="mt-3 h-2 rounded-full overflow-hidden" style={{ background: '#e2e8f0', maxWidth: '280px' }}>
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: codeProgress !== null ? `${codeProgress}%` : '30%',
+                background: '#0369a1',
+              }}
+            />
+          </div>
+        )}
+
+        {codeError && (
+          <div className="mt-4 rounded-xl px-4 py-3 text-sm font-semibold" style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}>
+            {codeError}
+          </div>
+        )}
       </div>
 
       <div className="rounded-2xl p-5" style={{ background: '#fffbeb', border: '1px solid #fde68a' }}>
