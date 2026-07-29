@@ -62,7 +62,9 @@ export default function AdminDashboard() {
   const commentsThisMonth  = comments.filter((c) => isWithinLast30Days(c.created_at)).length
   const reactionsThisMonth = reactions.filter((r) => isWithinLast30Days(r.created_at)).length
 
-  const topArticles = [...articles].sort((a, b) => b.views - a.views).slice(0, 5)
+  // Ranked by real (organic) views, not the boosted total, so an admin-set
+  // boost can't make an article look more popular than it actually is here.
+  const topArticles = [...articles].sort((a, b) => (b.real_views ?? b.views) - (a.real_views ?? a.views)).slice(0, 5)
 
   const monthlyPublished = Array.from({ length: 6 }, (_, i) => {
     const d = new Date()

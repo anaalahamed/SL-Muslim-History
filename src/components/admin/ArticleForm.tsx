@@ -67,7 +67,8 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
   const [slugLocked,  setSlugLocked] = useState(!!initial.slug)
   const [slugError,   setSlugError]  = useState('')
   const [image,       setImage]      = useState(initial.featured_image ?? '')
-  const [views,       setViews]      = useState(initial.views ?? 26)
+  const realViews = initial.real_views ?? 0
+  const [boostViews, setBoostViews]  = useState(initial.boost_views ?? (initial.id ? 0 : 26))
   const [publishedAt, setPublishedAt] = useState(toDatetimeLocal(initial.published_at ?? new Date().toISOString()))
 
   // ── Multiple categories ──
@@ -204,7 +205,8 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
       featured_image: featuredGalleryImg?.url || image,
       gallery:       galleryWithFeatured,
       published_at:  new Date(publishedAt).toISOString(),
-      views,
+      views: realViews + boostViews,
+      boost_views: boostViews,
     }
   }
 
@@ -402,20 +404,21 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
               </p>
             </div>
 
-            {/* View count */}
+            {/* Boost views */}
             <div className="mb-4">
               <label className="block text-xs font-bold mb-1.5" style={{ color: '#334155' }}>
-                👁 View Count
-                <span className="ml-1 font-normal" style={{ color: '#94a3b8' }}>{initial.id ? '(edit to override)' : '(starting count)'}</span>
+                👁 Boost Views <span className="font-normal" style={{ color: '#94a3b8' }}>(optional)</span>
               </label>
               <input
-                type="number" min={0} value={views}
-                onChange={(e) => setViews(Math.max(0, parseInt(e.target.value) || 0))}
+                type="number" min={0} value={boostViews}
+                onChange={(e) => setBoostViews(Math.max(0, parseInt(e.target.value) || 0))}
                 className={inputClass} style={IS}
                 onFocus={focus} onBlur={blur}
               />
               <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>
-                Live visitors add on top of this number automatically.
+                {initial.id
+                  ? <>Added on top of {realViews.toLocaleString()} real visitor view{realViews !== 1 ? 's' : ''} so far — visitors will see {(realViews + boostViews).toLocaleString()} total.</>
+                  : <>Real visitor views start counting from 0 and add on top of this number.</>}
               </p>
             </div>
 

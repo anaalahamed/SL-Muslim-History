@@ -205,9 +205,9 @@ export default function AdminArticlesPage() {
                 <p className="text-xs" style={{ color: '#94a3b8' }}>{formatDate(article.published_at)}</p>
               </div>
 
-              {/* Views */}
-              <span className="text-sm font-bold" style={{ color: '#64748b' }}>
-                👁 {formatViews(article.views)}
+              {/* Views — total (incl. any admin boost) / real visitor-only count */}
+              <span className="text-sm font-bold" style={{ color: '#64748b' }} title="Total views / real (organic) views">
+                👁 {formatViews(article.views)} / {formatViews(article.real_views ?? article.views)}
               </span>
 
               {/* Featured toggle */}

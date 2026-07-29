@@ -158,9 +158,9 @@ export default function AdminNewsPage() {
               {/* Date */}
               <p className="text-xs" style={{ color: '#94a3b8' }}>{formatDate(post.published_at)}</p>
 
-              {/* Views */}
-              <span className="text-sm font-bold" style={{ color: '#64748b' }}>
-                👁 {formatViews(post.views ?? 0)}
+              {/* Views — total (incl. any admin boost) / real visitor-only count */}
+              <span className="text-sm font-bold" style={{ color: '#64748b' }} title="Total views / real (organic) views">
+                👁 {formatViews(post.views ?? 0)} / {formatViews(post.real_views ?? post.views ?? 0)}
               </span>
 
               {/* Actions */}

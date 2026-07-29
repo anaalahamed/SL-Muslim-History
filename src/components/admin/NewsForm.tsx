@@ -38,6 +38,8 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
   const [slugError,  setSlugError]  = useState('')
   const [image,       setImage]       = useState(initial.featured_image ?? '')
   const [publishedAt, setPublishedAt] = useState(toDatetimeLocal(initial.published_at ?? new Date().toISOString()))
+  const realViews = initial.real_views ?? 0
+  const [boostViews, setBoostViews]   = useState(initial.boost_views ?? 0)
   const contentRef = useRef<HTMLTextAreaElement>(null)
 
   function insertMarkdown(before: string, after = '', placeholder = '') {
@@ -79,6 +81,8 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
       is_featured:    isFeatured,
       featured_image: image,
       published_at:   new Date(publishedAt).toISOString(),
+      views: realViews + boostViews,
+      boost_views: boostViews,
     }
   }
 
@@ -309,6 +313,24 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
                   </p>
                 </div>
               </label>
+            </div>
+
+            {/* Boost views */}
+            <div className="mb-5">
+              <label className="block text-xs font-bold mb-1.5" style={{ color: '#334155' }}>
+                👁 Boost Views <span className="font-normal" style={{ color: '#94a3b8' }}>(optional)</span>
+              </label>
+              <input
+                type="number" min={0} value={boostViews}
+                onChange={(e) => setBoostViews(Math.max(0, parseInt(e.target.value) || 0))}
+                className={inputClass} style={inputStyle}
+                onFocus={focus} onBlur={blur}
+              />
+              <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>
+                {initial.id
+                  ? <>Added on top of {realViews.toLocaleString()} real visitor view{realViews !== 1 ? 's' : ''} so far — visitors will see {(realViews + boostViews).toLocaleString()} total.</>
+                  : <>Real visitor views start counting from 0 and add on top of this number.</>}
+              </p>
             </div>
 
             <div className="flex flex-col gap-2">

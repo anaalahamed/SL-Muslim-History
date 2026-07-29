@@ -13,6 +13,8 @@ export interface Article {
   featured_image: string
   gallery: GalleryImage[]   // multiple photos
   views: number
+  real_views?: number   // organic, visitor-driven count only (excludes boost_views)
+  boost_views?: number  // admin-set starting/vanity count, added on top of real_views
   is_featured: boolean
   published_at: string
   status?: 'draft' | 'published'
@@ -50,6 +52,8 @@ export interface NewsPost {
   published_at: string
   status?: 'draft' | 'published'
   views?: number
+  real_views?: number   // organic, visitor-driven count only (excludes boost_views)
+  boost_views?: number  // admin-set starting/vanity count, added on top of real_views
 }
 
 export interface Category {
