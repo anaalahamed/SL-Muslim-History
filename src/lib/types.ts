@@ -15,6 +15,7 @@ export interface Article {
   views: number
   is_featured: boolean
   published_at: string
+  status?: 'draft' | 'published'
 }
 
 export interface GalleryImage {
@@ -47,6 +48,7 @@ export interface NewsPost {
   news_type: 'special' | 'janaza'
   category?: string
   published_at: string
+  status?: 'draft' | 'published'
 }
 
 export interface Category {

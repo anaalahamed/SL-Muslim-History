@@ -11,6 +11,7 @@ export default function NewArticlePage() {
   const [saving, setSaving] = useState(false)
   const [done,   setDone]   = useState(false)
   const [error,  setError]  = useState<string | null>(null)
+  const [savedAsDraft, setSavedAsDraft] = useState(false)
 
   async function handleSave(data: Partial<Article>) {
     setSaving(true)
@@ -18,7 +19,7 @@ export default function NewArticlePage() {
     const { data: saved, error } = await saveArticle(data, getAuthClient())
     setSaving(false)
     if (error) { setError(error); return }
-    if (saved) setDone(true)
+    if (saved) { setSavedAsDraft(data.status === 'draft'); setDone(true) }
   }
 
   return (
@@ -47,10 +48,14 @@ export default function NewArticlePage() {
           className="rounded-2xl p-12 text-center"
           style={{ background: 'white', border: '1px solid #e2e8f0' }}
         >
-          <div className="text-5xl mb-4">🎉</div>
-          <h3 className="text-xl font-extrabold mb-2" style={{ color: '#0f172a' }}>Article Published!</h3>
+          <div className="text-5xl mb-4">{savedAsDraft ? '📝' : '🎉'}</div>
+          <h3 className="text-xl font-extrabold mb-2" style={{ color: '#0f172a' }}>
+            {savedAsDraft ? 'Draft Saved!' : 'Article Published!'}
+          </h3>
           <p className="text-sm mb-6" style={{ color: '#64748b' }}>
-            Your article has been saved successfully.
+            {savedAsDraft
+              ? 'Your draft is saved privately — it will not appear on the live site until you publish it.'
+              : 'Your article has been saved successfully.'}
           </p>
           <div className="flex gap-3 justify-center">
             <Link

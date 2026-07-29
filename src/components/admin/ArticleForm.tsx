@@ -8,6 +8,7 @@ import { getArticles } from '@/lib/db/articles'
 import { Article, Category, Author, GalleryImage } from '@/lib/types'
 import ImageUpload from './ImageUpload'
 import { supabase } from '@/lib/supabase'
+import { getAuthClient } from '@/lib/supabase-auth'
 
 interface Props {
   initial?: Partial<Article>
@@ -38,7 +39,7 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
     getCategories().then(setCategories)
     getAuthors().then(setAuthors)
     if (!initial.id) {
-      getArticles().then(articles => {
+      getArticles(getAuthClient()).then(articles => {
         const nums = articles
           .map(a => { const m = a.slug.match(/^(\d+)-/); return m ? parseInt(m[1]) : 0 })
           .filter(n => n >= 46)
@@ -182,17 +183,16 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
     }
   }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
+  function buildPayload(): Partial<Article> | null {
     const cleanSlug = slug.trim()
-    if (!cleanSlug) { setSlugError('URL slug is required.'); return }
-    if (/[^\w-]/.test(cleanSlug)) { setSlugError('Slug can only contain letters, numbers, and hyphens.'); return }
+    if (!cleanSlug) { setSlugError('URL slug is required.'); return null }
+    if (/[^\w-]/.test(cleanSlug)) { setSlugError('Slug can only contain letters, numbers, and hyphens.'); return null }
     setSlugError('')
     const primaryCat = categories.find((c) => c.slug === selCats[0])
     const selectedAuthor = authors.find((a) => a.id === authorId)
     const galleryWithFeatured = gallery.map((g, i) => ({ ...g, order: i }))
     const featuredGalleryImg = galleryWithFeatured.find((g) => g.is_featured)
-    onSave({
+    return {
       title, slug: cleanSlug, content,
       category:      primaryCat?.name_en ?? '',
       category_slug: selCats[0] ?? '',
@@ -205,7 +205,20 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
       gallery:       galleryWithFeatured,
       published_at:  new Date(publishedAt).toISOString(),
       views,
-    })
+    }
+  }
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const payload = buildPayload()
+    if (!payload) return
+    onSave({ ...payload, status: 'published' })
+  }
+
+  function handleSaveDraft() {
+    const payload = buildPayload()
+    if (!payload) return
+    onSave({ ...payload, status: 'draft' })
   }
 
   // ── Styles ──
@@ -350,7 +363,16 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
 
           {/* Publish */}
           <div className="rounded-2xl p-5" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
-            <h3 className="text-sm font-extrabold mb-4" style={{ color: '#0f172a' }}>Publish</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-extrabold" style={{ color: '#0f172a' }}>Publish</h3>
+              {initial.id && (
+                initial.status === 'draft' ? (
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: '#fef9c3', color: '#a16207' }}>📝 Draft</span>
+                ) : (
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: '#f0fdf4', color: '#15803d' }}>✅ Published</span>
+                )
+              )}
+            </div>
 
             {/* Featured toggle */}
             <div className="flex items-center justify-between p-3 rounded-xl mb-4" style={{ background: featured ? '#f0fdf4' : '#f8fafc', border: `1px solid ${featured ? '#4a9e1f' : '#e2e8f0'}` }}>
@@ -399,7 +421,10 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
 
             <div className="flex flex-col gap-2">
               <button type="submit" disabled={saving} className="w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all" style={{ background: saving ? '#94a3b8' : '#4a9e1f', boxShadow: saving ? 'none' : '0 2px 8px rgba(74,158,31,0.3)' }}>
-                {saving ? 'Saving...' : initial.id ? '💾 Update Article' : '🚀 Publish Article'}
+                {saving ? 'Saving...' : initial.id && initial.status !== 'draft' ? '💾 Update Article' : '🚀 Publish Article'}
+              </button>
+              <button type="button" disabled={saving} onClick={handleSaveDraft} className="w-full py-2.5 rounded-xl text-sm font-bold transition-all" style={{ background: '#fef9c3', color: '#a16207' }}>
+                📝 Save as Draft
               </button>
               <Link href="/admin/articles" className="w-full py-2.5 rounded-xl text-sm font-bold text-center transition-all block" style={{ background: '#f1f5f9', color: '#64748b' }}>Cancel</Link>
             </div>

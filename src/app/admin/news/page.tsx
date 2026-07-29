@@ -10,15 +10,17 @@ import { getAuthClient } from '@/lib/supabase-auth'
 export default function AdminNewsPage() {
   const [search,     setSearch]     = useState('')
   const [filterType, setFilterType] = useState<'all' | 'special' | 'janaza'>('all')
+  const [filterStatus, setFilterStatus] = useState('all')
   const [news,       setNews]       = useState<NewsPost[]>([])
   const [deleteId,   setDeleteId]   = useState<string | null>(null)
 
   useEffect(() => {
-    getNews().then(setNews)
+    getNews(getAuthClient()).then(setNews)
   }, [])
 
   const filtered = news
     .filter((n) => filterType === 'all' || n.news_type === filterType)
+    .filter((n) => filterStatus === 'all' || (n.status ?? 'published') === filterStatus)
     .filter((n) =>
       search.trim() === '' ||
       n.title.toLowerCase().includes(search.toLowerCase())
@@ -73,6 +75,18 @@ export default function AdminNewsPage() {
           <option value="janaza">Janaza News only</option>
         </select>
 
+        {/* Status filter */}
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="px-3 py-2.5 rounded-xl text-sm font-semibold outline-none cursor-pointer"
+          style={{ border: '1px solid #e2e8f0', background: '#f8fafc', color: '#475569' }}
+        >
+          <option value="all">Published + Drafts</option>
+          <option value="published">Published only</option>
+          <option value="draft">Drafts only</option>
+        </select>
+
         <span className="flex items-center text-xs font-semibold px-3" style={{ color: '#94a3b8' }}>
           {filtered.length} result{filtered.length !== 1 ? 's' : ''}
         </span>
@@ -117,6 +131,9 @@ export default function AdminNewsPage() {
               {/* Title */}
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
+                  {post.status === 'draft' && (
+                    <span className="text-xs font-bold px-1.5 py-0.5 rounded flex-shrink-0" style={{ background: '#fef9c3', color: '#a16207' }}>📝 Draft</span>
+                  )}
                   {post.is_featured && (
                     <span title="Featured Story" style={{ fontSize: '13px', lineHeight: 1 }}>⭐</span>
                   )}

@@ -196,6 +196,11 @@ export default function AdminDashboard() {
                   <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{article.category} · {formatDate(article.published_at)}</p>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                  {article.status === 'draft' && (
+                    <span className="hidden sm:inline text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: '#fef9c3', color: '#a16207' }}>
+                      📝 Draft
+                    </span>
+                  )}
                   <span
                     className="hidden sm:inline text-xs px-2 py-0.5 rounded-full font-semibold"
                     style={{
@@ -203,7 +208,7 @@ export default function AdminDashboard() {
                       color:      article.is_featured ? '#4a9e1f' : '#94a3b8',
                     }}
                   >
-                    {article.is_featured ? '✦ Featured' : 'Draft'}
+                    {article.is_featured ? '✦ Featured' : 'Regular'}
                   </span>
                   <span className="hidden sm:inline text-xs" style={{ color: '#94a3b8' }}>👁 {formatViews(article.views)}</span>
                   <Link
@@ -281,7 +286,12 @@ export default function AdminDashboard() {
                     {item.news_type === 'janaza' ? 'J' : 'S'}
                   </span>
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold line-clamp-2" style={{ color: '#1e293b', lineHeight: '1.5' }}>{item.title}</p>
+                    <p className="text-xs font-semibold line-clamp-2" style={{ color: '#1e293b', lineHeight: '1.5' }}>
+                      {item.status === 'draft' && (
+                        <span className="text-xs font-bold px-1.5 py-0.5 rounded mr-1" style={{ background: '#fef9c3', color: '#a16207' }}>📝 Draft</span>
+                      )}
+                      {item.title}
+                    </p>
                     <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>{formatDate(item.published_at)}</p>
                   </div>
                 </div>

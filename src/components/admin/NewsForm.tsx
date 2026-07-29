@@ -60,19 +60,18 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
     if (!slugLocked) setSlug(toSlug(val))
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  function buildPayload(): Partial<NewsPost> | null {
     const cleanSlug = slug.trim()
     if (!cleanSlug) {
       setSlugError('URL slug is required. Enter a short English slug (e.g. "ramadan-event-colombo").')
-      return
+      return null
     }
     if (/[^\w-]/.test(cleanSlug)) {
       setSlugError('Slug can only contain letters, numbers, and hyphens.')
-      return
+      return null
     }
     setSlugError('')
-    onSave({
+    return {
       title,
       slug: cleanSlug,
       content,
@@ -80,7 +79,20 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
       is_featured:    isFeatured,
       featured_image: image,
       published_at:   new Date(publishedAt).toISOString(),
-    })
+    }
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const payload = buildPayload()
+    if (!payload) return
+    onSave({ ...payload, status: 'published' })
+  }
+
+  function handleSaveDraft() {
+    const payload = buildPayload()
+    if (!payload) return
+    onSave({ ...payload, status: 'draft' })
   }
 
   const inputClass = "w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all"
@@ -208,7 +220,16 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
 
           {/* Publish box */}
           <div className="rounded-2xl p-5" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
-            <h3 className="text-sm font-extrabold mb-4" style={{ color: '#0f172a' }}>Publish</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-extrabold" style={{ color: '#0f172a' }}>Publish</h3>
+              {initial.id && (
+                initial.status === 'draft' ? (
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: '#fef9c3', color: '#a16207' }}>📝 Draft</span>
+                ) : (
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: '#f0fdf4', color: '#15803d' }}>✅ Published</span>
+                )
+              )}
+            </div>
 
             {/* Publish date */}
             <div className="mb-5">
@@ -297,7 +318,16 @@ export default function NewsForm({ initial = {}, onSave, saving }: Props) {
                 className="w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all"
                 style={{ background: saving ? '#94a3b8' : '#4a9e1f', boxShadow: saving ? 'none' : '0 2px 8px rgba(74,158,31,0.3)' }}
               >
-                {saving ? 'Saving...' : initial.id ? '💾 Update Post' : '🚀 Publish Post'}
+                {saving ? 'Saving...' : initial.id && initial.status !== 'draft' ? '💾 Update Post' : '🚀 Publish Post'}
+              </button>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={handleSaveDraft}
+                className="w-full py-2.5 rounded-xl text-sm font-bold transition-all"
+                style={{ background: '#fef9c3', color: '#a16207' }}
+              >
+                📝 Save as Draft
               </button>
               <Link
                 href="/admin/news"

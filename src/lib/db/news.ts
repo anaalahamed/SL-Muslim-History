@@ -3,9 +3,12 @@ import { mockNews } from '../mockData'
 import { NewsPost } from '../types'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-export async function getNews(): Promise<NewsPost[]> {
-  if (!supabase) return mockNews
-  const { data, error } = await supabase
+// Pass an authenticated client (getAuthClient()) from admin pages to also
+// see drafts — the anon client is RLS-restricted to published rows only.
+export async function getNews(client?: SupabaseClient): Promise<NewsPost[]> {
+  const db = client ?? supabase
+  if (!db) return mockNews
+  const { data, error } = await db
     .from('news')
     .select('*')
     .order('published_at', { ascending: false })
@@ -59,9 +62,12 @@ export async function getNewsBySlug(slug: string): Promise<NewsPost | null> {
   return data as NewsPost
 }
 
-export async function getNewsById(id: string): Promise<NewsPost | null> {
-  if (!supabase) return mockNews.find((n) => n.id === id) ?? null
-  const { data, error } = await supabase
+// Pass an authenticated client (getAuthClient()) from admin pages so a
+// draft news post can still be found and opened for editing.
+export async function getNewsById(id: string, client?: SupabaseClient): Promise<NewsPost | null> {
+  const db = client ?? supabase
+  if (!db) return mockNews.find((n) => n.id === id) ?? null
+  const { data, error } = await db
     .from('news')
     .select('*')
     .eq('id', id)

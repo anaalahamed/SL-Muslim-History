@@ -14,7 +14,7 @@ export default function PageClient() {
   const [saving,  setSaving]  = useState(false)
   const [saved,   setSaved]   = useState(false)
   useEffect(() => {
-    getArticleById(id).then((data) => setArticle(data ?? null))
+    getArticleById(id, getAuthClient()).then((data) => setArticle(data ?? null))
   }, [id])
   if (article === undefined) return <div className="text-center py-24 text-sm" style={{color:'#94a3b8'}}>Loading...</div>
   if (!article) notFound()

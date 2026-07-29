@@ -12,7 +12,7 @@ export default function PageClient() {
   const [saving, setSaving] = useState(false)
   const [saved,  setSaved]  = useState(false)
   useEffect(() => {
-    getNewsById(id).then((data) => setPost(data ?? null))
+    getNewsById(id, getAuthClient()).then((data) => setPost(data ?? null))
   }, [id])
   if (post === undefined) return <div className="text-center py-24 text-sm" style={{color:'#94a3b8'}}>Loading...</div>
   if (!post) notFound()

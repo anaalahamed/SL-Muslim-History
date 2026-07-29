@@ -14,19 +14,21 @@ export default function AdminArticlesPage() {
   const [search,      setSearch]      = useState('')
   const [filterCat,   setFilterCat]   = useState('all')
   const [filterFeat,  setFilterFeat]  = useState('all')
+  const [filterStatus, setFilterStatus] = useState('all')
   const [articles,    setArticles]    = useState<Article[]>([])
   const [categories,  setCategories]  = useState<Category[]>([])
   const [deleteId,    setDeleteId]    = useState<string | null>(null)
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
 
   useEffect(() => {
-    getArticles().then(setArticles)
+    getArticles(getAuthClient()).then(setArticles)
     getCategories().then(setCategories)
   }, [])
 
   const filtered = articles
     .filter((a) => filterCat  === 'all' || a.category_slug === filterCat)
     .filter((a) => filterFeat === 'all' || (filterFeat === 'featured' ? a.is_featured : !a.is_featured))
+    .filter((a) => filterStatus === 'all' || (a.status ?? 'published') === filterStatus)
     .filter((a) =>
       search.trim() === '' ||
       a.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -113,6 +115,18 @@ export default function AdminArticlesPage() {
           <option value="regular">Not featured</option>
         </select>
 
+        {/* Status filter */}
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="px-3 py-2.5 rounded-xl text-sm font-semibold outline-none cursor-pointer"
+          style={{ border: '1px solid #e2e8f0', background: '#f8fafc', color: '#475569' }}
+        >
+          <option value="all">Published + Drafts</option>
+          <option value="published">Published only</option>
+          <option value="draft">Drafts only</option>
+        </select>
+
         <span className="flex items-center text-xs font-semibold px-3" style={{ color: '#94a3b8' }}>
           {filtered.length} result{filtered.length !== 1 ? 's' : ''}
         </span>
@@ -158,7 +172,12 @@ export default function AdminArticlesPage() {
             >
               {/* Title */}
               <div className="min-w-0">
-                <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{article.title}</p>
+                <div className="flex items-center gap-1.5">
+                  {article.status === 'draft' && (
+                    <span className="text-xs font-bold px-1.5 py-0.5 rounded flex-shrink-0" style={{ background: '#fef9c3', color: '#a16207' }}>📝 Draft</span>
+                  )}
+                  <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{article.title}</p>
+                </div>
                 <p className="text-xs mt-0.5 truncate" style={{ color: '#94a3b8' }}>/articles/{article.slug}</p>
               </div>
 

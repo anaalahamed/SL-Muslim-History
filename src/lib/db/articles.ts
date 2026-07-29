@@ -3,9 +3,12 @@ import { mockArticles } from '../mockData'
 import { Article } from '../types'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-export async function getArticles(): Promise<Article[]> {
-  if (!supabase) return mockArticles
-  const { data, error } = await supabase
+// Pass an authenticated client (getAuthClient()) from admin pages to also
+// see drafts — the anon client is RLS-restricted to published rows only.
+export async function getArticles(client?: SupabaseClient): Promise<Article[]> {
+  const db = client ?? supabase
+  if (!db) return mockArticles
+  const { data, error } = await db
     .from('articles')
     .select('*')
     .order('published_at', { ascending: false })
@@ -72,9 +75,12 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
   return data as Article
 }
 
-export async function getArticleById(id: string): Promise<Article | null> {
-  if (!supabase) return mockArticles.find((a) => a.id === id) ?? null
-  const { data, error } = await supabase.from('articles').select('*').eq('id', id).single()
+// Pass an authenticated client (getAuthClient()) from admin pages so a
+// draft article can still be found and opened for editing.
+export async function getArticleById(id: string, client?: SupabaseClient): Promise<Article | null> {
+  const db = client ?? supabase
+  if (!db) return mockArticles.find((a) => a.id === id) ?? null
+  const { data, error } = await db.from('articles').select('*').eq('id', id).single()
   if (error || !data) return null
   return data as Article
 }
