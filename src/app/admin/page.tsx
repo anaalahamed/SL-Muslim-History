@@ -62,10 +62,10 @@ export default function AdminDashboard() {
   const reactionsThisMonth = reactions.filter((r) => isWithinLast30Days(r.created_at)).length
 
   const statCards = [
-    { label: 'Total Articles', value: articles.length,   icon: '📝', color: '#4a9e1f', bg: '#f0fdf4',  href: '/admin/articles',   change: `+${articlesThisMonth} this month` },
-    { label: 'News Posts',     value: news.length,       icon: '📰', color: '#0369a1', bg: '#f0f9ff',  href: '/admin/news',        change: `+${newsThisMonth} this month` },
-    { label: 'Categories',     value: categoryCount,     icon: '🗂️', color: '#7c3aed', bg: '#faf5ff',  href: '/admin/categories',  change: 'Active' },
-    { label: 'Newsletter Subs',value: subCount !== null ? subCount.toLocaleString() : '—', icon: '📬', color: '#c2410c', bg: '#fff7ed', href: '/admin/newsletter', change: 'Subscribers' },
+    { label: 'Total Articles', value: articles.length,   icon: '📝', color: '#4a9e1f', href: '/admin/articles',   change: `+${articlesThisMonth} this month` },
+    { label: 'News Posts',     value: news.length,       icon: '📰', color: '#0369a1', href: '/admin/news',        change: `+${newsThisMonth} this month` },
+    { label: 'Categories',     value: categoryCount,     icon: '🗂️', color: '#7c3aed', href: '/admin/categories',  change: 'Active' },
+    { label: 'Newsletter Subs',value: subCount !== null ? subCount.toLocaleString() : '—', icon: '📬', color: '#c2410c', href: '/admin/newsletter', change: 'Subscribers' },
   ]
 
   return (
@@ -100,81 +100,57 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stat cards — all six in one compact row: heading, then emoji + count + this-month */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {statCards.map((s) => (
           <Link
             key={s.label}
             href={s.href}
-            className="rounded-2xl p-5 transition-all duration-200"
-            style={{
-              background: 'white',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)' }}
+            className="rounded-xl p-3 transition-all duration-200 min-w-0"
+            style={{ background: 'white', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.1)' }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)' }}
           >
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-4"
-              style={{ background: s.bg }}
-            >
-              {s.icon}
+            <div className="text-xs font-semibold truncate mb-1.5" style={{ color: '#64748b' }}>{s.label}</div>
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <span className="text-sm">{s.icon}</span>
+              <span className="text-lg font-black" style={{ color: '#0f172a' }}>{s.value}</span>
+              <span className="text-xs font-bold" style={{ color: s.color }}>{s.change}</span>
             </div>
-            <div className="text-2xl font-black mb-0.5" style={{ color: '#0f172a' }}>{s.value}</div>
-            <div className="text-xs font-semibold mb-1" style={{ color: '#64748b' }}>{s.label}</div>
-            <div className="text-xs font-bold" style={{ color: s.color }}>{s.change}</div>
           </Link>
         ))}
-      </div>
 
-      {/* Comments + Reactions stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Comments — three counts in one card */}
+        {/* Comments — three counts squeezed into the same compact card */}
         <Link
           href="/admin/comments"
-          className="rounded-2xl p-5 transition-all duration-200"
+          className="rounded-xl p-3 transition-all duration-200 min-w-0"
           style={{ background: 'white', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.1)' }}
           onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)' }}
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ background: '#eff6ff' }}>💬</div>
-            <span className="text-xs font-bold" style={{ color: '#4a9e1f' }}>+{commentsThisMonth} this month</span>
-          </div>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div>
-              <div className="text-xl font-black" style={{ color: '#0f172a' }}>{comments.length}</div>
-              <div className="text-xs font-semibold" style={{ color: '#64748b' }}>All</div>
-            </div>
-            <div>
-              <div className="text-xl font-black" style={{ color: '#15803d' }}>{commentsApproved}</div>
-              <div className="text-xs font-semibold" style={{ color: '#64748b' }}>Approved</div>
-            </div>
-            <div>
-              <div className="text-xl font-black" style={{ color: '#b45309' }}>{commentsPending}</div>
-              <div className="text-xs font-semibold" style={{ color: '#64748b' }}>Pending</div>
-            </div>
+          <div className="text-xs font-semibold truncate mb-1.5" style={{ color: '#64748b' }}>Comments</div>
+          <div className="flex items-baseline gap-1 flex-wrap">
+            <span className="text-sm">💬</span>
+            <span className="text-lg font-black" style={{ color: '#0f172a' }}>{comments.length}</span>
+            <span className="text-xs font-bold" style={{ color: '#15803d' }}>✓{commentsApproved}</span>
+            <span className="text-xs font-bold" style={{ color: '#b45309' }}>⏳{commentsPending}</span>
           </div>
         </Link>
 
         {/* Reactions */}
         <Link
           href="/admin/reactions"
-          className="rounded-2xl p-5 transition-all duration-200"
+          className="rounded-xl p-3 transition-all duration-200 min-w-0"
           style={{ background: 'white', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.1)' }}
           onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)' }}
         >
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-4"
-            style={{ background: '#fff1f2' }}
-          >
-            ⭐
+          <div className="text-xs font-semibold truncate mb-1.5" style={{ color: '#64748b' }}>Reactions</div>
+          <div className="flex items-baseline gap-1.5 flex-wrap">
+            <span className="text-sm">⭐</span>
+            <span className="text-lg font-black" style={{ color: '#0f172a' }}>{reactions.length}</span>
+            <span className="text-xs font-bold" style={{ color: '#dc2626' }}>+{reactionsThisMonth} this month</span>
           </div>
-          <div className="text-2xl font-black mb-0.5" style={{ color: '#0f172a' }}>{reactions.length}</div>
-          <div className="text-xs font-semibold mb-1" style={{ color: '#64748b' }}>Total Reactions</div>
-          <div className="text-xs font-bold" style={{ color: '#dc2626' }}>+{reactionsThisMonth} this month</div>
         </Link>
       </div>
 
