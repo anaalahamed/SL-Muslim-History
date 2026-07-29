@@ -314,17 +314,16 @@ export default function AdminDashboard() {
           <h3 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Category Overview</h3>
           <Link href="/admin/categories" className="text-xs font-bold" style={{ color: '#4a9e1f' }}>Manage →</Link>
         </div>
-        <div className="p-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="p-4 flex gap-2.5 overflow-x-auto">
           {categories.map((cat) => (
             <div
               key={cat.id}
-              className="rounded-xl p-4 text-center"
+              className="flex items-center gap-2 rounded-xl px-3 py-2 flex-shrink-0"
               style={{ background: '#f8fafc', border: '1px solid #f1f5f9' }}
             >
-              <div className="text-2xl mb-2">{cat.icon}</div>
-              <div className="text-xs font-bold truncate mb-1" style={{ color: '#1e293b' }}>{cat.name_en}</div>
-              <div className="text-lg font-black" style={{ color: '#4a9e1f' }}>{cat.article_count}</div>
-              <div className="text-xs" style={{ color: '#94a3b8' }}>articles</div>
+              <span className="text-base">{cat.icon}</span>
+              <span className="text-xs font-bold whitespace-nowrap" style={{ color: '#1e293b' }}>{cat.name_en}</span>
+              <span className="text-xs font-black" style={{ color: '#4a9e1f' }}>{cat.article_count}</span>
             </div>
           ))}
         </div>
