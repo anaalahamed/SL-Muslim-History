@@ -21,6 +21,12 @@ const quickActions = [
   { label: 'Site Settings',     href: '/admin/settings',      icon: '⚙️', color: '#475569' },
 ]
 
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
+const isWithinLast30Days = (dateStr: string) => new Date(dateStr).getTime() > Date.now() - THIRTY_DAYS_MS
+
+interface CommentRow { status: string; created_at: string }
+interface ReactionRow { emoji: string | null; created_at: string }
+
 export default function AdminDashboard() {
   const [ownerName,       setOwnerName]       = useState('Admin')
   const [articles,        setArticles]        = useState<Article[]>([])
@@ -28,23 +34,36 @@ export default function AdminDashboard() {
   const [categoryCount,   setCategoryCount]   = useState(0)
   const [categories,      setCategories]      = useState<{id:string;icon:string;name_en:string;article_count:number}[]>([])
   const [subCount,        setSubCount]        = useState<number | null>(null)
+  const [comments,        setComments]        = useState<CommentRow[]>([])
+  const [reactions,       setReactions]       = useState<ReactionRow[]>([])
 
   useEffect(() => {
     setOwnerName(getAdminConfig().ownerName || 'Admin')
-    getArticles().then(setArticles)
-    getNews().then(setNews)
+    getArticles(getAuthClient()).then(setArticles)
+    getNews(getAuthClient()).then(setNews)
     getCategories().then((cats) => { setCategoryCount(cats.length); setCategories(cats) })
     getAuthClient().from('newsletter_subscribers').select('*', { count: 'exact', head: true })
         .then(({ count }) => setSubCount(count ?? 0))
+    getAuthClient().from('comments').select('status, created_at')
+        .then(({ data }) => setComments(data ?? []))
+    getAuthClient().from('reactions').select('emoji, created_at')
+        .then(({ data }) => setReactions((data ?? []).filter((r) => r.emoji))) // exclude removed reactions
   }, [])
 
   const totalViews     = articles.reduce((s, a) => s + a.views, 0)
   const recentArticles = [...articles].sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime()).slice(0, 5)
   const recentNews     = [...news].sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime()).slice(0, 4)
 
+  const articlesThisMonth  = articles.filter((a) => isWithinLast30Days(a.published_at)).length
+  const newsThisMonth      = news.filter((n) => isWithinLast30Days(n.published_at)).length
+  const commentsApproved   = comments.filter((c) => c.status === 'approved').length
+  const commentsPending    = comments.filter((c) => c.status === 'pending').length
+  const commentsThisMonth  = comments.filter((c) => isWithinLast30Days(c.created_at)).length
+  const reactionsThisMonth = reactions.filter((r) => isWithinLast30Days(r.created_at)).length
+
   const statCards = [
-    { label: 'Total Articles', value: articles.length,   icon: '📝', color: '#4a9e1f', bg: '#f0fdf4',  href: '/admin/articles',   change: '+3 this month' },
-    { label: 'News Posts',     value: news.length,       icon: '📰', color: '#0369a1', bg: '#f0f9ff',  href: '/admin/news',        change: '+2 this month' },
+    { label: 'Total Articles', value: articles.length,   icon: '📝', color: '#4a9e1f', bg: '#f0fdf4',  href: '/admin/articles',   change: `+${articlesThisMonth} this month` },
+    { label: 'News Posts',     value: news.length,       icon: '📰', color: '#0369a1', bg: '#f0f9ff',  href: '/admin/news',        change: `+${newsThisMonth} this month` },
     { label: 'Categories',     value: categoryCount,     icon: '🗂️', color: '#7c3aed', bg: '#faf5ff',  href: '/admin/categories',  change: 'Active' },
     { label: 'Newsletter Subs',value: subCount !== null ? subCount.toLocaleString() : '—', icon: '📬', color: '#c2410c', bg: '#fff7ed', href: '/admin/newsletter', change: 'Subscribers' },
   ]
@@ -107,6 +126,56 @@ export default function AdminDashboard() {
             <div className="text-xs font-bold" style={{ color: s.color }}>{s.change}</div>
           </Link>
         ))}
+      </div>
+
+      {/* Comments + Reactions stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Comments — three counts in one card */}
+        <Link
+          href="/admin/comments"
+          className="rounded-2xl p-5 transition-all duration-200"
+          style={{ background: 'white', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)' }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ background: '#eff6ff' }}>💬</div>
+            <span className="text-xs font-bold" style={{ color: '#4a9e1f' }}>+{commentsThisMonth} this month</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div>
+              <div className="text-xl font-black" style={{ color: '#0f172a' }}>{comments.length}</div>
+              <div className="text-xs font-semibold" style={{ color: '#64748b' }}>All</div>
+            </div>
+            <div>
+              <div className="text-xl font-black" style={{ color: '#15803d' }}>{commentsApproved}</div>
+              <div className="text-xs font-semibold" style={{ color: '#64748b' }}>Approved</div>
+            </div>
+            <div>
+              <div className="text-xl font-black" style={{ color: '#b45309' }}>{commentsPending}</div>
+              <div className="text-xs font-semibold" style={{ color: '#64748b' }}>Pending</div>
+            </div>
+          </div>
+        </Link>
+
+        {/* Reactions */}
+        <Link
+          href="/admin/reactions"
+          className="rounded-2xl p-5 transition-all duration-200"
+          style={{ background: 'white', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)' }}
+        >
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-4"
+            style={{ background: '#fff1f2' }}
+          >
+            ⭐
+          </div>
+          <div className="text-2xl font-black mb-0.5" style={{ color: '#0f172a' }}>{reactions.length}</div>
+          <div className="text-xs font-semibold mb-1" style={{ color: '#64748b' }}>Total Reactions</div>
+          <div className="text-xs font-bold" style={{ color: '#dc2626' }}>+{reactionsThisMonth} this month</div>
+        </Link>
       </div>
 
       {/* Main content grid */}
