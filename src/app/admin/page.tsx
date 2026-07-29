@@ -36,6 +36,7 @@ export default function AdminDashboard() {
   const [subCount,        setSubCount]        = useState<number | null>(null)
   const [comments,        setComments]        = useState<CommentRow[]>([])
   const [reactions,       setReactions]       = useState<ReactionRow[]>([])
+  const [hoveredMonth,    setHoveredMonth]     = useState<number | null>(null)
 
   useEffect(() => {
     setOwnerName(getAdminConfig().ownerName || 'Admin')
@@ -60,6 +61,20 @@ export default function AdminDashboard() {
   const commentsPending    = comments.filter((c) => c.status === 'pending').length
   const commentsThisMonth  = comments.filter((c) => isWithinLast30Days(c.created_at)).length
   const reactionsThisMonth = reactions.filter((r) => isWithinLast30Days(r.created_at)).length
+
+  const topArticles = [...articles].sort((a, b) => b.views - a.views).slice(0, 5)
+
+  const monthlyPublished = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date()
+    d.setDate(1) // avoid month-length rollover (e.g. Mar 31 - 1 month != Feb)
+    d.setMonth(d.getMonth() - (5 - i))
+    const count = articles.filter((a) => {
+      const pd = new Date(a.published_at)
+      return pd.getFullYear() === d.getFullYear() && pd.getMonth() === d.getMonth()
+    }).length
+    return { label: d.toLocaleDateString('en-US', { month: 'short' }), year: d.getFullYear(), count }
+  })
+  const maxMonthlyCount = Math.max(1, ...monthlyPublished.map((m) => m.count))
 
   const statCards = [
     { label: 'Total Articles', value: articles.length,   icon: '📝', color: '#4a9e1f', href: '/admin/articles',   change: `+${articlesThisMonth} this month` },
@@ -157,9 +172,12 @@ export default function AdminDashboard() {
       {/* Main content grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
+        {/* Left column */}
+        <div className="lg:col-span-2 space-y-6">
+
         {/* Recent articles */}
         <div
-          className="lg:col-span-2 rounded-2xl overflow-hidden"
+          className="rounded-2xl overflow-hidden"
           style={{ background: 'white', border: '1px solid #e2e8f0' }}
         >
           <div
@@ -224,6 +242,102 @@ export default function AdminDashboard() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Publishing activity — articles published per month, last 6 months.
+            No overflow-hidden here (unlike other cards): the hover tooltip on
+            the first/last bar needs to be able to spill past the card edge. */}
+        <div
+          className="rounded-2xl"
+          style={{ background: 'white', border: '1px solid #e2e8f0' }}
+        >
+          <div className="px-5 py-4 rounded-t-2xl" style={{ borderBottom: '1px solid #f1f5f9' }}>
+            <h3 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Publishing Activity</h3>
+            <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>Articles published per month</p>
+          </div>
+          <div className="px-5 py-6 flex items-end justify-between gap-2" style={{ height: 160 }}>
+            {monthlyPublished.map((m, i) => {
+              const barHeight = m.count === 0 ? 3 : Math.max(10, (m.count / maxMonthlyCount) * 110)
+              return (
+                <div key={`${m.label}-${m.year}`} className="flex-1 flex flex-col items-center gap-2" style={{ position: 'relative' }}>
+                  {hoveredMonth === i && (
+                    <div
+                      role="tooltip"
+                      className="absolute text-xs font-bold px-2 py-1 rounded-lg whitespace-nowrap"
+                      style={{
+                        bottom: barHeight + 32,
+                        background: '#0f172a',
+                        color: 'white',
+                        zIndex: 10,
+                      }}
+                    >
+                      {m.label} {m.year}: {m.count} article{m.count !== 1 ? 's' : ''}
+                    </div>
+                  )}
+                  <span className="text-xs font-black" style={{ color: '#0f172a' }}>{m.count}</span>
+                  <div
+                    onMouseEnter={() => setHoveredMonth(i)}
+                    onMouseLeave={() => setHoveredMonth(null)}
+                    style={{
+                      width: '100%',
+                      maxWidth: 28,
+                      height: barHeight,
+                      background: hoveredMonth === i ? '#3d8a1f' : '#4a9e1f',
+                      borderRadius: '4px 4px 0 0',
+                      transition: 'background 0.15s',
+                      cursor: 'default',
+                    }}
+                  />
+                  <span className="text-xs font-semibold" style={{ color: '#94a3b8' }}>{m.label}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Top performing articles */}
+        <div
+          className="rounded-2xl overflow-hidden"
+          style={{ background: 'white', border: '1px solid #e2e8f0' }}
+        >
+          <div
+            className="flex items-center justify-between px-5 py-4"
+            style={{ borderBottom: '1px solid #f1f5f9' }}
+          >
+            <h3 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Top Performing Articles</h3>
+            <Link href="/admin/articles" className="text-xs font-bold" style={{ color: '#4a9e1f' }}>View all →</Link>
+          </div>
+          <div>
+            {topArticles.length === 0 ? (
+              <p className="text-sm px-5 py-6" style={{ color: '#94a3b8' }}>No articles yet.</p>
+            ) : (
+              topArticles.map((article, i) => (
+                <div
+                  key={article.id}
+                  className="flex items-center gap-4 px-5 py-3.5 transition-colors"
+                  style={{ borderBottom: i < topArticles.length - 1 ? '1px solid #f8fafc' : 'none' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+                >
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0"
+                    style={{ background: i === 0 ? '#c2410c' : '#f1f5f9', color: i === 0 ? 'white' : '#94a3b8' }}
+                  >
+                    {i === 0 ? '🏆' : i + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{article.title}</p>
+                    <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{article.category}</p>
+                  </div>
+                  <span className="text-sm font-black flex-shrink-0" style={{ color: '#4a9e1f' }}>
+                    👁 {formatViews(article.views)}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
         </div>
 
         {/* Right column */}
