@@ -20,6 +20,7 @@ const navItems = [
   { label: 'Homepage',    href: '/admin/homepage',      icon: '🏠' },
   { label: 'Ads',          href: '/admin/ads',            icon: '📢' },
   { label: 'Newsletter',  href: '/admin/newsletter',    icon: '📬' },
+  { label: 'Backup',      href: '/admin/backup',        icon: '🗄️' },
   { label: 'Settings',    href: '/admin/settings',      icon: '⚙️' },
 ]
 
