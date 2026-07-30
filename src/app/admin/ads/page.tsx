@@ -62,7 +62,7 @@ export default function AdminAdsPage() {
           {/* Numbered list */}
           <ol className="text-xs space-y-2.5 flex-1" style={{ color: '#15803d' }}>
             {[
-              { n: 1, label: 'Between News', desc: 'Fills sidebar width, 120–180px tall. Homepage, between Special News and Latest News. Also shown on article pages, below "Share This Article".' },
+              { n: 1, label: 'Between News', desc: '500×200 recommended (5:2 shape). Homepage, between Special News and Latest News. Also shown on article pages, below "Share This Article".' },
               { n: 2, label: 'General Sidebar', desc: '300×250. On article, news, category, and search page sidebars.' },
               { n: 3, label: 'Full Banner', desc: '728×90. On listing pages (articles, news, search) — not on the homepage.' },
               { n: 4, label: 'Left Side Panel', desc: '160px wide. Desktop screens ≥ 1620px, every page.' },

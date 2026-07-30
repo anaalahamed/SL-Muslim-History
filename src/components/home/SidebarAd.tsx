@@ -17,8 +17,10 @@ export default function SidebarAd() {
       border: '1px solid var(--border)',
       borderRadius: '3px',
       overflow: 'hidden',
-      minHeight: '120px',
-      maxHeight: '180px',
+      // Fixed aspect ratio (not just a height range) so the same ad image
+      // is framed identically everywhere this appears, regardless of how
+      // wide the surrounding sidebar column happens to be on that page.
+      aspectRatio: '5 / 2',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -27,7 +29,7 @@ export default function SidebarAd() {
         <img
           src={ad.image_url}
           alt={ad.title}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', maxHeight: '180px' }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
       ) : (
         <div style={{ padding: '16px', textAlign: 'center' }}>
