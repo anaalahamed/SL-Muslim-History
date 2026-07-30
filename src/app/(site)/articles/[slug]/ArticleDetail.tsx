@@ -1,16 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { useState, useEffect, use } from 'react'
-import { getArticleBySlug, getRelatedArticles, incrementArticleViews } from '@/lib/db/articles'
-import { getCategories } from '@/lib/db/categories'
+import { useState, useEffect } from 'react'
+import { incrementArticleViews } from '@/lib/db/articles'
 import { Article, Category } from '@/lib/types'
 import Image from 'next/image'
 import { formatDate, formatViews, readingTime } from '@/lib/utils'
 import AnimateIn from '@/components/ui/AnimateIn'
 import RichContent from '@/components/ui/RichContent'
-import { DetailPageSkeleton } from '@/components/ui/Skeleton'
 import ReadingProgress from '@/components/ui/ReadingProgress'
 import AdBanner from '@/components/ui/AdBanner'
 import SidebarAd from '@/components/home/SidebarAd'
@@ -36,28 +33,22 @@ const categoryText: Record<string, string> = {
   'Community & Society':  '#0369a1',
 }
 
-export default function ArticleDetail({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params)
-  const [article, setArticle] = useState<Article | null | undefined>(undefined)
-  const [related, setRelated] = useState<Article[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
+interface Props {
+  article: Article
+  related: Article[]
+  categories: Category[]
+}
+
+export default function ArticleDetail({ article, related, categories }: Props) {
   const [copied, setCopied] = useState(false)
 
+  // Fire-and-forget view count — doesn't block or affect the initial render,
+  // which now arrives fully server-rendered via props (see page.tsx).
   useEffect(() => {
-    getArticleBySlug(slug).then((data) => {
-      setArticle(data ?? null)
-      if (data) {
-        getRelatedArticles(data.id, data.category).then(setRelated)
-        incrementArticleViews(data.id)
-      }
-    })
-    getCategories().then(setCategories)
-  }, [slug])
+    incrementArticleViews(article.id)
+  }, [article.id])
 
-  if (article === undefined) return <DetailPageSkeleton />
-  if (!article) notFound()
-
-  const pageUrl = typeof window !== 'undefined' ? window.location.href : `${BASE_URL}/articles/${slug}`
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : `${BASE_URL}/articles/${article.slug}`
   const encodedUrl   = encodeURIComponent(pageUrl)
   const encodedTitle = encodeURIComponent(article.title)
 

@@ -34,7 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .select('slug, published_at')
         .order('published_at', { ascending: false })
         .limit(1000),
-      db.from('news_posts')
+      db.from('news')
         .select('slug, published_at')
         .order('published_at', { ascending: false })
         .limit(500),

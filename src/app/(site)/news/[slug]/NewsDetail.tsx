@@ -1,44 +1,34 @@
 'use client'
 
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { useState, useEffect, use } from 'react'
-import { getNewsBySlug, getNews, incrementNewsViews } from '@/lib/db/news'
+import { useState, useEffect } from 'react'
+import { incrementNewsViews } from '@/lib/db/news'
 import { NewsPost } from '@/lib/types'
 import Image from 'next/image'
 import { formatDate } from '@/lib/utils'
 import AnimateIn from '@/components/ui/AnimateIn'
 import RichContent from '@/components/ui/RichContent'
-import { DetailPageSkeleton } from '@/components/ui/Skeleton'
 import ReadingProgress from '@/components/ui/ReadingProgress'
 import AdBanner from '@/components/ui/AdBanner'
 import { BASE_URL } from '@/lib/seo'
 import ReactionBar from '@/components/article/ReactionBar'
 
-export default function NewsDetail({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params)
-  const [post, setPost] = useState<NewsPost | null | undefined>(undefined)
-  const [related, setRelated] = useState<NewsPost[]>([])
-  const [recent, setRecent] = useState<NewsPost[]>([])
+interface Props {
+  post: NewsPost
+  related: NewsPost[]
+  recent: NewsPost[]
+}
+
+export default function NewsDetail({ post, related, recent }: Props) {
   const [copied, setCopied] = useState(false)
 
+  // Fire-and-forget view count — doesn't block or affect the initial render,
+  // which now arrives fully server-rendered via props (see page.tsx).
   useEffect(() => {
-    getNewsBySlug(slug).then((data) => {
-      setPost(data ?? null)
-      if (data) {
-        getNews().then((all) => {
-          setRelated(all.filter((n) => n.id !== data.id && n.news_type === data.news_type).slice(0, 3))
-          setRecent(all.filter((n) => n.id !== data.id && n.news_type === data.news_type).slice(0, 4))
-        })
-        incrementNewsViews(data.id)
-      }
-    })
-  }, [slug])
+    incrementNewsViews(post.id)
+  }, [post.id])
 
-  if (post === undefined) return <DetailPageSkeleton />
-  if (!post) notFound()
-
-  const pageUrl     = typeof window !== 'undefined' ? window.location.href : `${BASE_URL}/news/${slug}`
+  const pageUrl     = typeof window !== 'undefined' ? window.location.href : `${BASE_URL}/news/${post.slug}`
   const encodedUrl   = encodeURIComponent(pageUrl)
   const encodedTitle = encodeURIComponent(post.title)
 
