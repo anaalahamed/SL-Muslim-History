@@ -334,10 +334,12 @@ footer {
    MOBILE RESPONSIVE
 ════════════════════════════════ */
 
-/* Homepage 2-col → 1-col on tablet/mobile */
+/* Homepage 2-col → 1-col on tablet/mobile.
+   minmax(0, 1fr) — not bare 1fr — so the track itself can't be forced
+   wider than the viewport by a child's intrinsic content width. */
 @media (max-width: 900px) {
   .home-content-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 }
 

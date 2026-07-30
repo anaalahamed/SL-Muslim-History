@@ -45,7 +45,11 @@ export default function HomePage() {
         <div className="home-content-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.65fr) minmax(0,1fr)', gap: '12px' }}>
 
           {/* LEFT COLUMN */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {/* minWidth: 0 is required — grid/flex items default to a min-width
+              equal to their content's intrinsic size, so without it a wide
+              child (e.g. hero title text) can force this column wider than
+              its own grid track, overflowing the viewport on mobile. */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0 }}>
             <HeroSlider />
             <FeaturedArticle />
             <AllArticles />
@@ -53,7 +57,7 @@ export default function HomePage() {
           </div>
 
           {/* RIGHT SIDEBAR */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignSelf: 'start' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignSelf: 'start', minWidth: 0 }}>
             <SpecialNews />
             <SidebarAd />
             <JanazaNews />
