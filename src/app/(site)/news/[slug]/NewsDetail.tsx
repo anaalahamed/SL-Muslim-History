@@ -10,6 +10,7 @@ import AnimateIn from '@/components/ui/AnimateIn'
 import RichContent from '@/components/ui/RichContent'
 import ReadingProgress from '@/components/ui/ReadingProgress'
 import AdBanner from '@/components/ui/AdBanner'
+import SidebarAd from '@/components/home/SidebarAd'
 import { BASE_URL } from '@/lib/seo'
 import ReactionBar from '@/components/article/ReactionBar'
 
@@ -339,6 +340,9 @@ export default function NewsDetail({ post, related, recent }: Props) {
                 </div>
               </AnimateIn>
 
+              {/* Between-news ad — also shown here, right below the share widget */}
+              <SidebarAd />
+
               <AdBanner position="sidebar" />
 
             </div>
@@ -354,6 +358,7 @@ export default function NewsDetail({ post, related, recent }: Props) {
             order={post.news_type === 'janaza' ? 'janaza' : 'default'}
           />
         </div>
+        <AdBanner position="homepage-bottom" />
       </div>
     </div>
   )
