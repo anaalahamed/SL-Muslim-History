@@ -102,19 +102,19 @@ export default function AdminNewsletterPage() {
         <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>Manage subscribers and send newsletters</p>
       </div>
 
-      {/* Stats strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      {/* Stats strip — compact cards, matching the dashboard's style */}
+      <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Total Subscribers', value: subscribers.length, icon: '👥', color: '#4a9e1f', bg: '#f0fdf4' },
-          { label: 'This Month',        value: subscribers.filter((s) => new Date(s.subscribed_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length, icon: '📈', color: '#0369a1', bg: '#f0f9ff' },
-          { label: 'Campaigns Sent',    value: 0, icon: '📨', color: '#7c3aed', bg: '#f5f3ff' },
+          { label: 'Total Subscribers', value: subscribers.length, icon: '👥', color: '#4a9e1f' },
+          { label: 'This Month',        value: subscribers.filter((s) => new Date(s.subscribed_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length, icon: '📈', color: '#0369a1' },
+          { label: 'Campaigns Sent',    value: 0, icon: '📨', color: '#7c3aed' },
         ].map((s) => (
-          <div key={s.label} className="rounded-2xl p-4" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-base mb-2" style={{ background: s.bg }}>
-              {s.icon}
+          <div key={s.label} className="rounded-xl p-3 min-w-0" style={{ background: 'white', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+            <div className="text-xs font-semibold truncate mb-1.5" style={{ color: '#64748b' }}>{s.label}</div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-sm">{s.icon}</span>
+              <span className="text-lg font-black" style={{ color: '#0f172a' }}>{s.value}</span>
             </div>
-            <p className="text-2xl font-black" style={{ color: s.color }}>{s.value}</p>
-            <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{s.label}</p>
           </div>
         ))}
       </div>
