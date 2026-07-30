@@ -6,7 +6,7 @@ import { getAds } from '@/lib/db/ads'
 import { Advertisement } from '@/lib/types'
 
 interface Props {
-  position: 'sidebar' | 'banner'
+  position: 'sidebar' | 'banner' | 'homepage-bottom'
   className?: string
 }
 
@@ -20,7 +20,7 @@ export default function AdBanner({ position, className = '' }: Props) {
   if (ads.length === 0) return null
 
   /* ── Full-width leaderboard banner ── */
-  if (position === 'banner') {
+  if (position === 'banner' || position === 'homepage-bottom') {
     return (
       <div className={`w-full ${className}`}>
         <div className="flex items-center justify-center gap-3 mb-2">

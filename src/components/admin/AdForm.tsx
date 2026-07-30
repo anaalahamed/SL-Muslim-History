@@ -17,6 +17,7 @@ const POSITIONS: { value: Advertisement['position']; label: string; desc: string
   { value: 'banner',       label: '🖥️ Full Banner',                   desc: 'Wide leaderboard banner (728×90) across the page' },
   { value: 'left-panel',   label: '◀ Left Side Panel',               desc: 'Vertical skyscraper (160px wide) — shown on desktop screens ≥ 1620px, beside the main content' },
   { value: 'right-panel',  label: '▶ Right Side Panel',              desc: 'Vertical skyscraper (160px wide) — shown on desktop screens ≥ 1620px, beside the main content' },
+  { value: 'homepage-bottom', label: '🏠 Homepage — Below Articles', desc: 'Full banner at the bottom of the homepage article list, below the page numbers' },
 ]
 
 export default function AdForm({ initial = {}, onSave, saving }: Props) {

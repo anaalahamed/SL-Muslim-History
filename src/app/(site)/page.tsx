@@ -5,6 +5,7 @@ import SpecialNews from '@/components/home/SpecialNews'
 import FeaturedArticle from '@/components/home/FeaturedArticle'
 import AllArticles from '@/components/home/AllArticles'
 import SidebarAd from '@/components/home/SidebarAd'
+import AdBanner from '@/components/ui/AdBanner'
 import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
@@ -48,6 +49,7 @@ export default function HomePage() {
             <HeroSlider />
             <FeaturedArticle />
             <AllArticles />
+            <AdBanner position="homepage-bottom" />
           </div>
 
           {/* RIGHT SIDEBAR */}
