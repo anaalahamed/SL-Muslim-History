@@ -13,6 +13,7 @@ import RichContent from '@/components/ui/RichContent'
 import { DetailPageSkeleton } from '@/components/ui/Skeleton'
 import ReadingProgress from '@/components/ui/ReadingProgress'
 import AdBanner from '@/components/ui/AdBanner'
+import SidebarAd from '@/components/home/SidebarAd'
 import { BASE_URL } from '@/lib/seo'
 import ReactionBar from '@/components/article/ReactionBar'
 import CommentSection from '@/components/article/CommentSection'
@@ -301,6 +302,7 @@ export default function ArticleDetail({ params }: { params: Promise<{ slug: stri
 
             {/* Reactions + Comments below article card */}
             <ReactionBar contentType="article" contentId={article.id} />
+            <AdBanner position="homepage-bottom" />
             <CommentSection articleId={article.id} />
           </div>
 
@@ -517,6 +519,9 @@ export default function ArticleDetail({ params }: { params: Promise<{ slug: stri
                 </div>
               </div>
             </AnimateIn>
+
+            {/* Between-news ad — also shown here, right below the share widget */}
+            <SidebarAd />
 
             {/* Ad banner */}
             <AdBanner position="sidebar" />

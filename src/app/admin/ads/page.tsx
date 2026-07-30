@@ -54,17 +54,56 @@ export default function AdminAdsPage() {
         </Link>
       </div>
 
-      {/* Info box */}
-      <div className="rounded-2xl p-4 text-sm" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
-        <p className="font-bold mb-1" style={{ color: '#166534' }}>Six ad positions available:</p>
-        <ul className="text-xs space-y-1" style={{ color: '#15803d' }}>
-          <li><strong>Between News</strong> — Sidebar ad between Special News and Latest News sections on homepage</li>
-          <li><strong>General Sidebar</strong> — 300×250 box on article, news, category, and search page sidebars</li>
-          <li><strong>Full Banner</strong> — 728×90 leaderboard between sections on homepage and listing pages</li>
-          <li><strong>Left Side Panel</strong> — 160px skyscraper column, visible on desktop screens ≥ 1620px</li>
-          <li><strong>Right Side Panel</strong> — 160px skyscraper column, visible on desktop screens ≥ 1620px</li>
-          <li><strong>Homepage — Below Articles</strong> — Full banner at the bottom of the homepage article list</li>
-        </ul>
+      {/* Info box: numbered list + homepage blueprint, side by side */}
+      <div className="rounded-2xl p-4" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
+        <p className="font-bold mb-3 text-sm" style={{ color: '#166534' }}>Six ad positions available:</p>
+        <div className="flex flex-col lg:flex-row gap-5">
+
+          {/* Numbered list */}
+          <ol className="text-xs space-y-2.5 flex-1" style={{ color: '#15803d' }}>
+            {[
+              { n: 1, label: 'Between News', desc: 'Homepage sidebar, between Special News and Latest News. Also shown on article pages, below "Share This Article".' },
+              { n: 2, label: 'General Sidebar', desc: '300×250 box on article, news, category, and search page sidebars.' },
+              { n: 3, label: 'Full Banner', desc: '728×90 leaderboard on listing pages (articles, news, search) — not on the homepage.' },
+              { n: 4, label: 'Left Side Panel', desc: 'Skyscraper column, desktop screens ≥ 1620px, every page.' },
+              { n: 5, label: 'Right Side Panel', desc: 'Skyscraper column, desktop screens ≥ 1620px, every page.' },
+              { n: 6, label: 'Homepage — Below Articles', desc: 'Bottom of the homepage article list. Also shown on article pages, below the reactions.' },
+            ].map(({ n, label, desc }) => (
+              <li key={n} className="flex gap-2">
+                <NumberBadge n={n} />
+                <span><strong>{label}</strong> — {desc}</span>
+              </li>
+            ))}
+          </ol>
+
+          {/* Homepage blueprint */}
+          <div className="flex-shrink-0" style={{ width: '100%', maxWidth: '280px' }}>
+            <p className="text-xs font-bold mb-2" style={{ color: '#166534' }}>Where these appear on your homepage:</p>
+            <div style={{ border: '2px solid #86efac', borderRadius: 10, padding: 6, background: 'white', display: 'flex', gap: 4 }}>
+              <NumberBadge n={4} tall />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <PlaceholderBox label="Header" />
+                <div style={{ display: 'flex', gap: 4 }}>
+                  <div style={{ flex: 1.6, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <PlaceholderBox label="Hero / Featured" />
+                    <PlaceholderBox label="Article List" tall />
+                    <NumberBadge n={6} wide />
+                  </div>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <PlaceholderBox label="Special News" />
+                    <NumberBadge n={1} wide />
+                    <PlaceholderBox label="More sections" tall />
+                  </div>
+                </div>
+              </div>
+              <NumberBadge n={5} tall />
+            </div>
+            <p className="text-xs mt-2" style={{ color: '#4d7c0f' }}>
+              #2 and #3 aren&apos;t on the homepage — they appear on article and listing pages instead.
+            </p>
+          </div>
+
+        </div>
       </div>
 
       {/* Between-news ads */}
@@ -187,6 +226,47 @@ function AdSection({ title, ads, onToggle, onDelete }: {
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+// Small numbered marker used both in the list and inside the blueprint
+// diagram, so the same number visually ties an ad position to its spot.
+function NumberBadge({ n, wide, tall }: { n: number; wide?: boolean; tall?: boolean }) {
+  return (
+    <div
+      className="flex items-center justify-center font-black flex-shrink-0"
+      style={{
+        width: wide ? '100%' : tall ? '18px' : '22px',
+        height: tall ? '100%' : '22px',
+        minHeight: wide ? '22px' : undefined,
+        borderRadius: 6,
+        background: '#4a9e1f',
+        color: 'white',
+        fontSize: '11px',
+      }}
+    >
+      {n}
+    </div>
+  )
+}
+
+// Generic gray placeholder rectangle standing in for a real homepage
+// section in the blueprint diagram (not an actual ad slot itself).
+function PlaceholderBox({ label, tall }: { label: string; tall?: boolean }) {
+  return (
+    <div
+      className="flex items-center justify-center text-center"
+      style={{
+        background: '#f1f5f9',
+        color: '#94a3b8',
+        borderRadius: 6,
+        fontSize: '9px',
+        padding: '4px 2px',
+        minHeight: tall ? '52px' : '22px',
+      }}
+    >
+      {label}
     </div>
   )
 }
