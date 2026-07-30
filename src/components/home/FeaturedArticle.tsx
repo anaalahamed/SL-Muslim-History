@@ -112,7 +112,7 @@ export default function FeaturedArticle() {
                       {article.category}
                     </span>
                   </div>
-                  <p className="feat-title" style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '11px', fontWeight: 700, lineHeight: 1.5, color: 'var(--dark)', transition: 'color .2s', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  <p className="feat-title" style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '11px', fontWeight: 700, lineHeight: 1.5, color: 'var(--dark)', transition: 'color .2s', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', overflowWrap: 'anywhere' }}>
                     {article.title}
                   </p>
                   <p style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '10px', color: 'var(--muted)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginTop: '2px' }}>

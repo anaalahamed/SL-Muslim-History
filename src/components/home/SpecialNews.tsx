@@ -54,7 +54,7 @@ export default function SpecialNews() {
             >
               {/* Text left */}
               <div style={{ flex: 1, minWidth: 0, padding: '7px 9px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '3px' }}>
-                <p style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '11px', fontWeight: 700, color: 'var(--red, #c0392b)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                <p style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '11px', fontWeight: 700, color: 'var(--red, #c0392b)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', overflowWrap: 'anywhere' }}>
                   {item.title}
                 </p>
                 <span style={{ fontSize: '9px', color: 'var(--muted)' }}>
