@@ -12,12 +12,12 @@ interface Props {
 }
 
 const POSITIONS: { value: Advertisement['position']; label: string; desc: string }[] = [
-  { value: 'between-news', label: '📰 Between News & Latest News',    desc: 'Sidebar — between Special News and Latest News sections (~4–6cm tall)' },
+  { value: 'between-news', label: '📰 Between News & Latest News',    desc: 'Sidebar — between Special News and Latest News sections (image fills the width, 120–180px tall)' },
   { value: 'sidebar',      label: '📌 General Sidebar',               desc: 'General sidebar placement — 300×250 on article, news, category, and search pages' },
   { value: 'banner',       label: '🖥️ Full Banner',                   desc: 'Wide leaderboard banner (728×90) across the page' },
   { value: 'left-panel',   label: '◀ Left Side Panel',               desc: 'Vertical skyscraper (160px wide) — shown on desktop screens ≥ 1620px, beside the main content' },
   { value: 'right-panel',  label: '▶ Right Side Panel',              desc: 'Vertical skyscraper (160px wide) — shown on desktop screens ≥ 1620px, beside the main content' },
-  { value: 'homepage-bottom', label: '🏠 Homepage — Below Articles', desc: 'Full banner at the bottom of the homepage article list, below the page numbers' },
+  { value: 'homepage-bottom', label: '🏠 Homepage — Below Articles', desc: 'Full banner (728×90) at the bottom of the homepage article list, below the page numbers' },
 ]
 
 export default function AdForm({ initial = {}, onSave, saving }: Props) {

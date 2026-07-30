@@ -62,12 +62,12 @@ export default function AdminAdsPage() {
           {/* Numbered list */}
           <ol className="text-xs space-y-2.5 flex-1" style={{ color: '#15803d' }}>
             {[
-              { n: 1, label: 'Between News', desc: 'Homepage sidebar, between Special News and Latest News. Also shown on article pages, below "Share This Article".' },
-              { n: 2, label: 'General Sidebar', desc: '300×250 box on article, news, category, and search page sidebars.' },
-              { n: 3, label: 'Full Banner', desc: '728×90 leaderboard on listing pages (articles, news, search) — not on the homepage.' },
-              { n: 4, label: 'Left Side Panel', desc: 'Skyscraper column, desktop screens ≥ 1620px, every page.' },
-              { n: 5, label: 'Right Side Panel', desc: 'Skyscraper column, desktop screens ≥ 1620px, every page.' },
-              { n: 6, label: 'Homepage — Below Articles', desc: 'Bottom of the homepage article list. Also shown on article pages, below the reactions.' },
+              { n: 1, label: 'Between News', desc: 'Fills sidebar width, 120–180px tall. Homepage, between Special News and Latest News. Also shown on article pages, below "Share This Article".' },
+              { n: 2, label: 'General Sidebar', desc: '300×250. On article, news, category, and search page sidebars.' },
+              { n: 3, label: 'Full Banner', desc: '728×90. On listing pages (articles, news, search) — not on the homepage.' },
+              { n: 4, label: 'Left Side Panel', desc: '160px wide. Desktop screens ≥ 1620px, every page.' },
+              { n: 5, label: 'Right Side Panel', desc: '160px wide. Desktop screens ≥ 1620px, every page.' },
+              { n: 6, label: 'Homepage — Below Articles', desc: '728×90. Bottom of the homepage article list. Also shown on article pages, below the reactions.' },
             ].map(({ n, label, desc }) => (
               <li key={n} className="flex gap-2">
                 <NumberBadge n={n} />
