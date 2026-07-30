@@ -43,6 +43,9 @@ export interface AdminConfig {
   whatsapp: string
   twitter: string
   instagram: string
+  telegram: string
+  reddit: string
+  pinterest: string
   // About page content
   mission: string
   teamMembers: TeamMember[]
@@ -70,6 +73,9 @@ export const defaultConfig: AdminConfig = {
   whatsapp: '',
   twitter: '',
   instagram: '',
+  telegram: '',
+  reddit: '',
+  pinterest: '',
   mission: "Sri Lanka's Muslim community has a history stretching back over 1,400 years — predating the arrival of colonial powers and deeply intertwined with the island's culture, trade, and society. Yet much of this history remains undocumented or scattered across fragmented sources.\n\nOur mission is to change that. We bring together historians, researchers, and community contributors to create a comprehensive, accessible, and beautifully presented record of this heritage — in Tamil, for the community.",
   teamMembers: [
     { id: '1', name: 'டாக்டர் A. முஹம்மட்', role: 'Chief Editor & Historian',  bio: 'PhD in Islamic History from the University of Colombo. Over 20 years of research into Sri Lanka Muslim heritage.', initials: 'AM', color: '#1d4ed8' },
@@ -109,6 +115,9 @@ export async function saveSocialLinksToSupabase(config: AdminConfig, client?: im
       whatsapp:  config.whatsapp  || '',
       twitter:   config.twitter   || '',
       instagram: config.instagram || '',
+      telegram:  config.telegram  || '',
+      reddit:    config.reddit    || '',
+      pinterest: config.pinterest || '',
     }, client)
   } catch {
     // non-critical — localStorage still works for local admin

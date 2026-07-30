@@ -7,6 +7,9 @@ export interface SiteSettingsConfig {
   whatsapp?:  string
   twitter?:   string
   instagram?: string
+  telegram?:  string
+  reddit?:    string
+  pinterest?: string
   [key: string]: string | undefined
 }
 
