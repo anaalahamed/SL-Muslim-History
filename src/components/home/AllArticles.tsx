@@ -145,13 +145,13 @@ export default function AllArticles() {
                     {article.category}
                   </span>
                   <p
-                    className="art-title line-clamp-none sm:line-clamp-2"
-                    style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '12.5px', fontWeight: 700, lineHeight: 1.5, color: 'var(--dark)', transition: 'color .2s' }}
+                    className="art-title sm:line-clamp-2"
+                    style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '12.5px', fontWeight: 700, lineHeight: 1.5, color: 'var(--dark)', transition: 'color .2s', overflowWrap: 'break-word', wordBreak: 'break-word' }}
                   >
                     {article.title}
                   </p>
                   {preview && (
-                    <p className="art-excerpt line-clamp-1 sm:line-clamp-2 md:line-clamp-3" style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '11px', color: 'var(--muted)', lineHeight: 1.55 }}>
+                    <p className="art-excerpt line-clamp-1 sm:line-clamp-2 md:line-clamp-3" style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '11px', color: 'var(--muted)', lineHeight: 1.55, overflowWrap: 'break-word', wordBreak: 'break-word' }}>
                       {preview}
                     </p>
                   )}
