@@ -26,6 +26,7 @@ const isWithinLast30Days = (dateStr: string) => new Date(dateStr).getTime() > Da
 
 interface CommentRow { status: string; created_at: string }
 interface ReactionRow { emoji: string | null; created_at: string }
+interface SubscriberRow { status: string }
 
 export default function AdminDashboard() {
   const [ownerName,       setOwnerName]       = useState('Admin')
@@ -33,7 +34,7 @@ export default function AdminDashboard() {
   const [news,            setNews]            = useState<NewsPost[]>([])
   const [categoryCount,   setCategoryCount]   = useState(0)
   const [categories,      setCategories]      = useState<{id:string;icon:string;name_en:string;article_count:number}[]>([])
-  const [subCount,        setSubCount]        = useState<number | null>(null)
+  const [subscribers,     setSubscribers]     = useState<SubscriberRow[]>([])
   const [comments,        setComments]        = useState<CommentRow[]>([])
   const [reactions,       setReactions]       = useState<ReactionRow[]>([])
   const [hoveredMonth,    setHoveredMonth]     = useState<number | null>(null)
@@ -43,8 +44,8 @@ export default function AdminDashboard() {
     getArticles(getAuthClient()).then(setArticles)
     getNews(getAuthClient()).then(setNews)
     getCategories().then((cats) => { setCategoryCount(cats.length); setCategories(cats) })
-    getAuthClient().from('newsletter_subscribers').select('*', { count: 'exact', head: true })
-        .then(({ count }) => setSubCount(count ?? 0))
+    getAuthClient().from('newsletter_subscribers').select('status')
+        .then(({ data }) => setSubscribers(data ?? []))
     getAuthClient().from('comments').select('status, created_at')
         .then(({ data }) => setComments(data ?? []))
     getAuthClient().from('reactions').select('emoji, created_at')
@@ -61,6 +62,8 @@ export default function AdminDashboard() {
   const commentsPending    = comments.filter((c) => c.status === 'pending').length
   const commentsThisMonth  = comments.filter((c) => isWithinLast30Days(c.created_at)).length
   const reactionsThisMonth = reactions.filter((r) => isWithinLast30Days(r.created_at)).length
+  const subsAccepted       = subscribers.filter((s) => s.status === 'accepted').length
+  const subsPending        = subscribers.filter((s) => s.status === 'pending').length
 
   // Ranked by real (organic) views, not the boosted total, so an admin-set
   // boost can't make an article look more popular than it actually is here.
@@ -82,7 +85,6 @@ export default function AdminDashboard() {
     { label: 'Total Articles', value: articles.length,   icon: '📝', color: '#4a9e1f', href: '/admin/articles',   change: `+${articlesThisMonth} this month` },
     { label: 'News Posts',     value: news.length,       icon: '📰', color: '#0369a1', href: '/admin/news',        change: `+${newsThisMonth} this month` },
     { label: 'Categories',     value: categoryCount,     icon: '🗂️', color: '#7c3aed', href: '/admin/categories',  change: 'Active' },
-    { label: 'Newsletter Subs',value: subCount !== null ? subCount.toLocaleString() : '—', icon: '📬', color: '#c2410c', href: '/admin/newsletter', change: 'Subscribers' },
   ]
 
   return (
@@ -136,6 +138,23 @@ export default function AdminDashboard() {
             </div>
           </Link>
         ))}
+
+        {/* Newsletter Subs — three counts squeezed into the same compact card */}
+        <Link
+          href="/admin/newsletter"
+          className="rounded-xl p-3 transition-all duration-200 min-w-0"
+          style={{ background: 'white', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.1)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)' }}
+        >
+          <div className="text-xs font-semibold truncate mb-1.5" style={{ color: '#64748b' }}>Newsletter Subs</div>
+          <div className="flex items-baseline gap-1 flex-wrap">
+            <span className="text-sm">📬</span>
+            <span className="text-lg font-black" style={{ color: '#0f172a' }}>{subscribers.length}</span>
+            <span className="text-xs font-bold" style={{ color: '#15803d' }}>✓{subsAccepted}</span>
+            <span className="text-xs font-bold" style={{ color: '#b45309' }}>⏳{subsPending}</span>
+          </div>
+        </Link>
 
         {/* Comments — three counts squeezed into the same compact card */}
         <Link
