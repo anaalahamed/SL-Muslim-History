@@ -54,6 +54,11 @@ export default function AdminDashboard() {
   const totalViews     = articles.reduce((s, a) => s + a.views, 0)
   const recentArticles = [...articles].sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime()).slice(0, 5)
 
+  // Real (organic) view totals, per section — for the welcome banner
+  const realArticleViews = articles.reduce((s, a) => s + (a.real_views ?? a.views), 0)
+  const realSpecialViews = news.filter((n) => n.news_type === 'special').reduce((s, n) => s + (n.real_views ?? n.views ?? 0), 0)
+  const realJanazaViews  = news.filter((n) => n.news_type === 'janaza').reduce((s, n) => s + (n.real_views ?? n.views ?? 0), 0)
+
   const articlesThisMonth  = articles.filter((a) => isWithinLast30Days(a.published_at)).length
   const newsThisMonth      = news.filter((n) => isWithinLast30Days(n.published_at)).length
   const commentsApproved   = comments.filter((c) => c.status === 'approved').length
@@ -107,14 +112,19 @@ export default function AdminDashboard() {
             <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Total Views</div>
           </div>
           <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.15)' }} />
-          <div>
-            <div className="text-2xl font-black" style={{ color: '#c9a84c' }}>{articles.filter(a => a.is_featured).length}</div>
-            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Featured</div>
+          <div title="Real (organic) article views">
+            <div className="text-2xl font-black" style={{ color: '#c9a84c' }}>{formatViews(realArticleViews)}</div>
+            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Articles</div>
           </div>
           <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.15)' }} />
-          <div>
-            <div className="text-2xl font-black" style={{ color: '#c9a84c' }}>{news.filter(n => n.news_type === 'special').length}</div>
+          <div title="Real (organic) special news views">
+            <div className="text-2xl font-black" style={{ color: '#c9a84c' }}>{formatViews(realSpecialViews)}</div>
             <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Special</div>
+          </div>
+          <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.15)' }} />
+          <div title="Real (organic) janaza news views">
+            <div className="text-2xl font-black" style={{ color: '#c9a84c' }}>{formatViews(realJanazaViews)}</div>
+            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Janaza</div>
           </div>
         </div>
       </div>
