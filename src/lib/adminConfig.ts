@@ -111,8 +111,12 @@ export const defaultConfig: AdminConfig = {
 // just the admin's own browser storage.
 export async function saveSharedConfigToSupabase(config: AdminConfig, client?: import('@supabase/supabase-js').SupabaseClient): Promise<void> {
   try {
-    const { saveSiteSettings } = await import('./db/siteSettings')
-    await saveSiteSettings({
+    // updateSiteSettings merges rather than overwrites — saveSiteSettings
+    // replaces the whole stored config, which would otherwise silently wipe
+    // out reactionsLastViewed/newsletterLastViewed every time any settings
+    // tab is saved.
+    const { updateSiteSettings } = await import('./db/siteSettings')
+    await updateSiteSettings({
       facebook:  config.facebook  || '',
       youtube:   config.youtube   || '',
       whatsapp:  config.whatsapp  || '',

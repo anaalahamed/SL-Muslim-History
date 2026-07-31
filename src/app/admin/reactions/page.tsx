@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { formatDate } from '@/lib/utils'
 import { REACTIONS } from '@/lib/reactions'
 import { getAuthClient } from '@/lib/supabase-auth'
+import { updateSiteSettings } from '@/lib/db/siteSettings'
 
 const EMOJIS = [...REACTIONS]
 
@@ -62,7 +63,7 @@ export default function AdminReactionsPage() {
 
   useEffect(() => {
     load()
-    localStorage.setItem('slmh_reactions_last_viewed', new Date().toISOString())
+    updateSiteSettings({ reactionsLastViewed: new Date().toISOString() }, getAuthClient())
   }, [load])
 
   async function resetReactions(contentType: string, contentId: string) {

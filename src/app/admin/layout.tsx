@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { getAdminConfig } from '@/lib/adminConfig'
 import { getUnreadCount } from '@/lib/db/contact'
+import { getSiteSettings } from '@/lib/db/siteSettings'
 import { getAuthClient } from '@/lib/supabase-auth'
 
 const navItems = [
@@ -71,7 +72,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     async function checkNewSubs() {
       const authClient = getAuthClient()
-      const lastViewed = localStorage.getItem('slmh_newsletter_last_viewed')
+      const settings = await getSiteSettings()
+      const lastViewed = settings?.newsletterLastViewed
       if (!lastViewed) {
         const { count } = await authClient
           .from('newsletter_subscribers')
@@ -94,7 +96,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     async function checkNewReactions() {
       const authClient = getAuthClient()
-      const lastViewed = localStorage.getItem('slmh_reactions_last_viewed')
+      const settings = await getSiteSettings()
+      const lastViewed = settings?.reactionsLastViewed
       if (!lastViewed) {
         const { count } = await authClient
           .from('reactions')

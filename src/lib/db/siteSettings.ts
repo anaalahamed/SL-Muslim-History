@@ -25,6 +25,11 @@ export interface SiteSettingsConfig {
   location?: string
   maintenanceMode?: boolean
   announcement?:    Announcement
+  // "Last viewed" markers for admin sidebar notification badges — shared
+  // across devices so viewing on one laptop clears it everywhere, not just
+  // on the browser that happened to view it.
+  reactionsLastViewed?:  string
+  newsletterLastViewed?: string
 }
 
 /**
@@ -63,4 +68,13 @@ export async function saveSiteSettings(config: SiteSettingsConfig, client?: Supa
   } catch (err) {
     console.error('[siteSettings] unexpected write error:', err)
   }
+}
+
+// Updates just the given fields without clobbering the rest of the shared
+// config — saveSiteSettings() replaces the whole JSON blob, so callers that
+// only care about one or two fields (like a "last viewed" marker) must
+// read-merge-write instead of overwriting everything else that's been saved.
+export async function updateSiteSettings(partial: SiteSettingsConfig, client?: SupabaseClient): Promise<void> {
+  const current = (await getSiteSettings()) ?? {}
+  await saveSiteSettings({ ...current, ...partial }, client)
 }

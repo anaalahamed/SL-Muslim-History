@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { getAuthClient } from '@/lib/supabase-auth'
+import { updateSiteSettings } from '@/lib/db/siteSettings'
 
 type SubStatus = 'pending' | 'accepted' | 'declined'
 
@@ -42,7 +43,7 @@ export default function AdminNewsletterPage() {
 
   useEffect(() => {
     loadSubscribers()
-    localStorage.setItem('slmh_newsletter_last_viewed', new Date().toISOString())
+    updateSiteSettings({ newsletterLastViewed: new Date().toISOString() }, getAuthClient())
   }, [])
 
   async function loadSubscribers() {
