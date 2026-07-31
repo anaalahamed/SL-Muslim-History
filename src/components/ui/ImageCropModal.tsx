@@ -9,6 +9,8 @@ import ReactCrop, {
 } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
+const MAX_OUTPUT_DIMENSION = 1600 // px, longest side — plenty for web display
+
 // ── helpers ──────────────────────────────────────────────────────────────────
 function centered(w: number, h: number, aspect: number): Crop {
   return centerCrop(
@@ -95,9 +97,16 @@ export default function ImageCropModal({ imageSrc, fileName, onDone, onCancel, o
       const scaleX = img.naturalWidth  / img.width
       const scaleY = img.naturalHeight / img.height
 
+      const cropWidth  = Math.round(pixelCrop.width  * scaleX)
+      const cropHeight = Math.round(pixelCrop.height * scaleY)
+      // Cap the output at a sane web display size — nothing on the site
+      // shows images anywhere near full camera resolution, and this is
+      // where most of the storage savings come from.
+      const outScale = Math.min(1, MAX_OUTPUT_DIMENSION / Math.max(cropWidth, cropHeight))
+
       const canvas = document.createElement('canvas')
-      canvas.width  = Math.round(pixelCrop.width  * scaleX)
-      canvas.height = Math.round(pixelCrop.height * scaleY)
+      canvas.width  = Math.round(cropWidth  * outScale)
+      canvas.height = Math.round(cropHeight * outScale)
 
       const ctx = canvas.getContext('2d')!
       ctx.drawImage(
@@ -109,10 +118,11 @@ export default function ImageCropModal({ imageSrc, fileName, onDone, onCancel, o
         0, 0, canvas.width, canvas.height,
       )
 
-      const ext  = fileName.split('.').pop()?.toLowerCase() ?? 'jpg'
-      const mime = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg'
+      const ext     = fileName.split('.').pop()?.toLowerCase() ?? 'jpg'
+      const mime    = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg'
+      const quality = mime === 'image/png' ? undefined : 0.82
       const blob = await new Promise<Blob>((res, rej) =>
-        canvas.toBlob(b => b ? res(b) : rej(new Error('toBlob failed')), mime, 0.92)
+        canvas.toBlob(b => b ? res(b) : rej(new Error('toBlob failed')), mime, quality)
       )
       onDone(blob, fileName)
     } catch (err) {

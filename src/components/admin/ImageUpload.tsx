@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { supabase } from '@/lib/supabase'
+import { getAuthClient } from '@/lib/supabase-auth'
+import { resizeImageBlob } from '@/lib/imageResize'
 import ImageCropModal from '@/components/ui/ImageCropModal'
 
 interface Props {
@@ -35,18 +36,14 @@ export default function ImageUpload({ value, onChange }: Props) {
     setUploading(true)
     setError(null)
     try {
-      if (supabase) {
-        const safe = fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
-        const path = `${Date.now()}-${safe}`
-        const file = fileOrBlob instanceof File ? fileOrBlob : new File([fileOrBlob], safe, { type: fileOrBlob.type })
-        const { data, error: upErr } = await supabase.storage.from('media').upload(path, file, { upsert: false })
-        if (upErr) { setError(upErr.message); return }
-        const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(data.path)
-        onChange(publicUrl)
-      } else {
-        onChange(URL.createObjectURL(fileOrBlob))
-        setError('Supabase not connected — image URL is temporary.')
-      }
+      const safe = fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
+      const path = `${Date.now()}-${safe}`
+      const file = fileOrBlob instanceof File ? fileOrBlob : new File([fileOrBlob], safe, { type: fileOrBlob.type })
+      const client = getAuthClient()
+      const { data, error: upErr } = await client.storage.from('media').upload(path, file, { upsert: false })
+      if (upErr) { setError(upErr.message); return }
+      const { data: { publicUrl } } = client.storage.from('media').getPublicUrl(data.path)
+      onChange(publicUrl)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
     } finally {
@@ -54,21 +51,27 @@ export default function ImageUpload({ value, onChange }: Props) {
     }
   }
 
-  // Crop confirmed → upload cropped blob
+  // Crop confirmed → the cropped blob from ImageCropModal is already
+  // resized/compressed — upload it as-is
   async function handleCropDone(blob: Blob, fileName: string) {
     setCropSrc(null)
     setPendingFile(null)
     await uploadToSupabase(blob, fileName)
   }
 
-  // Skip crop → upload original file directly
+  // Skip crop → the original file was never resized, so do that here
   async function handleSkipCrop() {
     if (!pendingFile) return
     const file = pendingFile
     const name = cropName
     setCropSrc(null)
     setPendingFile(null)
-    await uploadToSupabase(file, name)
+    try {
+      const resized = await resizeImageBlob(file, file.type)
+      await uploadToSupabase(resized, name)
+    } catch {
+      await uploadToSupabase(file, name) // fall back to the original if resizing fails
+    }
   }
 
   function handleCropCancel() {
