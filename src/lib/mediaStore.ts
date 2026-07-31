@@ -1,83 +1,61 @@
-// Shared media library — persisted in localStorage until Supabase Storage is connected.
+// Shared media library — the list is read directly from the Supabase
+// Storage 'media' bucket (the actual source of truth for uploaded files),
+// instead of a separate index kept in the browser's localStorage. That old
+// index only ever existed on whichever device did the upload, so photos
+// uploaded on one device silently never showed up in the picker on another.
+
+import { getAuthClient } from './supabase-auth'
 
 export interface StoredMediaItem {
-  id: string
+  id: string      // storage path — also what's passed to removeMediaItems
   name: string
-  size: string
-  dimensions: string
-  uploaded: string
-  dataUrl: string   // base64 data URL — real storage URL after Supabase is connected
+  size: string     // formatted, e.g. "128 KB"
+  uploaded: string // YYYY-MM-DD
+  dataUrl: string  // public Supabase Storage URL
 }
 
-const KEY = 'slmh_media_library'
-
-export function getMediaItems(): StoredMediaItem[] {
-  if (typeof window === 'undefined') return []
-  try {
-    return JSON.parse(localStorage.getItem(KEY) ?? '[]')
-  } catch {
-    return []
-  }
+function formatSize(bytes: number): string {
+  return bytes > 1024 * 1024
+    ? `${(bytes / 1024 / 1024).toFixed(1)} MB`
+    : `${Math.round(bytes / 1024)} KB`
 }
 
-export function saveMediaItems(items: StoredMediaItem[]): void {
-  // May throw QuotaExceededError — callers should catch when uploading large files
-  localStorage.setItem(KEY, JSON.stringify(items))
-}
-
-export function addMediaItem(item: StoredMediaItem): void {
-  const items = getMediaItems()
-  saveMediaItems([item, ...items])
-}
-
-export function removeMediaItems(ids: string[]): void {
-  saveMediaItems(getMediaItems().filter((i) => !ids.includes(i.id)))
-}
-
-export function getMediaItemById(id: string): StoredMediaItem | undefined {
-  return getMediaItems().find((i) => i.id === id)
-}
-
-/** Convert a File to a StoredMediaItem.
- *  If `storageUrl` is provided it is used as the dataUrl (Supabase Storage public URL).
- *  Otherwise the file is read as a base64 data URL (localStorage fallback). */
-export function fileToMediaItem(file: File, storageUrl?: string): Promise<StoredMediaItem> {
-  const sizeStr = file.size > 1024 * 1024
-    ? `${(file.size / 1024 / 1024).toFixed(1)} MB`
-    : `${Math.round(file.size / 1024)} KB`
-
-  function buildItem(dataUrl: string, dimensions: string): StoredMediaItem {
-    return {
-      id:         `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      name:       file.name,
-      size:       sizeStr,
-      dimensions,
-      uploaded:   new Date().toISOString().split('T')[0],
-      dataUrl,
-    }
-  }
-
-  // When we already have a public URL, still read dimensions locally (no quota cost)
-  if (storageUrl) {
-    return new Promise((resolve) => {
-      const img = new Image()
-      img.onload = () => resolve(buildItem(storageUrl, `${img.naturalWidth} × ${img.naturalHeight}`))
-      img.onerror = () => resolve(buildItem(storageUrl, '—'))
-      img.src = storageUrl
-    })
-  }
-
-  // Fallback: base64 in localStorage
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string
-      const img = new Image()
-      img.onload = () => resolve(buildItem(dataUrl, `${img.naturalWidth} × ${img.naturalHeight}`))
-      img.onerror = () => resolve(buildItem(dataUrl, '—'))
-      img.src = dataUrl
-    }
-    reader.onerror = reject
-    reader.readAsDataURL(file)
+export async function getMediaItems(): Promise<StoredMediaItem[]> {
+  const client = getAuthClient()
+  const { data, error } = await client.storage.from('media').list('', {
+    limit: 1000,
+    sortBy: { column: 'created_at', order: 'desc' },
   })
+  if (error || !data) return []
+  return data
+    .filter((f) => f.id !== null) // skip subfolders, if any
+    .map((f) => ({
+      id:       f.name,
+      name:     f.name,
+      size:     formatSize(f.metadata?.size ?? 0),
+      uploaded: (f.created_at ?? '').split('T')[0],
+      dataUrl:  client.storage.from('media').getPublicUrl(f.name).data.publicUrl,
+    }))
+}
+
+export async function removeMediaItems(paths: string[]): Promise<void> {
+  if (paths.length === 0) return
+  await getAuthClient().storage.from('media').remove(paths)
+}
+
+/** Uploads a file to the shared media bucket and returns its library entry. */
+export async function uploadMediaFile(file: File): Promise<StoredMediaItem> {
+  const client = getAuthClient()
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+  const path = `${Date.now()}-${safeName}`
+  const { data, error } = await client.storage.from('media').upload(path, file, { upsert: false })
+  if (error) throw error
+  const { data: { publicUrl } } = client.storage.from('media').getPublicUrl(data.path)
+  return {
+    id:       data.path,
+    name:     file.name,
+    size:     formatSize(file.size),
+    uploaded: new Date().toISOString().split('T')[0],
+    dataUrl:  publicUrl,
+  }
 }

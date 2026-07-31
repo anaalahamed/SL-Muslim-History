@@ -1,21 +1,19 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import {
   StoredMediaItem,
   getMediaItems,
-  addMediaItem,
   removeMediaItems,
-  fileToMediaItem,
+  uploadMediaFile,
 } from '@/lib/mediaStore'
 import ImageCropModal from '@/components/ui/ImageCropModal'
-import { supabase } from '@/lib/supabase'
-import { getAuthClient } from '@/lib/supabase-auth'
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25 MB
 
 export default function AdminMediaPage() {
   const [media,      setMedia]      = useState<StoredMediaItem[]>([])
+  const [dims,       setDims]       = useState<Record<string, string>>({})
   const [search,     setSearch]     = useState('')
   const [selected,   setSelected]   = useState<Set<string>>(new Set())
   const [deleteId,   setDeleteId]   = useState<string | null>(null)
@@ -32,7 +30,15 @@ export default function AdminMediaPage() {
   const [cropFileName, setCropFileName] = useState<string>('')
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
 
-  useEffect(() => { setMedia(getMediaItems()) }, [])
+  const reload = useCallback(() => { getMediaItems().then(setMedia) }, [])
+  useEffect(() => { reload() }, [reload])
+
+  // Dimensions aren't stored by Supabase Storage — read them once the
+  // thumbnail actually loads in the browser, and cache per file.
+  function handleImgLoad(id: string, e: React.SyntheticEvent<HTMLImageElement>) {
+    const img = e.currentTarget
+    setDims((d) => (d[id] ? d : { ...d, [id]: `${img.naturalWidth} × ${img.naturalHeight}` }))
+  }
 
   const filtered = media.filter((m) =>
     search.trim() === '' || m.name.toLowerCase().includes(search.toLowerCase())
@@ -56,10 +62,10 @@ export default function AdminMediaPage() {
     setTimeout(() => setCopied(null), 2000)
   }
 
-  function doDelete() {
+  async function doDelete() {
     const ids = deleteBulk ? Array.from(selected) : deleteId ? [deleteId] : []
-    removeMediaItems(ids)
-    setMedia(getMediaItems())
+    await removeMediaItems(ids)
+    reload()
     setSelected((prev) => { const n = new Set(prev); ids.forEach((id) => n.delete(id)); return n })
     setDeleteId(null)
     setDeleteBulk(false)
@@ -94,29 +100,12 @@ export default function AdminMediaPage() {
 
     try {
       const croppedFile = new File([blob], fileName, { type: blob.type })
-      if (supabase) {
-        const authClient = getAuthClient()
-        const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
-        const path = `${Date.now()}-${safeName}`
-        const { data, error } = await authClient.storage.from('media').upload(path, croppedFile, { upsert: false })
-        if (error) {
-          errors.push(`${fileName}: ${error.message}`)
-        } else {
-          const { data: { publicUrl } } = authClient.storage.from('media').getPublicUrl(data.path)
-          const item = await fileToMediaItem(croppedFile, publicUrl)
-          addMediaItem(item)
-        }
-      } else {
-        const item = await fileToMediaItem(croppedFile)
-        try { addMediaItem(item) } catch {
-          errors.push(`${fileName}: browser storage full`)
-        }
-      }
+      await uploadMediaFile(croppedFile)
     } catch (err) {
       errors.push(`${fileName}: ${err instanceof Error ? err.message : 'unknown error'}`)
     }
 
-    setMedia(getMediaItems())
+    reload()
     if (errors.length > 0) setUploadError(errors.join(' | '))
     setUploading(false)
 
@@ -211,7 +200,7 @@ export default function AdminMediaPage() {
           className="text-xs font-semibold px-3 py-1 rounded-lg"
           style={{ background: '#f1f5f9', color: '#94a3b8' }}
         >
-          {supabase ? 'Uploaded to Supabase Storage' : 'Saved in browser (connect Supabase for larger files)'}
+          Uploaded to Supabase Storage — visible on every device
         </div>
       </div>
 
@@ -308,6 +297,7 @@ export default function AdminMediaPage() {
                   <img
                     src={item.dataUrl}
                     alt={item.name}
+                    onLoad={(e) => handleImgLoad(item.id, e)}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
                   {isSelected && (
@@ -321,7 +311,7 @@ export default function AdminMediaPage() {
                 </div>
                 <div className="p-2.5">
                   <p className="text-xs font-semibold truncate" style={{ color: '#1e293b' }}>{item.name}</p>
-                  <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{item.size} · {item.dimensions}</p>
+                  <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{item.size} · {dims[item.id] ?? '—'}</p>
                   <div className="flex gap-1 mt-2" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => copyUrl(item)}
@@ -379,11 +369,11 @@ export default function AdminMediaPage() {
                 </div>
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
-                    <img src={item.dataUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={item.dataUrl} alt={item.name} onLoad={(e) => handleImgLoad(item.id, e)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                   <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{item.name}</p>
                 </div>
-                <span className="text-xs" style={{ color: '#64748b' }}>{item.dimensions}</span>
+                <span className="text-xs" style={{ color: '#64748b' }}>{dims[item.id] ?? '—'}</span>
                 <span className="text-xs" style={{ color: '#64748b' }}>{item.size}</span>
                 <span className="text-xs" style={{ color: '#94a3b8' }}>{item.uploaded}</span>
                 <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>

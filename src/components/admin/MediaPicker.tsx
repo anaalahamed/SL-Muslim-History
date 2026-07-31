@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { StoredMediaItem, getMediaItems, addMediaItem, fileToMediaItem } from '@/lib/mediaStore'
-import { supabase } from '@/lib/supabase'
+import { StoredMediaItem, getMediaItems, uploadMediaFile } from '@/lib/mediaStore'
 
 interface Props {
   onSelect: (dataUrl: string, id: string) => void
@@ -11,47 +10,38 @@ interface Props {
 
 export default function MediaPicker({ onSelect, onClose }: Props) {
   const [items,       setItems]       = useState<StoredMediaItem[]>([])
+  const [dims,        setDims]        = useState<Record<string, string>>({})
   const [selected,    setSelected]    = useState<string | null>(null)
   const [uploading,   setUploading]   = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [search,      setSearch]      = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => { setItems(getMediaItems()) }, [])
+  useEffect(() => { getMediaItems().then(setItems) }, [])
+
+  function handleImgLoad(id: string, e: React.SyntheticEvent<HTMLImageElement>) {
+    const img = e.currentTarget
+    setDims((d) => (d[id] ? d : { ...d, [id]: `${img.naturalWidth} × ${img.naturalHeight}` }))
+  }
 
   async function handleUpload(files: FileList | null) {
     if (!files || files.length === 0) return
     setUploading(true)
     setUploadError(null)
-    const firstNewId: string[] = []
+    let firstNewId: string | null = null
 
     for (const file of Array.from(files)) {
       try {
-        let storageUrl: string | undefined
-
-        if (supabase) {
-          const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-          const path = `${Date.now()}-${safeName}`
-          const { data, error } = await supabase.storage.from('media').upload(path, file, { upsert: false })
-          if (error) {
-            setUploadError(`Upload failed: ${error.message}`)
-            continue
-          }
-          const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(data.path)
-          storageUrl = publicUrl
-        }
-
-        const item = await fileToMediaItem(file, storageUrl)
-        addMediaItem(item)
-        if (firstNewId.length === 0) firstNewId.push(item.id)
+        const item = await uploadMediaFile(file)
+        if (!firstNewId) firstNewId = item.id
       } catch (err) {
-        setUploadError(err instanceof Error ? err.message : 'Upload failed — browser storage may be full. Connect Supabase Storage to fix this.')
+        setUploadError(err instanceof Error ? err.message : 'Upload failed.')
       }
     }
 
-    const updated = getMediaItems()
+    const updated = await getMediaItems()
     setItems(updated)
-    if (firstNewId.length > 0) setSelected(firstNewId[0])
+    if (firstNewId) setSelected(firstNewId)
     setUploading(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
@@ -173,6 +163,7 @@ export default function MediaPicker({ onSelect, onClose }: Props) {
                       <img
                         src={item.dataUrl}
                         alt={item.name}
+                        onLoad={(e) => handleImgLoad(item.id, e)}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                       {isSelected && (
@@ -186,7 +177,7 @@ export default function MediaPicker({ onSelect, onClose }: Props) {
                     </div>
                     <div className="px-2 py-1.5" style={{ background: 'white' }}>
                       <p className="text-xs font-semibold truncate" style={{ color: '#1e293b' }}>{item.name}</p>
-                      <p className="text-xs" style={{ color: '#94a3b8' }}>{item.dimensions}</p>
+                      <p className="text-xs" style={{ color: '#94a3b8' }}>{dims[item.id] ?? '—'}</p>
                     </div>
                   </button>
                 )
