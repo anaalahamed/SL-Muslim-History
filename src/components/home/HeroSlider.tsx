@@ -111,7 +111,8 @@ export default function HeroSlider() {
                 padding: '24px 22px 20px',
               }}
             >
-              {/* Background image — Next.js optimized */}
+              {/* Background image — shows the full photo uncropped (on top of
+                  the slide's gradient backdrop) instead of zooming/cropping it */}
               {article.featured_image && (
                 <Image
                   src={article.featured_image}
@@ -119,7 +120,7 @@ export default function HeroSlider() {
                   fill
                   priority={i === 0}
                   sizes="(max-width: 900px) 100vw, 65vw"
-                  style={{ objectFit: 'cover', opacity: 0.55 }}
+                  style={{ objectFit: 'contain', opacity: 0.55 }}
                 />
               )}
 

@@ -124,14 +124,14 @@ export default function NewsDetail({ post, related, recent }: Props) {
                 style={{ border: '1px solid var(--border)', background: 'white' }}
               >
                 {post.featured_image ? (
-                  <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3' }}>
+                  <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', background: '#0f172a' }}>
                     <Image
                       src={post.featured_image}
                       alt={post.title}
                       fill
                       priority
                       sizes="(max-width: 1280px) 100vw, 896px"
-                      style={{ objectFit: 'cover' }}
+                      style={{ objectFit: 'contain' }}
                     />
                   </div>
                 ) : (

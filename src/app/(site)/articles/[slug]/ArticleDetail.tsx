@@ -158,16 +158,17 @@ export default function ArticleDetail({ article, related, categories }: Props) {
                 className="rounded-2xl overflow-hidden"
                 style={{ border: '1px solid var(--border)', background: 'white' }}
               >
-                {/* Article hero — fixed 16:9 */}
+                {/* Article hero — fixed 16:9, showing the full photo uncropped
+                    (matching the gallery below) instead of zooming/cropping it */}
                 {article.featured_image ? (
-                  <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9' }}>
+                  <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#0f172a' }}>
                     <Image
                       src={article.featured_image}
                       alt={article.title}
                       fill
                       priority
                       sizes="(max-width: 1280px) 100vw, 896px"
-                      style={{ objectFit: 'cover' }}
+                      style={{ objectFit: 'contain' }}
                     />
                   </div>
                 ) : (
