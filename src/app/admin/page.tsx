@@ -349,8 +349,8 @@ export default function AdminDashboard() {
                     <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{article.title}</p>
                     <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{article.category}</p>
                   </div>
-                  <span className="text-sm font-black flex-shrink-0" style={{ color: '#4a9e1f' }}>
-                    👁 {formatViews(article.views)}
+                  <span className="text-sm font-black flex-shrink-0" style={{ color: '#4a9e1f' }} title="Real (organic) views">
+                    👁 {formatViews(article.real_views ?? article.views)}
                   </span>
                 </div>
               ))
