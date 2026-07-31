@@ -12,22 +12,6 @@ import PageHero from '@/components/ui/PageHero'
 import { ArticleListSkeleton } from '@/components/ui/Skeleton'
 import AdBanner from '@/components/ui/AdBanner'
 
-const categoryColors: Record<string, string> = {
-  'Early History':        '#dbeafe',
-  'Mosques & Places':     '#dcfce7',
-  'Culture & Traditions': '#fef9c3',
-  'Notable Figures':      '#f3e8ff',
-  'Literature & Arts':    '#ffedd5',
-  'Community & Society':  '#e0f2fe',
-}
-const categoryText: Record<string, string> = {
-  'Early History':        '#1d4ed8',
-  'Mosques & Places':     '#15803d',
-  'Culture & Traditions': '#a16207',
-  'Notable Figures':      '#7c3aed',
-  'Literature & Arts':    '#c2410c',
-  'Community & Society':  '#0369a1',
-}
 
 function buildPreview(excerpt: string, content: string): string {
   const parts: string[] = []
@@ -207,8 +191,8 @@ export default function ArticlesClient() {
                   href={article.slug ? `/articles/${article.slug}` : '/articles'}
                   className="group relative block rounded-2xl overflow-hidden"
                   style={{
-                    background: categoryColors[article.category] ?? '#f8fafc',
-                    border: `1px solid ${categoryText[article.category] ? categoryText[article.category] + '22' : 'var(--border)'}`,
+                    background: 'white',
+                    border: '1px solid var(--border)',
                     boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
                     transition: 'box-shadow 0.25s ease, transform 0.25s ease',
                   }}
@@ -230,7 +214,7 @@ export default function ArticlesClient() {
                     >
                       <span
                         className="font-black text-3xl leading-none"
-                        style={{ color: categoryText[article.category] ? categoryText[article.category] + '33' : 'rgba(0,0,0,0.08)' }}
+                        style={{ color: 'rgba(0,0,0,0.08)' }}
                       >
                         {String((page - 1) * PER_PAGE + i + 1).padStart(2, '0')}
                       </span>
@@ -251,13 +235,13 @@ export default function ArticlesClient() {
                         <span
                           className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full"
                           style={{
-                            background: categoryText[article.category] ?? '#475569',
+                            background: 'var(--green)',
                             color: 'white',
                           }}
                         >
                           {article.category}
                         </span>
-                        <span className="text-xs" style={{ color: categoryText[article.category] ?? 'var(--muted)', opacity: 0.75 }}>
+                        <span className="text-xs" style={{ color: 'var(--muted)', opacity: 0.75 }}>
                           {new Date(article.published_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                         </span>
                       </div>
@@ -289,11 +273,11 @@ export default function ArticlesClient() {
 
                       {/* Footer row */}
                       <div className="flex items-center justify-between flex-wrap gap-2">
-                        <div className="flex items-center gap-3 text-xs" style={{ color: categoryText[article.category] ?? 'var(--muted)', opacity: 0.8 }}>
+                        <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--muted)', opacity: 0.8 }}>
                           <div className="flex items-center gap-1.5">
                             <div
                               className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-black text-white flex-shrink-0"
-                              style={{ background: categoryText[article.category] ?? 'var(--green)' }}
+                              style={{ background: 'var(--green)' }}
                             >
                               {article.author.charAt(0)}
                             </div>
@@ -305,7 +289,7 @@ export default function ArticlesClient() {
                         </div>
                         <span
                           className="text-xs font-bold px-3 py-1.5 rounded-xl"
-                          style={{ background: categoryText[article.category] ?? 'var(--green)', color: 'white' }}
+                          style={{ background: 'var(--green)', color: 'white' }}
                         >
                           Read article →
                         </span>
