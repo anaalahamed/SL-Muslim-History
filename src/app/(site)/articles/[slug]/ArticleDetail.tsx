@@ -92,7 +92,7 @@ export default function ArticleDetail({ article, related, categories }: Props) {
           </svg>
         </div>
 
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-white">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 text-white">
           <AnimateIn direction="up">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-xs mb-3" style={{ color: 'rgba(255,255,255,0.45)' }}>
