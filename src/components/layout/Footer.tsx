@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { getAdminConfig, defaultConfig } from '@/lib/adminConfig'
+import { getAdminConfig, mergeSharedConfigFromSupabase, defaultConfig } from '@/lib/adminConfig'
 import { supabase } from '@/lib/supabase'
 
 const SOCIAL_DEFS = [
@@ -36,11 +36,13 @@ export default function Footer() {
   const [subStatus,   setSubStatus]   = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
 
   useEffect(() => {
-    const cfg = getAdminConfig()
-    setSocialLinks(SOCIAL_DEFS.map((s) => ({
-      label: s.label, href: cfg[s.key] || '', color: s.color, icon: s.icon, active: !!cfg[s.key],
-    })))
-    setStats(cfg.stats)
+    const local = getAdminConfig()
+    mergeSharedConfigFromSupabase(local).then((cfg) => {
+      setSocialLinks(SOCIAL_DEFS.map((s) => ({
+        label: s.label, href: cfg[s.key] || '', color: s.color, icon: s.icon, active: !!cfg[s.key],
+      })))
+      setStats(cfg.stats)
+    })
   }, [])
 
   useEffect(() => {

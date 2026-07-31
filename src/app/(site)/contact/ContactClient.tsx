@@ -83,15 +83,9 @@ export default function ContactClient() {
   const [config, setConfig] = useState<AdminConfig>(defaultConfig)
 
   useEffect(() => {
-    async function load() {
-      const sc = await getSiteSettings()
-      if (sc && Object.values(sc).some(Boolean)) {
-        setConfig((prev) => ({ ...prev, ...sc }))
-        return
-      }
-      setConfig(getAdminConfig())
-    }
-    load()
+    const local = getAdminConfig()
+    setConfig(local)
+    mergeSharedConfigFromSupabase(local).then(setConfig)
   }, [])
 
   const contactInfo = [

@@ -7,7 +7,7 @@ import { getArticles } from '@/lib/db/articles'
 import { Category } from '@/lib/types'
 import AnimateIn from '@/components/ui/AnimateIn'
 import PageHero from '@/components/ui/PageHero'
-import { getAdminConfig, defaultConfig } from '@/lib/adminConfig'
+import { getAdminConfig, mergeSharedConfigFromSupabase, defaultConfig } from '@/lib/adminConfig'
 
 const categoryDescriptions: Record<string, string> = {
   'early-history':       'Explore the origins of Islam in Sri Lanka, from the first Arab traders to the establishment of Muslim communities across the island.',
@@ -35,7 +35,8 @@ export default function CategoryIndexClient() {
   useEffect(() => {
     getCategories().then(setCategories)
     getArticles().then((a) => setTotalArticles(a.length))
-    setStats(getAdminConfig().stats)
+    const local = getAdminConfig()
+    mergeSharedConfigFromSupabase(local).then((cfg) => setStats(cfg.stats))
   }, [])
 
   return (
