@@ -117,7 +117,7 @@ export default function ArticleDetail({ article, related, categories }: Props) {
             </div>
 
             {/* Title */}
-            <h1 className="tamil-heading article-hero-title font-extrabold text-2xl md:text-3xl text-white mb-5" style={{ lineHeight: '1.45', maxWidth: '680px' }}>
+            <h1 className="tamil-heading article-hero-title font-extrabold text-2xl md:text-3xl text-white mb-5" style={{ lineHeight: '1.45' }}>
               {article.title}
             </h1>
 
