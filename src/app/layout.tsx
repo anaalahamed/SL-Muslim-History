@@ -13,6 +13,10 @@ export const viewport: Viewport = {
   themeColor: '#1a3d1a',
 }
 
+// Kept static (not reading Settings/Supabase here) so every page in the
+// site keeps its fast, pre-built rendering — only the homepage's own
+// metadata (page.tsx) is admin-editable, since that's the one page that
+// actually needed it and was already dynamic to begin with.
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {

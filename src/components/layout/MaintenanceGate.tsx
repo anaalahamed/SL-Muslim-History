@@ -2,15 +2,22 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { getAdminConfig } from '@/lib/adminConfig'
+import { getAdminConfig, mergeSharedConfigFromSupabase } from '@/lib/adminConfig'
 
 export default function MaintenanceGate({ children }: { children: React.ReactNode }) {
   const [maintenance, setMaintenance] = useState(false)
   const [checked,     setChecked]     = useState(false)
 
   useEffect(() => {
-    setMaintenance(getAdminConfig().maintenanceMode)
-    setChecked(true)
+    // maintenanceMode must be read from Supabase, not just this browser's
+    // localStorage — otherwise turning it on only ever "works" for the
+    // admin's own device, while every real visitor keeps seeing the live
+    // site with no maintenance page at all.
+    const local = getAdminConfig()
+    mergeSharedConfigFromSupabase(local).then((merged) => {
+      setMaintenance(merged.maintenanceMode)
+      setChecked(true)
+    })
   }, [])
 
   // Don't flash anything until we've checked localStorage

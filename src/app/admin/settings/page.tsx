@@ -546,18 +546,6 @@ export default function SettingsPage() {
                   Image shown when sharing on WhatsApp, Facebook etc. Recommended: 1200×630px
                 </p>
               </div>
-              <div>
-                <label className="block text-xs font-bold mb-1.5" style={{ color: '#334155' }}>Google Analytics ID</label>
-                <input
-                  type="text"
-                  value={config.seo.googleAnalyticsId}
-                  onChange={(e) => setConfig({ ...config, seo: { ...config.seo, googleAnalyticsId: e.target.value } })}
-                  placeholder="G-XXXXXXXXXX"
-                  className={inputClass} style={inputStyle}
-                  onFocus={(e) => Object.assign(e.currentTarget.style, focusStyle)}
-                  onBlur={(e) => Object.assign(e.currentTarget.style, inputStyle)}
-                />
-              </div>
             </div>
             <div className="px-6 py-4 flex items-center gap-3" style={{ borderTop: '1px solid #f1f5f9' }}>
               <button type="submit" className="px-6 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: '#4a9e1f' }}>

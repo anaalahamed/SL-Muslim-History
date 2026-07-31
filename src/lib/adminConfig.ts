@@ -1,6 +1,8 @@
 // Admin configuration — editable from Settings page
 // In production this will be stored in Supabase. For now, localStorage is used.
 
+import { SITE_DESCRIPTION } from './seo'
+
 export interface TeamMember {
   id: string
   name: string      // Tamil
@@ -27,7 +29,6 @@ export interface Announcement {
 export interface SEO {
   metaDescription: string
   ogImage: string
-  googleAnalyticsId: string
 }
 
 export interface AdminConfig {
@@ -93,9 +94,8 @@ export const defaultConfig: AdminConfig = {
   heroBannerImage: '',
   featuredArticleIds: [],
   seo: {
-    metaDescription: "Preserving the rich history and living heritage of Sri Lanka's Muslim community.",
-    ogImage: '',
-    googleAnalyticsId: '',
+    metaDescription: SITE_DESCRIPTION,
+    ogImage: '/og-image.jpg',
   },
   announcement: {
     enabled: false,
@@ -124,6 +124,13 @@ export async function saveSharedConfigToSupabase(config: AdminConfig, client?: i
       teamMembers: config.teamMembers,
       stats:       config.stats,
       mission:     config.mission,
+      metaDescription: config.seo.metaDescription || '',
+      ogImage:         config.seo.ogImage || '',
+      email:    config.email    || '',
+      phone:    config.phone    || '',
+      location: config.location || '',
+      maintenanceMode: config.maintenanceMode,
+      announcement:    config.announcement,
     }, client)
   } catch {
     // non-critical — localStorage still works for local admin
@@ -151,6 +158,16 @@ export async function mergeSharedConfigFromSupabase(config: AdminConfig): Promis
       teamMembers: shared.teamMembers ?? config.teamMembers,
       stats:       shared.stats       ?? config.stats,
       mission:     shared.mission     ?? config.mission,
+      seo: {
+        ...config.seo,
+        metaDescription: shared.metaDescription || config.seo.metaDescription,
+        ogImage:         shared.ogImage         || config.seo.ogImage,
+      },
+      email:    shared.email    ?? config.email,
+      phone:    shared.phone    ?? config.phone,
+      location: shared.location ?? config.location,
+      maintenanceMode: shared.maintenanceMode ?? config.maintenanceMode,
+      announcement:    shared.announcement    ?? config.announcement,
     }
   } catch {
     return config

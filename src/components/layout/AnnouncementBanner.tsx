@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getAdminConfig } from '@/lib/adminConfig'
+import { getAdminConfig, mergeSharedConfigFromSupabase } from '@/lib/adminConfig'
 
 const colorMap = {
   green: { bg: '#4a9e1f', text: 'white',   hover: '#3a8010' },
@@ -15,11 +15,13 @@ export default function AnnouncementBanner() {
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
-    const cfg = getAdminConfig()
-    setAnnouncement(cfg.announcement)
-    // Check if dismissed in this session
-    const key = `slmh_announce_dismissed_${cfg.announcement.text}`
-    if (sessionStorage.getItem(key)) setDismissed(true)
+    const local = getAdminConfig()
+    mergeSharedConfigFromSupabase(local).then((cfg) => {
+      setAnnouncement(cfg.announcement)
+      // Check if dismissed in this session
+      const key = `slmh_announce_dismissed_${cfg.announcement.text}`
+      if (sessionStorage.getItem(key)) setDismissed(true)
+    })
   }, [])
 
   function dismiss() {

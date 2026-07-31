@@ -1,6 +1,6 @@
 import { supabase } from '../supabase'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { TeamMember, Stat } from '../adminConfig'
+import type { TeamMember, Stat, Announcement } from '../adminConfig'
 
 export interface SiteSettingsConfig {
   facebook?:  string
@@ -16,6 +16,15 @@ export interface SiteSettingsConfig {
   teamMembers?: TeamMember[]
   stats?:       Stat[]
   mission?:     string
+  // SEO — falls back to the hardcoded defaults in lib/seo.ts when unset
+  metaDescription?: string
+  ogImage?:         string
+  // General site info + announcement banner — also shared across devices
+  email?:    string
+  phone?:    string
+  location?: string
+  maintenanceMode?: boolean
+  announcement?:    Announcement
 }
 
 /**

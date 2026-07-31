@@ -3,7 +3,6 @@ import dynamic from 'next/dynamic'
 import Header from '@/components/layout/Header'
 import AnnouncementBanner from '@/components/layout/AnnouncementBanner'
 import MaintenanceGate from '@/components/layout/MaintenanceGate'
-import GoogleAnalytics from '@/components/layout/GoogleAnalytics'
 import BreakingTicker from '@/components/layout/BreakingTicker'
 import SidePanelAd from '@/components/layout/SidePanelAd'
 
@@ -31,7 +30,6 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
 
         {/* ── Entire site content — header → footer ── */}
         <div className="portal-center">
-          <GoogleAnalytics />
           <AnnouncementBanner />
           <Header />
           {/* Reserve 36px so layout doesn't shift when ticker data arrives */}

@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import AnimateIn from '@/components/ui/AnimateIn'
 import PageHero from '@/components/ui/PageHero'
-import { getAdminConfig, defaultConfig, AdminConfig } from '@/lib/adminConfig'
-import { getSiteSettings } from '@/lib/db/siteSettings'
+import { getAdminConfig, mergeSharedConfigFromSupabase, defaultConfig, AdminConfig } from '@/lib/adminConfig'
 import { saveMessage } from '@/lib/db/contact'
 
 const faqs = [
