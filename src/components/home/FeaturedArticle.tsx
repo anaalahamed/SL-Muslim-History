@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { getFeaturedArticles } from '@/lib/db/articles'
 import { Article } from '@/lib/types'
-import { formatDate } from '@/lib/utils'
+import { formatDate, getExcerpt } from '@/lib/utils'
 
 const CAT_COLORS: Record<string, { bg: string; text: string }> = {
   'Early History':        { bg: '#eaf3de', text: '#27500a' },
@@ -116,7 +116,7 @@ export default function FeaturedArticle() {
                     {article.title}
                   </p>
                   <p style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '10px', color: 'var(--muted)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginTop: '2px' }}>
-                    {article.excerpt}
+                    {getExcerpt(article, 14)}
                   </p>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', fontSize: '9px', color: 'var(--muted)' }}>
                     <span>👁 {article.views}</span>

@@ -9,7 +9,7 @@ import { getNews } from '@/lib/db/news'
 import { Article, NewsPost } from '@/lib/types'
 import PageHero from '@/components/ui/PageHero'
 import AnimateIn from '@/components/ui/AnimateIn'
-import { formatDate } from '@/lib/utils'
+import { formatDate, getExcerpt } from '@/lib/utils'
 import { SearchSkeleton } from '@/components/ui/Skeleton'
 import AdBanner from '@/components/ui/AdBanner'
 
@@ -160,7 +160,7 @@ function SearchResults() {
                             <span className="text-xs" style={{ color: 'var(--muted)' }}>{formatDate(article.published_at)}</span>
                           </div>
                           <h3 className="font-extrabold text-sm mb-1 line-clamp-1" style={{ color: 'var(--dark)' }}>{article.title}</h3>
-                          <p className="text-xs line-clamp-2" style={{ color: 'var(--muted)', lineHeight: '1.6' }}>{article.excerpt}</p>
+                          <p className="text-xs line-clamp-2" style={{ color: 'var(--muted)', lineHeight: '1.6' }}>{getExcerpt(article, 20)}</p>
                         </div>
                         <span className="text-sm flex-shrink-0" style={{ color: 'var(--green)' }}>→</span>
                       </Link>

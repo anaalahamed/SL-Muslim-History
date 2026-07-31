@@ -181,18 +181,21 @@ export default function ArticleDetail({ article, related, categories }: Props) {
 
                 {/* Article content */}
                 <div className="article-body-pad p-6 md:p-10">
-                  {/* Excerpt / lead */}
-                  <p
-                    className="tamil-text text-base leading-loose mb-8 pb-8"
-                    style={{
-                      color: 'var(--dark)',
-                      borderBottom: '2px solid var(--green-light)',
-                      fontSize: '1.05rem',
-                      fontWeight: 500,
-                    }}
-                  >
-                    {article.excerpt}
-                  </p>
+                  {/* Excerpt / lead — only shown when an excerpt was actually written,
+                      since the full content renders right below it anyway */}
+                  {article.excerpt?.trim() && (
+                    <p
+                      className="tamil-text text-base leading-loose mb-8 pb-8"
+                      style={{
+                        color: 'var(--dark)',
+                        borderBottom: '2px solid var(--green-light)',
+                        fontSize: '1.05rem',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {article.excerpt}
+                    </p>
+                  )}
 
                   {/* Author info if available */}
                   {article.author_link && (

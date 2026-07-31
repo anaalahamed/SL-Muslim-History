@@ -5,28 +5,9 @@ import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { getArticlesPaginated } from '@/lib/db/articles'
 import { Article } from '@/lib/types'
-import { formatDate } from '@/lib/utils'
+import { formatDate, getExcerpt } from '@/lib/utils'
 
 const ITEMS_PER_PAGE = 10
-
-// Returns a plain-text preview for an article card.
-// Prefers article.excerpt; falls back to the first paragraph of content.
-// Strips basic markdown so raw symbols don't appear in the preview.
-function getExcerpt(article: Article, maxWords = 30): string {
-  const src = article.excerpt?.trim()
-    || article.content?.split('\n\n')[0]?.trim()
-    || ''
-  // strip markdown headers, bold/italic markers, inline links
-  const clean = src
-    .replace(/^#{1,6}\s+/gm, '')
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    .replace(/\*([^*]+)\*/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/\s+/g, ' ')
-    .trim()
-  const words = clean.split(' ')
-  return words.length <= maxWords ? clean : words.slice(0, maxWords).join(' ') + '…'
-}
 
 const CAT_COLORS: Record<string, { bg: string; text: string }> = {
   'Early History':        { bg: '#eaf3de', text: '#27500a' },

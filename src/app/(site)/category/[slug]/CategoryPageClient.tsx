@@ -7,7 +7,7 @@ import { useState, useEffect, use } from 'react'
 import { getCategoryBySlug, getCategories } from '@/lib/db/categories'
 import { getArticles } from '@/lib/db/articles'
 import { Category, Article } from '@/lib/types'
-import { formatDate, formatViews } from '@/lib/utils'
+import { formatDate, formatViews, getExcerpt } from '@/lib/utils'
 import AnimateIn from '@/components/ui/AnimateIn'
 import { CategoryPageSkeleton } from '@/components/ui/Skeleton'
 import AdBanner from '@/components/ui/AdBanner'
@@ -202,7 +202,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
                         className="tamil-text text-sm line-clamp-3 mb-5"
                         style={{ color: 'var(--muted)', lineHeight: '1.8' }}
                       >
-                        {featured.excerpt}
+                        {getExcerpt(featured, 30)}
                       </p>
                       <div className="flex items-center justify-between text-xs" style={{ color: 'var(--muted)' }}>
                         <span>{featured.author} · {formatDate(featured.published_at)}</span>
@@ -270,7 +270,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
                               className="tamil-text text-xs line-clamp-2 mb-4 flex-1"
                               style={{ color: 'var(--muted)', lineHeight: '1.8' }}
                             >
-                              {article.excerpt}
+                              {getExcerpt(article, 20)}
                             </p>
                             <div
                               className="flex items-center justify-between text-xs pt-3"

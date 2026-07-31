@@ -119,8 +119,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid visitor_id' }, { status: 400 })
     }
 
-    console.log('[reactions] POST', { content_type, content_id, emoji, visitor_id_len: visitor_id.length })
-
     const anonDb    = db()
     const mutationDb = serviceDb()
 
@@ -151,7 +149,6 @@ export async function POST(request: NextRequest) {
       // MAX_CHANGES changes. Once used up, the request is a no-op: we return
       // their current (unchanged) state instead of erroring.
       if (existing.change_count >= MAX_CHANGES) {
-        console.log('[reactions] change limit reached — ignoring', { id: existing.id, change_count: existing.change_count })
         myReaction = existing.emoji
         changesRemaining = 0
       } else {
@@ -168,7 +165,6 @@ export async function POST(request: NextRequest) {
             { status: 500 },
           )
         }
-        console.log('[reactions] updated reaction', { id: existing.id, from: existing.emoji, to: nextEmoji })
         myReaction = nextEmoji
         changesRemaining = MAX_CHANGES - (existing.change_count + 1)
       }
@@ -185,7 +181,6 @@ export async function POST(request: NextRequest) {
           { status: 500 },
         )
       }
-      console.log('[reactions] inserted reaction', { content_type, content_id, emoji })
       myReaction = emoji
       changesRemaining = MAX_CHANGES
     }
@@ -200,7 +195,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, reactions: 'recount_failed', myReaction, changesRemaining })
     }
 
-    console.log('[reactions] returning counts', reactions)
     return NextResponse.json({ success: true, reactions, myReaction, changesRemaining })
 
   } catch (err) {

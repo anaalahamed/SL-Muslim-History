@@ -2,6 +2,13 @@
 -- SL Muslim History — RLS Migration
 -- Safe to run multiple times (idempotent)
 -- Admin UUID: f0f05784-403f-4a70-a6ad-b904a36d09ba
+--
+-- NOTE: this file is a full from-scratch reference snapshot. The live
+-- database has since been updated by supabase/migrations/007-010, which
+-- this file has been kept in sync with (draft/published status gating on
+-- articles/news, and removal of old permissive policies). If this file
+-- and the migrations/ folder ever diverge again, the migrations/ folder
+-- is the source of truth — update this file to match, don't run it blindly.
 -- ============================================================
 
 -- ============================================================
@@ -27,10 +34,22 @@ ALTER TABLE site_settings           ENABLE ROW LEVEL SECURITY;
 -- articles
 DROP POLICY IF EXISTS "articles_public_select"          ON articles;
 DROP POLICY IF EXISTS "articles_admin_all"              ON articles;
+-- legacy policies from an earlier iteration of this project's RLS setup —
+-- all USING(true), and being OR'd with every other policy they granted
+-- unrestricted read/write access regardless of the more specific policies
+-- below (see migrations/008_cleanup_legacy_permissive_policies.sql)
+DROP POLICY IF EXISTS "Allow all articles"              ON articles;
+DROP POLICY IF EXISTS "Public read articles"            ON articles;
+DROP POLICY IF EXISTS "admin write"                     ON articles;
+DROP POLICY IF EXISTS "public read"                     ON articles;
 
 -- news
 DROP POLICY IF EXISTS "news_public_select"              ON news;
 DROP POLICY IF EXISTS "news_admin_all"                  ON news;
+DROP POLICY IF EXISTS "Allow all news"                  ON news;
+DROP POLICY IF EXISTS "Public read news"                ON news;
+DROP POLICY IF EXISTS "admin write"                     ON news;
+DROP POLICY IF EXISTS "public read"                     ON news;
 
 -- authors
 DROP POLICY IF EXISTS "authors_public_select"           ON authors;
@@ -76,10 +95,17 @@ DROP POLICY IF EXISTS "site_settings_admin_all"         ON site_settings;
 -- 3. ARTICLES
 -- ============================================================
 
+-- draft/published status gate (see migrations/007_article_news_status.sql)
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'published';
+ALTER TABLE articles DROP CONSTRAINT IF EXISTS articles_status_check;
+ALTER TABLE articles ADD CONSTRAINT articles_status_check CHECK (status IN ('draft', 'published'));
+
+-- Public: only published rows. Admin still sees drafts via articles_admin_all
+-- below — RLS policies are OR'd together, so the admin's own uid match wins.
 CREATE POLICY "articles_public_select"
   ON articles FOR SELECT
   TO anon, authenticated
-  USING (true);
+  USING (status = 'published');
 
 CREATE POLICY "articles_admin_all"
   ON articles FOR ALL
@@ -91,10 +117,14 @@ CREATE POLICY "articles_admin_all"
 -- 4. NEWS
 -- ============================================================
 
+ALTER TABLE news ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'published';
+ALTER TABLE news DROP CONSTRAINT IF EXISTS news_status_check;
+ALTER TABLE news ADD CONSTRAINT news_status_check CHECK (status IN ('draft', 'published'));
+
 CREATE POLICY "news_public_select"
   ON news FOR SELECT
   TO anon, authenticated
-  USING (true);
+  USING (status = 'published');
 
 CREATE POLICY "news_admin_all"
   ON news FOR ALL
@@ -275,14 +305,15 @@ CREATE POLICY "site_settings_admin_all"
   WITH CHECK (auth.uid() = 'f0f05784-403f-4a70-a6ad-b904a36d09ba');
 
 -- ============================================================
--- 14. RPC — increment_article_views
+-- 14. RPC — increment_article_views / increment_news_views
 -- ============================================================
 
--- Called from article detail page using the anon client.
+-- Called from article/news detail pages using the anon client.
 -- Requires SECURITY DEFINER on the function — verify in Supabase Dashboard
--- before running this migration (Database → Functions → increment_article_views).
--- If the function is SECURITY INVOKER, alter it to SECURITY DEFINER first.
+-- before running this migration (Database → Functions).
+-- If a function is SECURITY INVOKER, alter it to SECURITY DEFINER first.
 GRANT EXECUTE ON FUNCTION increment_article_views(uuid) TO anon;
+GRANT EXECUTE ON FUNCTION increment_news_views(uuid) TO anon;
 
 -- ============================================================
 -- 15. STORAGE — media bucket
