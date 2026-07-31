@@ -5,7 +5,7 @@ import AnimateIn from '@/components/ui/AnimateIn'
 
 export default function DonationCTA() {
   return (
-    <section style={{ background: 'var(--green-deeper)', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '56px 24px' }}>
+    <section style={{ background: 'var(--green-deeper)', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '32px 24px' }}>
         <AnimateIn direction="up">
           <div
             style={{

@@ -75,7 +75,7 @@ export default function ArticleDetail({ article, related, categories }: Props) {
       {/* Article hero */}
       <div
         className="relative overflow-hidden"
-        style={{ background: 'linear-gradient(160deg, #0d2e1b 0%, #163522 55%, #0a2213 100%)', paddingTop: '48px', paddingBottom: '48px' }}
+        style={{ background: 'linear-gradient(160deg, #0d2e1b 0%, #163522 55%, #0a2213 100%)', paddingTop: '28px', paddingBottom: '28px' }}
       >
         {/* Gold top border */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, var(--gold) 30%, #f0d060 50%, var(--gold) 70%, transparent)' }} />
@@ -95,7 +95,7 @@ export default function ArticleDetail({ article, related, categories }: Props) {
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-white">
           <AnimateIn direction="up">
             {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-xs mb-4" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <div className="flex items-center gap-2 text-xs mb-3" style={{ color: 'rgba(255,255,255,0.45)' }}>
               <Link href="/" className="hover:text-white transition-colors">Home</Link>
               <span style={{ color: 'rgba(255,255,255,0.25)' }}>/</span>
               <Link href="/articles" className="hover:text-white transition-colors">Articles</Link>
@@ -104,7 +104,7 @@ export default function ArticleDetail({ article, related, categories }: Props) {
             </div>
 
             {/* Gold bar + badges */}
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-3">
               <div style={{ width: '3px', height: '32px', borderRadius: '9999px', background: 'var(--gold)', flexShrink: 0 }} />
               <span className="text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full" style={{ background: 'var(--gold)', color: '#0d1f0a', letterSpacing: '0.12em' }}>
                 {article.category}
@@ -117,7 +117,7 @@ export default function ArticleDetail({ article, related, categories }: Props) {
             </div>
 
             {/* Title */}
-            <h1 className="tamil-heading article-hero-title font-extrabold text-2xl md:text-3xl text-white mb-5" style={{ lineHeight: '1.45' }}>
+            <h1 className="tamil-heading article-hero-title font-extrabold text-xl md:text-2xl text-white mb-3" style={{ lineHeight: '1.4' }}>
               {article.title}
             </h1>
 

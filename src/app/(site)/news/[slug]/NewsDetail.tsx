@@ -59,7 +59,7 @@ export default function NewsDetail({ post, related, recent }: Props) {
       {/* Hero */}
       <div
         className="relative overflow-hidden"
-        style={{ background: 'linear-gradient(160deg, #0d2e1b 0%, #163522 55%, #0a2213 100%)', paddingTop: '48px', paddingBottom: '48px' }}
+        style={{ background: 'linear-gradient(160deg, #0d2e1b 0%, #163522 55%, #0a2213 100%)', paddingTop: '28px', paddingBottom: '28px' }}
       >
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, var(--gold) 30%, #f0d060 50%, var(--gold) 70%, transparent)' }} />
         <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,168,76,0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
@@ -75,7 +75,7 @@ export default function NewsDetail({ post, related, recent }: Props) {
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-white">
           <AnimateIn direction="up">
             {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-xs mb-4" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <div className="flex items-center gap-2 text-xs mb-3" style={{ color: 'rgba(255,255,255,0.45)' }}>
               <Link href="/" className="hover:text-white transition-colors">Home</Link>
               <span style={{ color: 'rgba(255,255,255,0.25)' }}>/</span>
               <Link href="/news" className="hover:text-white transition-colors">News</Link>
@@ -89,7 +89,7 @@ export default function NewsDetail({ post, related, recent }: Props) {
             </div>
 
             {/* Gold bar + type badge */}
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-3">
               <div style={{ width: '3px', height: '32px', borderRadius: '9999px', background: 'var(--gold)', flexShrink: 0 }} />
               <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: typeBg, color: typeColor }}>
                 {typeLabel}
@@ -97,7 +97,7 @@ export default function NewsDetail({ post, related, recent }: Props) {
             </div>
 
             {/* Title */}
-            <h1 className="tamil-heading font-extrabold text-2xl md:text-3xl text-white mb-5" style={{ lineHeight: '1.45' }}>
+            <h1 className="tamil-heading font-extrabold text-xl md:text-2xl text-white mb-3" style={{ lineHeight: '1.4' }}>
               {post.title}
             </h1>
 
