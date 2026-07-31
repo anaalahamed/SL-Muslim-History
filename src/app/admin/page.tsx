@@ -17,7 +17,6 @@ const quickActions = [
   { label: 'Add Category',      href: '/admin/categories',    icon: '🗂️', color: '#7c3aed' },
   { label: 'Upload Media',      href: '/admin/media',         icon: '🖼️', color: '#c2410c' },
   { label: 'View Newsletter',   href: '/admin/newsletter',    icon: '📬', color: '#a16207' },
-  { label: 'Database Setup',    href: '/admin/setup',         icon: '🔧', color: '#b45309' },
   { label: 'Site Settings',     href: '/admin/settings',      icon: '⚙️', color: '#475569' },
 ]
 

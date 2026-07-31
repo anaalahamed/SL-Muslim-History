@@ -51,10 +51,6 @@ export interface AdminConfig {
   mission: string
   teamMembers: TeamMember[]
   stats: Stat[]
-  // Homepage control
-  heroArticleId: string
-  heroBannerImage: string
-  featuredArticleIds: string[]
   // SEO
   seo: SEO
   // Announcement banner
@@ -90,9 +86,6 @@ export const defaultConfig: AdminConfig = {
     { id: '3', value: '1,400', label: 'Years of History',      icon: '📜' },
     { id: '4', value: '20+',   label: 'Research Contributors', icon: '🎓' },
   ],
-  heroArticleId: '',
-  heroBannerImage: '',
-  featuredArticleIds: [],
   seo: {
     metaDescription: SITE_DESCRIPTION,
     ogImage: '/og-image.jpg',
@@ -190,7 +183,6 @@ export function getAdminConfig(): AdminConfig {
       // Ensure arrays / objects always have defaults if missing
       teamMembers:        parsed.teamMembers        ?? defaultConfig.teamMembers,
       stats:              parsed.stats              ?? defaultConfig.stats,
-      featuredArticleIds: parsed.featuredArticleIds ?? defaultConfig.featuredArticleIds,
       seo:         { ...defaultConfig.seo,          ...(parsed.seo         ?? {}) },
       announcement:{ ...defaultConfig.announcement, ...(parsed.announcement ?? {}) },
     }
