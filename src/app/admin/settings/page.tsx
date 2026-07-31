@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getAdminConfig, saveAdminConfig, saveSocialLinksToSupabase, defaultConfig, AdminConfig, TeamMember, Stat } from '@/lib/adminConfig'
+import { getAdminConfig, saveAdminConfig, saveSharedConfigToSupabase, mergeSharedConfigFromSupabase, defaultConfig, AdminConfig, TeamMember, Stat } from '@/lib/adminConfig'
 import { getAuthClient } from '@/lib/supabase-auth'
 
 
@@ -15,13 +15,21 @@ export default function SettingsPage() {
   const [confirmPwd,setConfirmPwd]= useState('')
   const [pwdMsg,    setPwdMsg]    = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
-  useEffect(() => { setConfig(getAdminConfig()) }, [])
+  useEffect(() => {
+    const local = getAdminConfig()
+    setConfig(local)
+    // Local storage is just a fast first paint — the real shared values
+    // (team/stats/mission/social) live in Supabase, so pull those in too
+    // once they arrive, otherwise this admin's own browser could show
+    // stale data from before someone else's change.
+    mergeSharedConfigFromSupabase(local).then(setConfig)
+  }, [])
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
     saveAdminConfig(config)
-    // Also persist social links to Supabase so all devices/browsers can read them
-    saveSocialLinksToSupabase(config, getAuthClient())
+    // Also persist to Supabase so every visitor/device sees the same thing
+    saveSharedConfigToSupabase(config, getAuthClient())
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
   }
@@ -480,7 +488,12 @@ export default function SettingsPage() {
 
             <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
               <button
-                onClick={() => { saveAdminConfig(config); setSaved(true); setTimeout(() => setSaved(false), 2500) }}
+                onClick={() => {
+                  saveAdminConfig(config)
+                  saveSharedConfigToSupabase(config, getAuthClient())
+                  setSaved(true)
+                  setTimeout(() => setSaved(false), 2500)
+                }}
                 className="px-6 py-2.5 rounded-xl text-sm font-bold text-white"
                 style={{ background: '#4a9e1f' }}
               >

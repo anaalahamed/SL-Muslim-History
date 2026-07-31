@@ -105,8 +105,11 @@ export const defaultConfig: AdminConfig = {
   },
 }
 
-// Persist social links to Supabase so they appear on all devices/browsers.
-export async function saveSocialLinksToSupabase(config: AdminConfig, client?: import('@supabase/supabase-js').SupabaseClient): Promise<void> {
+// Persist the parts of AdminConfig that visitors actually need to see —
+// social links, and the About page's team/stats/mission — to Supabase, so
+// they show up for every visitor and device instead of staying stuck in
+// just the admin's own browser storage.
+export async function saveSharedConfigToSupabase(config: AdminConfig, client?: import('@supabase/supabase-js').SupabaseClient): Promise<void> {
   try {
     const { saveSiteSettings } = await import('./db/siteSettings')
     await saveSiteSettings({
@@ -118,9 +121,39 @@ export async function saveSocialLinksToSupabase(config: AdminConfig, client?: im
       telegram:  config.telegram  || '',
       reddit:    config.reddit    || '',
       pinterest: config.pinterest || '',
+      teamMembers: config.teamMembers,
+      stats:       config.stats,
+      mission:     config.mission,
     }, client)
   } catch {
     // non-critical — localStorage still works for local admin
+  }
+}
+
+// Merges the shared Supabase-backed fields on top of a local AdminConfig —
+// used by both the public About page and the admin Settings page so both
+// reflect the true, shared state rather than only what's cached locally.
+export async function mergeSharedConfigFromSupabase(config: AdminConfig): Promise<AdminConfig> {
+  try {
+    const { getSiteSettings } = await import('./db/siteSettings')
+    const shared = await getSiteSettings()
+    if (!shared) return config
+    return {
+      ...config,
+      facebook:  shared.facebook  ?? config.facebook,
+      youtube:   shared.youtube   ?? config.youtube,
+      whatsapp:  shared.whatsapp  ?? config.whatsapp,
+      twitter:   shared.twitter   ?? config.twitter,
+      instagram: shared.instagram ?? config.instagram,
+      telegram:  shared.telegram  ?? config.telegram,
+      reddit:    shared.reddit    ?? config.reddit,
+      pinterest: shared.pinterest ?? config.pinterest,
+      teamMembers: shared.teamMembers ?? config.teamMembers,
+      stats:       shared.stats       ?? config.stats,
+      mission:     shared.mission     ?? config.mission,
+    }
+  } catch {
+    return config
   }
 }
 

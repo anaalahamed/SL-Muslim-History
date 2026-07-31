@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import AnimateIn from '@/components/ui/AnimateIn'
 import PageHero from '@/components/ui/PageHero'
-import { getAdminConfig, defaultConfig, AdminConfig } from '@/lib/adminConfig'
+import { getAdminConfig, mergeSharedConfigFromSupabase, defaultConfig, AdminConfig } from '@/lib/adminConfig'
 
 const milestones = [
   { year: '2010', event: 'SL Muslim History founded as a small research blog' },
@@ -25,7 +25,14 @@ const values = [
 
 export default function AboutClient() {
   const [config, setConfig] = useState<AdminConfig>(defaultConfig)
-  useEffect(() => { setConfig(getAdminConfig()) }, [])
+  useEffect(() => {
+    // Team/stats/mission are shared via Supabase (the admin's own browser
+    // storage is only ever a same-device fallback) — every visitor needs
+    // the real, shared values here, not just whatever this browser cached.
+    const local = getAdminConfig()
+    setConfig(local)
+    mergeSharedConfigFromSupabase(local).then(setConfig)
+  }, [])
 
   const team       = config.teamMembers
   const stats      = config.stats

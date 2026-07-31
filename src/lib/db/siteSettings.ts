@@ -1,5 +1,6 @@
 import { supabase } from '../supabase'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import type { TeamMember, Stat } from '../adminConfig'
 
 export interface SiteSettingsConfig {
   facebook?:  string
@@ -10,7 +11,11 @@ export interface SiteSettingsConfig {
   telegram?:  string
   reddit?:    string
   pinterest?: string
-  [key: string]: string | undefined
+  // About page content — shared across every visitor/device, unlike the
+  // rest of AdminConfig which still only lives in the admin's own browser.
+  teamMembers?: TeamMember[]
+  stats?:       Stat[]
+  mission?:     string
 }
 
 /**
