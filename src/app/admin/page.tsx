@@ -53,7 +53,6 @@ export default function AdminDashboard() {
 
   const totalViews     = articles.reduce((s, a) => s + a.views, 0)
   const recentArticles = [...articles].sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime()).slice(0, 5)
-  const recentNews     = [...news].sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime()).slice(0, 4)
 
   const articlesThisMonth  = articles.filter((a) => isWithinLast30Days(a.published_at)).length
   const newsThisMonth      = news.filter((n) => isWithinLast30Days(n.published_at)).length
@@ -66,7 +65,9 @@ export default function AdminDashboard() {
 
   // Ranked by real (organic) views, not the boosted total, so an admin-set
   // boost can't make an article look more popular than it actually is here.
-  const topArticles = [...articles].sort((a, b) => (b.real_views ?? b.views) - (a.real_views ?? a.views)).slice(0, 5)
+  const topArticles     = [...articles].sort((a, b) => (b.real_views ?? b.views) - (a.real_views ?? a.views)).slice(0, 5)
+  const topSpecialNews  = news.filter((n) => n.news_type === 'special').sort((a, b) => (b.real_views ?? b.views ?? 0) - (a.real_views ?? a.views ?? 0)).slice(0, 5)
+  const topJanazaNews   = news.filter((n) => n.news_type === 'janaza').sort((a, b) => (b.real_views ?? b.views ?? 0) - (a.real_views ?? a.views ?? 0)).slice(0, 5)
 
   const monthlyPublished = Array.from({ length: 6 }, (_, i) => {
     const d = new Date()
@@ -396,7 +397,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Recent news */}
+          {/* Top performing special news */}
           <div
             className="rounded-2xl overflow-hidden"
             style={{ background: 'white', border: '1px solid #e2e8f0' }}
@@ -405,33 +406,78 @@ export default function AdminDashboard() {
               className="flex items-center justify-between px-5 py-4"
               style={{ borderBottom: '1px solid #f1f5f9' }}
             >
-              <h3 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Recent News</h3>
+              <h3 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Top Special News</h3>
               <Link href="/admin/news" className="text-xs font-bold" style={{ color: '#4a9e1f' }}>View all →</Link>
             </div>
-            <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
-              {recentNews.map((item) => (
-                <div key={item.id} className="flex items-start gap-3 px-5 py-3">
-                  <span
-                    className="flex-shrink-0 text-xs font-bold px-1.5 py-0.5 rounded mt-0.5"
-                    style={item.news_type === 'janaza'
-                      ? { background: '#f0f9ff', color: '#0369a1' }
-                      : { background: '#f0fdf4', color: '#166534' }}
+            <div>
+              {topSpecialNews.length === 0 ? (
+                <p className="text-sm px-5 py-6" style={{ color: '#94a3b8' }}>No special news yet.</p>
+              ) : (
+                topSpecialNews.map((item, i) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-4 px-5 py-3.5 transition-colors"
+                    style={{ borderBottom: i < topSpecialNews.length - 1 ? '1px solid #f8fafc' : 'none' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
                   >
-                    {item.news_type === 'janaza' ? 'J' : 'S'}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold line-clamp-2" style={{ color: '#1e293b', lineHeight: '1.5' }}>
-                      {item.status === 'draft' && (
-                        <span className="text-xs font-bold px-1.5 py-0.5 rounded mr-1" style={{ background: '#fef9c3', color: '#a16207' }}>📝 Draft</span>
-                      )}
-                      {item.title}
-                    </p>
-                    <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>
-                      {formatDate(item.published_at)} · 👁 {formatViews(item.views ?? 0)}
-                    </p>
+                    <div
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0"
+                      style={{ background: i === 0 ? '#166534' : '#f1f5f9', color: i === 0 ? 'white' : '#94a3b8' }}
+                    >
+                      {i === 0 ? '🏆' : i + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{item.title}</p>
+                    </div>
+                    <span className="text-sm font-black flex-shrink-0" style={{ color: '#4a9e1f' }} title="Real (organic) views">
+                      👁 {formatViews(item.real_views ?? item.views ?? 0)}
+                    </span>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Top performing janaza news */}
+          <div
+            className="rounded-2xl overflow-hidden"
+            style={{ background: 'white', border: '1px solid #e2e8f0' }}
+          >
+            <div
+              className="flex items-center justify-between px-5 py-4"
+              style={{ borderBottom: '1px solid #f1f5f9' }}
+            >
+              <h3 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Top Janaza News</h3>
+              <Link href="/admin/news" className="text-xs font-bold" style={{ color: '#4a9e1f' }}>View all →</Link>
+            </div>
+            <div>
+              {topJanazaNews.length === 0 ? (
+                <p className="text-sm px-5 py-6" style={{ color: '#94a3b8' }}>No janaza news yet.</p>
+              ) : (
+                topJanazaNews.map((item, i) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-4 px-5 py-3.5 transition-colors"
+                    style={{ borderBottom: i < topJanazaNews.length - 1 ? '1px solid #f8fafc' : 'none' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+                  >
+                    <div
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0"
+                      style={{ background: i === 0 ? '#0369a1' : '#f1f5f9', color: i === 0 ? 'white' : '#94a3b8' }}
+                    >
+                      {i === 0 ? '🏆' : i + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{item.title}</p>
+                    </div>
+                    <span className="text-sm font-black flex-shrink-0" style={{ color: '#4a9e1f' }} title="Real (organic) views">
+                      👁 {formatViews(item.real_views ?? item.views ?? 0)}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
