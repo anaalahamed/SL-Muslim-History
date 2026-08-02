@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
-import { getRecentArticles } from '@/lib/db/articles'
 import { Article } from '@/lib/types'
 import { formatDate } from '@/lib/utils'
 
@@ -31,15 +30,13 @@ const SLIDE_BG = [
   'linear-gradient(160deg,#200a20,#3d1a3d)',
 ]
 
-export default function HeroSlider() {
-  const [slides,  setSlides]  = useState<Article[]>([])
-  const [cur,     setCur]     = useState(0)
-  const [loading, setLoading] = useState(true)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+interface Props {
+  slides: Article[]
+}
 
-  useEffect(() => {
-    getRecentArticles(5).then((articles) => { setSlides(articles); setLoading(false) })
-  }, [])
+export default function HeroSlider({ slides }: Props) {
+  const [cur, setCur] = useState(0)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const go = (n: number) => {
     setCur(n)
@@ -81,15 +78,7 @@ export default function HeroSlider() {
     </div>
   )
 
-  if (loading) return (
-    <div>
-      {LabelRow}
-      {/* Same height as the real slider so there's no layout shift on load */}
-      <div className="hero-slide-container" style={{ borderRadius: '4px', border: '1px solid var(--border)', overflow: 'hidden', height: '300px' }}>
-        <div className="animate-shimmer" style={{ width: '100%', height: '100%' }} />
-      </div>
-    </div>
-  )
+  if (slides.length === 0) return null
 
   return (
     <div>
@@ -112,8 +101,12 @@ export default function HeroSlider() {
               }}
             >
               {/* Background image — shows the full photo uncropped (on top of
-                  the slide's gradient backdrop) instead of zooming/cropping it */}
-              {article.featured_image && (
+                  the slide's gradient backdrop) instead of zooming/cropping it.
+                  Only the active slide's image is mounted — all 5 sit stacked
+                  in the same viewport spot regardless of opacity, so rendering
+                  every <Image> at once made the browser fetch all 5 full-size
+                  photos concurrently, competing with the actual LCP image. */}
+              {article.featured_image && i === cur && (
                 <Image
                   src={article.featured_image}
                   alt={article.title}

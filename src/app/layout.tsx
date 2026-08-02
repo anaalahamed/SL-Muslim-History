@@ -1,10 +1,32 @@
 import type { Metadata, Viewport } from 'next'
 import { Suspense } from 'react'
 import './globals.css'
-import FontLoader from '@/components/layout/FontLoader'
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import AnalyticsPageView from '@/components/analytics/AnalyticsPageView'
 import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS, websiteJsonLd, organizationJsonLd } from '@/lib/seo'
+
+// Server-rendered so the browser discovers and starts fetching this while
+// parsing the initial HTML, instead of waiting for JS to hydrate and inject
+// it (which is what the old client-side FontLoader component did). The
+// `&display=swap` in the URL means text still paints immediately with the
+// criticalCSS fallback fonts below and swaps in once this loads — this
+// change makes it load *sooner*, it doesn't make anything render-blocking.
+const FONT_URL =
+  'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700' +
+  '&family=Lato:wght@400;700;900' +
+  '&family=Noto+Sans+Tamil:wght@400;500;600;700;800' +
+  '&display=swap'
+
+// Every page loads data from Supabase; preconnecting to its origin lets the
+// browser start the DNS/TLS handshake immediately instead of paying that
+// cost on the first actual data request.
+const supabaseOrigin = (() => {
+  try {
+    return process.env.NEXT_PUBLIC_SUPABASE_URL ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin : null
+  } catch {
+    return null
+  }
+})()
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -65,11 +87,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ta" data-scroll-behavior="smooth">
       <head>
-        {/* Preconnect so DNS/TCP is ready when FontLoader requests the stylesheet */}
+        {/* Preconnect so DNS/TCP is ready before the font stylesheet/Supabase requests fire */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {supabaseOrigin && <link rel="preconnect" href={supabaseOrigin} />}
         {/* Inline critical font fallbacks — no blocking network request */}
         <style dangerouslySetInnerHTML={{ __html: criticalCSS }} />
+        <link rel="stylesheet" href={FONT_URL} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd()) }}
@@ -80,7 +104,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
-        <FontLoader />
         <Suspense>
           <AnalyticsPageView />
         </Suspense>

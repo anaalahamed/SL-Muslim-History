@@ -4,28 +4,25 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { getAdminConfig, mergeSharedConfigFromSupabase } from '@/lib/adminConfig'
 
+// Renders the real site immediately (the overwhelmingly common case) instead
+// of blocking every single page load behind a Supabase round-trip just to
+// confirm maintenance mode is off. The check still happens, in the
+// background — if it turns out maintenance IS on, this swaps to the
+// maintenance page a moment later. That rare-case flash is a far better
+// trade-off than delaying first paint on every normal visit.
 export default function MaintenanceGate({ children }: { children: React.ReactNode }) {
   const [maintenance, setMaintenance] = useState(false)
-  const [checked,     setChecked]     = useState(false)
 
   useEffect(() => {
-    // maintenanceMode must be read from Supabase, not just this browser's
-    // localStorage — otherwise turning it on only ever "works" for the
-    // admin's own device, while every real visitor keeps seeing the live
-    // site with no maintenance page at all.
     const local = getAdminConfig()
     mergeSharedConfigFromSupabase(local).then((merged) => {
-      setMaintenance(merged.maintenanceMode)
-      setChecked(true)
+      if (merged.maintenanceMode) setMaintenance(true)
     })
   }, [])
 
-  // Don't flash anything until we've checked localStorage
-  if (!checked) return null
+  if (maintenance) return <MaintenancePage />
 
-  if (!maintenance) return <>{children}</>
-
-  return <MaintenancePage />
+  return <>{children}</>
 }
 
 function MaintenancePage() {

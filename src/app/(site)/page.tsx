@@ -8,6 +8,7 @@ import SidebarAd from '@/components/home/SidebarAd'
 import AdBanner from '@/components/ui/AdBanner'
 import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
 import { getSiteSettings } from '@/lib/db/siteSettings'
+import { getRecentArticles } from '@/lib/db/articles'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,7 +48,11 @@ const FollowUs     = lazyLoad(() => import('@/components/home/FollowUs'))
 const CategoryGrid = lazyLoad(() => import('@/components/home/CategoryGrid'))
 const DonationCTA  = lazyLoad(() => import('@/components/home/DonationCTA'))
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Fetched server-side so the hero (the page's LCP element) is present in
+  // the initial HTML instead of waiting for a client-side fetch after hydration.
+  const heroSlides = await getRecentArticles(5)
+
   return (
     <>
       <div style={{ padding: '10px 14px 14px', background: 'var(--bg)' }}>
@@ -59,7 +64,7 @@ export default function HomePage() {
               child (e.g. hero title text) can force this column wider than
               its own grid track, overflowing the viewport on mobile. */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0 }}>
-            <HeroSlider />
+            <HeroSlider slides={heroSlides} />
             <FeaturedArticle />
             <AllArticles />
             <AdBanner position="homepage-bottom" />
