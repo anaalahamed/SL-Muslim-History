@@ -10,14 +10,15 @@ import { NewsPost } from '@/lib/types'
 import { formatDate, formatViews } from '@/lib/utils'
 import { getAdminConfig } from '@/lib/adminConfig'
 import { getAuthClient } from '@/lib/supabase-auth'
+import { theme, accents, cardStyle, AccentKey } from './adminTheme'
 
 const quickActions = [
-  { label: 'Write New Article', href: '/admin/articles/new',  icon: '📝', color: '#4a9e1f' },
-  { label: 'Add News Post',     href: '/admin/news/new',      icon: '📰', color: '#0369a1' },
-  { label: 'Add Category',      href: '/admin/categories',    icon: '🗂️', color: '#7c3aed' },
-  { label: 'Upload Media',      href: '/admin/media',         icon: '🖼️', color: '#c2410c' },
-  { label: 'View Newsletter',   href: '/admin/newsletter',    icon: '📬', color: '#a16207' },
-  { label: 'Site Settings',     href: '/admin/settings',      icon: '⚙️', color: '#475569' },
+  { label: 'Write New Article', href: '/admin/articles/new',  icon: '📝', accent: 'violet' as AccentKey },
+  { label: 'Add News Post',     href: '/admin/news/new',      icon: '📰', accent: 'blue' as AccentKey },
+  { label: 'Add Category',      href: '/admin/categories',    icon: '🗂️', accent: 'pink' as AccentKey },
+  { label: 'Upload Media',      href: '/admin/media',         icon: '🖼️', accent: 'cyan' as AccentKey },
+  { label: 'View Newsletter',   href: '/admin/newsletter',    icon: '📬', accent: 'emerald' as AccentKey },
+  { label: 'Site Settings',     href: '/admin/settings',      icon: '⚙️', accent: 'amber' as AccentKey },
 ]
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
@@ -63,7 +64,6 @@ export default function AdminDashboard() {
   const newsThisMonth      = news.filter((n) => isWithinLast30Days(n.published_at)).length
   const commentsApproved   = comments.filter((c) => c.status === 'approved').length
   const commentsPending    = comments.filter((c) => c.status === 'pending').length
-  const commentsThisMonth  = comments.filter((c) => isWithinLast30Days(c.created_at)).length
   const reactionsThisMonth = reactions.filter((r) => isWithinLast30Days(r.created_at)).length
   const subsAccepted       = subscribers.filter((s) => s.status === 'accepted').length
   const subsPending        = subscribers.filter((s) => s.status === 'pending').length
@@ -86,10 +86,10 @@ export default function AdminDashboard() {
   })
   const maxMonthlyCount = Math.max(1, ...monthlyPublished.map((m) => m.count))
 
-  const statCards = [
-    { label: 'Total Articles', value: articles.length,   icon: '📝', color: '#4a9e1f', href: '/admin/articles',   change: `+${articlesThisMonth} this month` },
-    { label: 'News Posts',     value: news.length,       icon: '📰', color: '#0369a1', href: '/admin/news',        change: `+${newsThisMonth} this month` },
-    { label: 'Categories',     value: categoryCount,     icon: '🗂️', color: '#7c3aed', href: '/admin/categories',  change: 'Active' },
+  const statCards: { label: string; value: number; icon: string; accent: AccentKey; href: string; change: string }[] = [
+    { label: 'Total Articles', value: articles.length,   icon: '📝', accent: 'violet', href: '/admin/articles',   change: `+${articlesThisMonth} this month` },
+    { label: 'News Posts',     value: news.length,       icon: '📰', accent: 'blue',   href: '/admin/news',        change: `+${newsThisMonth} this month` },
+    { label: 'Categories',     value: categoryCount,     icon: '🗂️', accent: 'pink',   href: '/admin/categories',  change: 'Active' },
   ]
 
   return (
@@ -97,72 +97,81 @@ export default function AdminDashboard() {
 
       {/* Welcome banner */}
       <div
-        className="rounded-2xl px-5 sm:px-7 py-5 sm:py-6 flex flex-wrap items-center justify-between gap-4"
-        style={{ background: 'linear-gradient(135deg, #1a3a0f 0%, #2d6112 100%)', color: 'white' }}
+        className="rounded-2xl px-5 sm:px-7 py-5 sm:py-6 flex flex-wrap items-center justify-between gap-4 relative overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, #1e1240 0%, #0f1b3d 60%, #0a0e17 100%)',
+          border: '1px solid rgba(139,92,246,0.25)',
+          boxShadow: `0 8px 40px ${accents.violet.glow}`,
+        }}
       >
-        <div>
-          <h2 className="text-xl font-extrabold mb-1">Welcome back, {ownerName} 👋</h2>
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
+        <div style={{ position: 'absolute', top: '-60px', right: '-40px', width: '220px', height: '220px', borderRadius: '50%', background: `radial-gradient(circle, ${accents.violet.glow} 0%, transparent 70%)`, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-50px', left: '20%', width: '180px', height: '180px', borderRadius: '50%', background: `radial-gradient(circle, ${accents.pink.glow} 0%, transparent 70%)`, pointerEvents: 'none' }} />
+        <div className="relative">
+          <h2 className="text-xl font-extrabold mb-1" style={{ color: theme.textPrimary }}>Welcome back, {ownerName} 👋</h2>
+          <p className="text-sm" style={{ color: theme.textSecondary }}>
             Here&apos;s what&apos;s happening with SL Muslim History today.
           </p>
         </div>
-        <div className="hidden sm:flex items-center gap-4 text-center">
+        <div className="relative hidden sm:flex items-center gap-4 text-center">
           <div>
-            <div className="text-2xl font-black" style={{ color: '#c9a84c' }}>{formatViews(totalViews)}</div>
-            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Total Views</div>
+            <div className="text-2xl font-black" style={{ color: accents.amber.solid, textShadow: `0 0 20px ${accents.amber.glow}` }}>{formatViews(totalViews)}</div>
+            <div className="text-xs" style={{ color: theme.textMuted }}>Total Views</div>
           </div>
-          <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.15)' }} />
+          <div style={{ width: '1px', height: '40px', background: theme.divider }} />
           <div title="Real (organic) article views">
-            <div className="text-2xl font-black" style={{ color: '#c9a84c' }}>{formatViews(realArticleViews)}</div>
-            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Articles</div>
+            <div className="text-2xl font-black" style={{ color: accents.violet.solid, textShadow: `0 0 20px ${accents.violet.glow}` }}>{formatViews(realArticleViews)}</div>
+            <div className="text-xs" style={{ color: theme.textMuted }}>Articles</div>
           </div>
-          <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.15)' }} />
+          <div style={{ width: '1px', height: '40px', background: theme.divider }} />
           <div title="Real (organic) special news views">
-            <div className="text-2xl font-black" style={{ color: '#c9a84c' }}>{formatViews(realSpecialViews)}</div>
-            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Special</div>
+            <div className="text-2xl font-black" style={{ color: accents.blue.solid, textShadow: `0 0 20px ${accents.blue.glow}` }}>{formatViews(realSpecialViews)}</div>
+            <div className="text-xs" style={{ color: theme.textMuted }}>Special</div>
           </div>
-          <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.15)' }} />
+          <div style={{ width: '1px', height: '40px', background: theme.divider }} />
           <div title="Real (organic) janaza news views">
-            <div className="text-2xl font-black" style={{ color: '#c9a84c' }}>{formatViews(realJanazaViews)}</div>
-            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Janaza</div>
+            <div className="text-2xl font-black" style={{ color: accents.cyan.solid, textShadow: `0 0 20px ${accents.cyan.glow}` }}>{formatViews(realJanazaViews)}</div>
+            <div className="text-xs" style={{ color: theme.textMuted }}>Janaza</div>
           </div>
         </div>
       </div>
 
       {/* Stat cards — all six in one compact row: heading, then emoji + count + this-month */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {statCards.map((s) => (
-          <Link
-            key={s.label}
-            href={s.href}
-            className="rounded-xl p-3 transition-all duration-200 min-w-0"
-            style={{ background: 'white', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.1)' }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)' }}
-          >
-            <div className="text-xs font-semibold truncate mb-1.5" style={{ color: '#64748b' }}>{s.label}</div>
-            <div className="flex items-baseline gap-1.5 flex-wrap">
-              <span className="text-sm">{s.icon}</span>
-              <span className="text-lg font-black" style={{ color: '#0f172a' }}>{s.value}</span>
-              <span className="text-xs font-bold" style={{ color: s.color }}>{s.change}</span>
-            </div>
-          </Link>
-        ))}
+        {statCards.map((s) => {
+          const a = accents[s.accent]
+          return (
+            <Link
+              key={s.label}
+              href={s.href}
+              className="rounded-xl p-3 transition-all duration-200 min-w-0"
+              style={cardStyle}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = a.glow; e.currentTarget.style.boxShadow = `0 8px 24px ${a.glow}` }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = 'none' }}
+            >
+              <div className="text-xs font-semibold truncate mb-1.5" style={{ color: theme.textSecondary }}>{s.label}</div>
+              <div className="flex items-baseline gap-1.5 flex-wrap">
+                <span className="text-sm">{s.icon}</span>
+                <span className="text-lg font-black" style={{ color: theme.textPrimary }}>{s.value}</span>
+                <span className="text-xs font-bold" style={{ color: a.solid }}>{s.change}</span>
+              </div>
+            </Link>
+          )
+        })}
 
         {/* Newsletter Subs — three counts squeezed into the same compact card */}
         <Link
           href="/admin/newsletter"
           className="rounded-xl p-3 transition-all duration-200 min-w-0"
-          style={{ background: 'white', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.1)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)' }}
+          style={cardStyle}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = accents.emerald.glow; e.currentTarget.style.boxShadow = `0 8px 24px ${accents.emerald.glow}` }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = 'none' }}
         >
-          <div className="text-xs font-semibold truncate mb-1.5" style={{ color: '#64748b' }}>Newsletter Subs</div>
+          <div className="text-xs font-semibold truncate mb-1.5" style={{ color: theme.textSecondary }}>Newsletter Subs</div>
           <div className="flex items-baseline gap-1 flex-wrap">
             <span className="text-sm">📬</span>
-            <span className="text-lg font-black" style={{ color: '#0f172a' }}>{subscribers.length}</span>
-            <span className="text-xs font-bold" style={{ color: '#15803d' }}>✓{subsAccepted}</span>
-            <span className="text-xs font-bold" style={{ color: '#b45309' }}>⏳{subsPending}</span>
+            <span className="text-lg font-black" style={{ color: theme.textPrimary }}>{subscribers.length}</span>
+            <span className="text-xs font-bold" style={{ color: accents.emerald.solid }}>✓{subsAccepted}</span>
+            <span className="text-xs font-bold" style={{ color: accents.amber.solid }}>⏳{subsPending}</span>
           </div>
         </Link>
 
@@ -170,16 +179,16 @@ export default function AdminDashboard() {
         <Link
           href="/admin/comments"
           className="rounded-xl p-3 transition-all duration-200 min-w-0"
-          style={{ background: 'white', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.1)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)' }}
+          style={cardStyle}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = accents.cyan.glow; e.currentTarget.style.boxShadow = `0 8px 24px ${accents.cyan.glow}` }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = 'none' }}
         >
-          <div className="text-xs font-semibold truncate mb-1.5" style={{ color: '#64748b' }}>Comments</div>
+          <div className="text-xs font-semibold truncate mb-1.5" style={{ color: theme.textSecondary }}>Comments</div>
           <div className="flex items-baseline gap-1 flex-wrap">
             <span className="text-sm">💬</span>
-            <span className="text-lg font-black" style={{ color: '#0f172a' }}>{comments.length}</span>
-            <span className="text-xs font-bold" style={{ color: '#15803d' }}>✓{commentsApproved}</span>
-            <span className="text-xs font-bold" style={{ color: '#b45309' }}>⏳{commentsPending}</span>
+            <span className="text-lg font-black" style={{ color: theme.textPrimary }}>{comments.length}</span>
+            <span className="text-xs font-bold" style={{ color: accents.emerald.solid }}>✓{commentsApproved}</span>
+            <span className="text-xs font-bold" style={{ color: accents.amber.solid }}>⏳{commentsPending}</span>
           </div>
         </Link>
 
@@ -187,15 +196,15 @@ export default function AdminDashboard() {
         <Link
           href="/admin/reactions"
           className="rounded-xl p-3 transition-all duration-200 min-w-0"
-          style={{ background: 'white', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.1)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)' }}
+          style={cardStyle}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = accents.amber.glow; e.currentTarget.style.boxShadow = `0 8px 24px ${accents.amber.glow}` }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = 'none' }}
         >
-          <div className="text-xs font-semibold truncate mb-1.5" style={{ color: '#64748b' }}>Reactions</div>
+          <div className="text-xs font-semibold truncate mb-1.5" style={{ color: theme.textSecondary }}>Reactions</div>
           <div className="flex items-baseline gap-1.5 flex-wrap">
             <span className="text-sm">⭐</span>
-            <span className="text-lg font-black" style={{ color: '#0f172a' }}>{reactions.length}</span>
-            <span className="text-xs font-bold" style={{ color: '#dc2626' }}>+{reactionsThisMonth} this month</span>
+            <span className="text-lg font-black" style={{ color: theme.textPrimary }}>{reactions.length}</span>
+            <span className="text-xs font-bold" style={{ color: accents.rose.solid }}>+{reactionsThisMonth} this month</span>
           </div>
         </Link>
       </div>
@@ -207,19 +216,16 @@ export default function AdminDashboard() {
         <div className="lg:col-span-2 space-y-6">
 
         {/* Recent articles */}
-        <div
-          className="rounded-2xl overflow-hidden"
-          style={{ background: 'white', border: '1px solid #e2e8f0' }}
-        >
+        <div className="rounded-2xl overflow-hidden" style={cardStyle}>
           <div
             className="flex items-center justify-between px-5 py-4"
-            style={{ borderBottom: '1px solid #f1f5f9' }}
+            style={{ borderBottom: `1px solid ${theme.divider}` }}
           >
-            <h3 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Recent Articles</h3>
+            <h3 className="font-extrabold text-sm" style={{ color: theme.textPrimary }}>Recent Articles</h3>
             <Link
               href="/admin/articles"
               className="text-xs font-bold transition-colors"
-              style={{ color: '#4a9e1f' }}
+              style={{ color: accents.violet.solid }}
             >
               View all →
             </Link>
@@ -229,43 +235,44 @@ export default function AdminDashboard() {
               <div
                 key={article.id}
                 className="flex items-center gap-4 px-5 py-3.5 transition-colors"
-                style={{ borderBottom: i < recentArticles.length - 1 ? '1px solid #f8fafc' : 'none' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc' }}
+                style={{ borderBottom: i < recentArticles.length - 1 ? `1px solid ${theme.divider}` : 'none' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
               >
                 {/* Number */}
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0"
-                  style={{ background: i === 0 ? '#4a9e1f' : '#f1f5f9', color: i === 0 ? 'white' : '#94a3b8' }}
+                  style={i === 0
+                    ? { background: accents.violet.grad, color: 'white', boxShadow: `0 0 12px ${accents.violet.glow}` }
+                    : { background: 'rgba(255,255,255,0.05)', color: theme.textMuted }}
                 >
                   {i + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{article.title}</p>
-                  <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{article.category} · {formatDate(article.published_at)}</p>
+                  <p className="text-sm font-semibold truncate" style={{ color: theme.textPrimary }}>{article.title}</p>
+                  <p className="text-xs mt-0.5" style={{ color: theme.textMuted }}>{article.category} · {formatDate(article.published_at)}</p>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                   {article.status === 'draft' && (
-                    <span className="hidden sm:inline text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: '#fef9c3', color: '#a16207' }}>
+                    <span className="hidden sm:inline text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: accents.amber.soft, color: accents.amber.solid }}>
                       📝 Draft
                     </span>
                   )}
                   <span
                     className="hidden sm:inline text-xs px-2 py-0.5 rounded-full font-semibold"
-                    style={{
-                      background: article.is_featured ? '#f0fdf4' : '#f8fafc',
-                      color:      article.is_featured ? '#4a9e1f' : '#94a3b8',
-                    }}
+                    style={article.is_featured
+                      ? { background: accents.violet.soft, color: accents.violet.solid }
+                      : { background: 'rgba(255,255,255,0.05)', color: theme.textMuted }}
                   >
                     {article.is_featured ? '✦ Featured' : 'Regular'}
                   </span>
-                  <span className="hidden sm:inline text-xs" style={{ color: '#94a3b8' }}>👁 {formatViews(article.views)}</span>
+                  <span className="hidden sm:inline text-xs" style={{ color: theme.textMuted }}>👁 {formatViews(article.views)}</span>
                   <Link
                     href={`/admin/articles/${article.id}`}
                     className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
-                    style={{ background: '#f1f5f9', color: '#475569' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = '#4a9e1f'; e.currentTarget.style.color = 'white' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#475569' }}
+                    style={{ background: 'rgba(255,255,255,0.06)', color: theme.textSecondary }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = accents.violet.grad; e.currentTarget.style.color = 'white' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = theme.textSecondary }}
                   >
                     Edit
                   </Link>
@@ -278,13 +285,10 @@ export default function AdminDashboard() {
         {/* Publishing activity — articles published per month, last 6 months.
             No overflow-hidden here (unlike other cards): the hover tooltip on
             the first/last bar needs to be able to spill past the card edge. */}
-        <div
-          className="rounded-2xl"
-          style={{ background: 'white', border: '1px solid #e2e8f0' }}
-        >
-          <div className="px-5 py-4 rounded-t-2xl" style={{ borderBottom: '1px solid #f1f5f9' }}>
-            <h3 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Publishing Activity</h3>
-            <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>Articles published per month</p>
+        <div className="rounded-2xl" style={cardStyle}>
+          <div className="px-5 py-4 rounded-t-2xl" style={{ borderBottom: `1px solid ${theme.divider}` }}>
+            <h3 className="font-extrabold text-sm" style={{ color: theme.textPrimary }}>Publishing Activity</h3>
+            <p className="text-xs mt-0.5" style={{ color: theme.textMuted }}>Articles published per month</p>
           </div>
           <div className="px-5 py-6 flex items-end justify-between gap-2" style={{ height: 160 }}>
             {monthlyPublished.map((m, i) => {
@@ -297,7 +301,8 @@ export default function AdminDashboard() {
                       className="absolute text-xs font-bold px-2 py-1 rounded-lg whitespace-nowrap"
                       style={{
                         bottom: barHeight + 32,
-                        background: '#0f172a',
+                        background: '#1a1030',
+                        border: `1px solid ${accents.violet.glow}`,
                         color: 'white',
                         zIndex: 10,
                       }}
@@ -305,7 +310,7 @@ export default function AdminDashboard() {
                       {m.label} {m.year}: {m.count} article{m.count !== 1 ? 's' : ''}
                     </div>
                   )}
-                  <span className="text-xs font-black" style={{ color: '#0f172a' }}>{m.count}</span>
+                  <span className="text-xs font-black" style={{ color: theme.textPrimary }}>{m.count}</span>
                   <div
                     onMouseEnter={() => setHoveredMonth(i)}
                     onMouseLeave={() => setHoveredMonth(null)}
@@ -313,13 +318,16 @@ export default function AdminDashboard() {
                       width: '100%',
                       maxWidth: 28,
                       height: barHeight,
-                      background: hoveredMonth === i ? '#3d8a1f' : '#4a9e1f',
+                      background: hoveredMonth === i
+                        ? 'linear-gradient(180deg,#a78bfa,#3b82f6)'
+                        : 'linear-gradient(180deg,#8b5cf6,#3b82f6)',
                       borderRadius: '4px 4px 0 0',
-                      transition: 'background 0.15s',
+                      boxShadow: hoveredMonth === i ? `0 0 16px ${accents.violet.glow}` : 'none',
+                      transition: 'box-shadow 0.15s',
                       cursor: 'default',
                     }}
                   />
-                  <span className="text-xs font-semibold" style={{ color: '#94a3b8' }}>{m.label}</span>
+                  <span className="text-xs font-semibold" style={{ color: theme.textMuted }}>{m.label}</span>
                 </div>
               )
             })}
@@ -327,40 +335,39 @@ export default function AdminDashboard() {
         </div>
 
         {/* Top performing articles */}
-        <div
-          className="rounded-2xl overflow-hidden"
-          style={{ background: 'white', border: '1px solid #e2e8f0' }}
-        >
+        <div className="rounded-2xl overflow-hidden" style={cardStyle}>
           <div
             className="flex items-center justify-between px-5 py-4"
-            style={{ borderBottom: '1px solid #f1f5f9' }}
+            style={{ borderBottom: `1px solid ${theme.divider}` }}
           >
-            <h3 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Top Performing Articles</h3>
-            <Link href="/admin/articles" className="text-xs font-bold" style={{ color: '#4a9e1f' }}>View all →</Link>
+            <h3 className="font-extrabold text-sm" style={{ color: theme.textPrimary }}>Top Performing Articles</h3>
+            <Link href="/admin/articles" className="text-xs font-bold" style={{ color: accents.violet.solid }}>View all →</Link>
           </div>
           <div>
             {topArticles.length === 0 ? (
-              <p className="text-sm px-5 py-6" style={{ color: '#94a3b8' }}>No articles yet.</p>
+              <p className="text-sm px-5 py-6" style={{ color: theme.textMuted }}>No articles yet.</p>
             ) : (
               topArticles.map((article, i) => (
                 <div
                   key={article.id}
                   className="flex items-center gap-4 px-5 py-3.5 transition-colors"
-                  style={{ borderBottom: i < topArticles.length - 1 ? '1px solid #f8fafc' : 'none' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc' }}
+                  style={{ borderBottom: i < topArticles.length - 1 ? `1px solid ${theme.divider}` : 'none' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
                 >
                   <div
                     className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0"
-                    style={{ background: i === 0 ? '#c2410c' : '#f1f5f9', color: i === 0 ? 'white' : '#94a3b8' }}
+                    style={i === 0
+                      ? { background: accents.amber.grad, color: 'white', boxShadow: `0 0 12px ${accents.amber.glow}` }
+                      : { background: 'rgba(255,255,255,0.05)', color: theme.textMuted }}
                   >
                     {i === 0 ? '🏆' : i + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{article.title}</p>
-                    <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{article.category}</p>
+                    <p className="text-sm font-semibold truncate" style={{ color: theme.textPrimary }}>{article.title}</p>
+                    <p className="text-xs mt-0.5" style={{ color: theme.textMuted }}>{article.category}</p>
                   </div>
-                  <span className="text-sm font-black flex-shrink-0" style={{ color: '#4a9e1f' }} title="Real (organic) views">
+                  <span className="text-sm font-black flex-shrink-0" style={{ color: accents.violet.solid }} title="Real (organic) views">
                     👁 {formatViews(article.real_views ?? article.views)}
                   </span>
                 </div>
@@ -375,72 +382,71 @@ export default function AdminDashboard() {
         <div className="space-y-6">
 
           {/* Quick actions */}
-          <div
-            className="rounded-2xl overflow-hidden"
-            style={{ background: 'white', border: '1px solid #e2e8f0' }}
-          >
-            <div className="px-5 py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
-              <h3 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Quick Actions</h3>
+          <div className="rounded-2xl overflow-hidden" style={cardStyle}>
+            <div className="px-5 py-4" style={{ borderBottom: `1px solid ${theme.divider}` }}>
+              <h3 className="font-extrabold text-sm" style={{ color: theme.textPrimary }}>Quick Actions</h3>
             </div>
             <div className="p-3 grid grid-cols-2 gap-2">
-              {quickActions.map((a) => (
-                <Link
-                  key={a.label}
-                  href={a.href}
-                  className="flex flex-col items-center gap-2 p-3 rounded-xl text-center transition-all text-xs font-semibold"
-                  style={{ border: '1px solid #f1f5f9', color: '#475569' }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = a.color + '12'
-                    e.currentTarget.style.borderColor = a.color + '40'
-                    e.currentTarget.style.color = a.color
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'transparent'
-                    e.currentTarget.style.borderColor = '#f1f5f9'
-                    e.currentTarget.style.color = '#475569'
-                  }}
-                >
-                  <span className="text-xl">{a.icon}</span>
-                  {a.label}
-                </Link>
-              ))}
+              {quickActions.map((a) => {
+                const c = accents[a.accent]
+                return (
+                  <Link
+                    key={a.label}
+                    href={a.href}
+                    className="flex flex-col items-center gap-2 p-3 rounded-xl text-center transition-all text-xs font-semibold"
+                    style={{ border: '1px solid rgba(255,255,255,0.06)', color: theme.textSecondary }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = c.soft
+                      e.currentTarget.style.borderColor = c.glow
+                      e.currentTarget.style.color = c.solid
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent'
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'
+                      e.currentTarget.style.color = theme.textSecondary
+                    }}
+                  >
+                    <span className="text-xl">{a.icon}</span>
+                    {a.label}
+                  </Link>
+                )
+              })}
             </div>
           </div>
 
           {/* Top performing special news */}
-          <div
-            className="rounded-2xl overflow-hidden"
-            style={{ background: 'white', border: '1px solid #e2e8f0' }}
-          >
+          <div className="rounded-2xl overflow-hidden" style={cardStyle}>
             <div
               className="flex items-center justify-between px-5 py-4"
-              style={{ borderBottom: '1px solid #f1f5f9' }}
+              style={{ borderBottom: `1px solid ${theme.divider}` }}
             >
-              <h3 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Top Special News</h3>
-              <Link href="/admin/news" className="text-xs font-bold" style={{ color: '#4a9e1f' }}>View all →</Link>
+              <h3 className="font-extrabold text-sm" style={{ color: theme.textPrimary }}>Top Special News</h3>
+              <Link href="/admin/news" className="text-xs font-bold" style={{ color: accents.violet.solid }}>View all →</Link>
             </div>
             <div>
               {topSpecialNews.length === 0 ? (
-                <p className="text-sm px-5 py-6" style={{ color: '#94a3b8' }}>No special news yet.</p>
+                <p className="text-sm px-5 py-6" style={{ color: theme.textMuted }}>No special news yet.</p>
               ) : (
                 topSpecialNews.map((item, i) => (
                   <div
                     key={item.id}
                     className="flex items-center gap-4 px-5 py-3.5 transition-colors"
-                    style={{ borderBottom: i < topSpecialNews.length - 1 ? '1px solid #f8fafc' : 'none' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc' }}
+                    style={{ borderBottom: i < topSpecialNews.length - 1 ? `1px solid ${theme.divider}` : 'none' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}
                     onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
                   >
                     <div
                       className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0"
-                      style={{ background: i === 0 ? '#166534' : '#f1f5f9', color: i === 0 ? 'white' : '#94a3b8' }}
+                      style={i === 0
+                        ? { background: accents.emerald.grad, color: 'white', boxShadow: `0 0 12px ${accents.emerald.glow}` }
+                        : { background: 'rgba(255,255,255,0.05)', color: theme.textMuted }}
                     >
                       {i === 0 ? '🏆' : i + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{item.title}</p>
+                      <p className="text-sm font-semibold truncate" style={{ color: theme.textPrimary }}>{item.title}</p>
                     </div>
-                    <span className="text-sm font-black flex-shrink-0" style={{ color: '#4a9e1f' }} title="Real (organic) views">
+                    <span className="text-sm font-black flex-shrink-0" style={{ color: accents.violet.solid }} title="Real (organic) views">
                       👁 {formatViews(item.real_views ?? item.views ?? 0)}
                     </span>
                   </div>
@@ -450,39 +456,38 @@ export default function AdminDashboard() {
           </div>
 
           {/* Top performing janaza news */}
-          <div
-            className="rounded-2xl overflow-hidden"
-            style={{ background: 'white', border: '1px solid #e2e8f0' }}
-          >
+          <div className="rounded-2xl overflow-hidden" style={cardStyle}>
             <div
               className="flex items-center justify-between px-5 py-4"
-              style={{ borderBottom: '1px solid #f1f5f9' }}
+              style={{ borderBottom: `1px solid ${theme.divider}` }}
             >
-              <h3 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Top Janaza News</h3>
-              <Link href="/admin/news" className="text-xs font-bold" style={{ color: '#4a9e1f' }}>View all →</Link>
+              <h3 className="font-extrabold text-sm" style={{ color: theme.textPrimary }}>Top Janaza News</h3>
+              <Link href="/admin/news" className="text-xs font-bold" style={{ color: accents.violet.solid }}>View all →</Link>
             </div>
             <div>
               {topJanazaNews.length === 0 ? (
-                <p className="text-sm px-5 py-6" style={{ color: '#94a3b8' }}>No janaza news yet.</p>
+                <p className="text-sm px-5 py-6" style={{ color: theme.textMuted }}>No janaza news yet.</p>
               ) : (
                 topJanazaNews.map((item, i) => (
                   <div
                     key={item.id}
                     className="flex items-center gap-4 px-5 py-3.5 transition-colors"
-                    style={{ borderBottom: i < topJanazaNews.length - 1 ? '1px solid #f8fafc' : 'none' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc' }}
+                    style={{ borderBottom: i < topJanazaNews.length - 1 ? `1px solid ${theme.divider}` : 'none' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}
                     onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
                   >
                     <div
                       className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0"
-                      style={{ background: i === 0 ? '#0369a1' : '#f1f5f9', color: i === 0 ? 'white' : '#94a3b8' }}
+                      style={i === 0
+                        ? { background: accents.blue.grad, color: 'white', boxShadow: `0 0 12px ${accents.blue.glow}` }
+                        : { background: 'rgba(255,255,255,0.05)', color: theme.textMuted }}
                     >
                       {i === 0 ? '🏆' : i + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate" style={{ color: '#1e293b' }}>{item.title}</p>
+                      <p className="text-sm font-semibold truncate" style={{ color: theme.textPrimary }}>{item.title}</p>
                     </div>
-                    <span className="text-sm font-black flex-shrink-0" style={{ color: '#4a9e1f' }} title="Real (organic) views">
+                    <span className="text-sm font-black flex-shrink-0" style={{ color: accents.violet.solid }} title="Real (organic) views">
                       👁 {formatViews(item.real_views ?? item.views ?? 0)}
                     </span>
                   </div>
@@ -495,29 +500,30 @@ export default function AdminDashboard() {
       </div>
 
       {/* Category overview */}
-      <div
-        className="rounded-2xl overflow-hidden"
-        style={{ background: 'white', border: '1px solid #e2e8f0' }}
-      >
+      <div className="rounded-2xl overflow-hidden" style={cardStyle}>
         <div
           className="flex items-center justify-between px-5 py-4"
-          style={{ borderBottom: '1px solid #f1f5f9' }}
+          style={{ borderBottom: `1px solid ${theme.divider}` }}
         >
-          <h3 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Category Overview</h3>
-          <Link href="/admin/categories" className="text-xs font-bold" style={{ color: '#4a9e1f' }}>Manage →</Link>
+          <h3 className="font-extrabold text-sm" style={{ color: theme.textPrimary }}>Category Overview</h3>
+          <Link href="/admin/categories" className="text-xs font-bold" style={{ color: accents.violet.solid }}>Manage →</Link>
         </div>
         <div className="p-4 flex flex-wrap gap-2.5">
-          {categories.map((cat) => (
-            <div
-              key={cat.id}
-              className="flex items-center gap-2 rounded-xl px-3 py-2"
-              style={{ background: '#f8fafc', border: '1px solid #f1f5f9' }}
-            >
-              <span className="text-base">{cat.icon}</span>
-              <span className="text-xs font-bold whitespace-nowrap" style={{ color: '#1e293b' }}>{cat.name_en}</span>
-              <span className="text-xs font-black" style={{ color: '#4a9e1f' }}>{cat.article_count}</span>
-            </div>
-          ))}
+          {categories.map((cat, i) => {
+            const keys = Object.keys(accents) as AccentKey[]
+            const a = accents[keys[i % keys.length]]
+            return (
+              <div
+                key={cat.id}
+                className="flex items-center gap-2 rounded-xl px-3 py-2"
+                style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${a.glow}` }}
+              >
+                <span className="text-base">{cat.icon}</span>
+                <span className="text-xs font-bold whitespace-nowrap" style={{ color: theme.textPrimary }}>{cat.name_en}</span>
+                <span className="text-xs font-black" style={{ color: a.solid }}>{cat.article_count}</span>
+              </div>
+            )
+          })}
         </div>
       </div>
 

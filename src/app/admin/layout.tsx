@@ -8,20 +8,21 @@ import { getAdminConfig } from '@/lib/adminConfig'
 import { getUnreadCount } from '@/lib/db/contact'
 import { getSiteSettings } from '@/lib/db/siteSettings'
 import { getAuthClient } from '@/lib/supabase-auth'
+import { theme, accents } from './adminTheme'
 
 const navItems = [
-  { label: 'Dashboard',   href: '/admin',              icon: '📊' },
-  { label: 'Backup',      href: '/admin/backup',        icon: '🗄️' },
-  { label: 'Articles',    href: '/admin/articles',      icon: '📝' },
-  { label: 'News',        href: '/admin/news',          icon: '📰' },
-  { label: 'Categories',  href: '/admin/categories',    icon: '🗂️' },
-  { label: 'Authors',     href: '/admin/authors',        icon: '✍️' },
-  { label: 'Comments',    href: '/admin/comments',      icon: '💬' },
-  { label: 'Reactions',   href: '/admin/reactions',     icon: '⭐' },
-  { label: 'Messages',    href: '/admin/messages',      icon: '✉️' },
-  { label: 'Ads',          href: '/admin/ads',            icon: '📢' },
-  { label: 'Newsletter',  href: '/admin/newsletter',    icon: '📬' },
-  { label: 'Settings',    href: '/admin/settings',      icon: '⚙️' },
+  { label: 'Dashboard',   href: '/admin',              icon: '📊', accent: 'violet' as const },
+  { label: 'Backup',      href: '/admin/backup',        icon: '🗄️', accent: 'blue' as const },
+  { label: 'Articles',    href: '/admin/articles',      icon: '📝', accent: 'violet' as const },
+  { label: 'News',        href: '/admin/news',          icon: '📰', accent: 'blue' as const },
+  { label: 'Categories',  href: '/admin/categories',    icon: '🗂️', accent: 'pink' as const },
+  { label: 'Authors',     href: '/admin/authors',        icon: '✍️', accent: 'cyan' as const },
+  { label: 'Comments',    href: '/admin/comments',      icon: '💬', accent: 'cyan' as const },
+  { label: 'Reactions',   href: '/admin/reactions',     icon: '⭐', accent: 'amber' as const },
+  { label: 'Messages',    href: '/admin/messages',      icon: '✉️', accent: 'rose' as const },
+  { label: 'Ads',          href: '/admin/ads',            icon: '📢', accent: 'pink' as const },
+  { label: 'Newsletter',  href: '/admin/newsletter',    icon: '📬', accent: 'emerald' as const },
+  { label: 'Settings',    href: '/admin/settings',      icon: '⚙️', accent: 'violet' as const },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -122,13 +123,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     href === '/admin' ? pathname === '/admin' : pathname.startsWith(href)
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#f1f5f9', fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen flex" style={{ background: theme.pageBgLayers, fontFamily: "'Inter', sans-serif" }}>
 
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-20 md:hidden"
-          style={{ background: 'rgba(0,0,0,0.4)' }}
+          style={{ background: 'rgba(0,0,0,0.6)' }}
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -140,22 +141,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }`}
         style={{
           width: '240px',
-          background: 'linear-gradient(180deg, #1a3a0f 0%, #0d2208 100%)',
-          boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
+          background: theme.sidebarBg,
+          borderRight: '1px solid rgba(255,255,255,0.06)',
+          boxShadow: '4px 0 32px rgba(0,0,0,0.4)',
         }}
       >
         {/* Logo */}
         <div
           className="flex items-center gap-3 px-5 py-5"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+          style={{ borderBottom: `1px solid ${theme.divider}` }}
         >
-          <div className="rounded-xl overflow-hidden flex-shrink-0" style={{ background: 'white', padding: '4px' }}>
+          <div
+            className="rounded-xl overflow-hidden flex-shrink-0"
+            style={{ background: 'white', padding: '4px', boxShadow: `0 0 20px ${accents.violet.glow}` }}
+          >
             <Image src="/logo.png" alt="SL Muslim History" width={36} height={36} style={{ height: '36px', width: 'auto', display: 'block' }} />
           </div>
           <div>
-            <div className="text-xs font-black text-white leading-tight">SL Muslim</div>
-            <div className="text-xs font-black leading-tight" style={{ color: 'var(--gold, #c9a84c)' }}>History</div>
-            <div className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)', fontSize: '10px' }}>Admin Panel</div>
+            <div
+              className="text-xs font-black leading-tight"
+              style={{
+                background: 'linear-gradient(90deg,#a78bfa,#60a5fa)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              SL Muslim
+            </div>
+            <div className="text-xs font-black leading-tight" style={{ color: accents.amber.solid }}>History</div>
+            <div className="text-xs mt-0.5" style={{ color: theme.textMuted, fontSize: '10px' }}>Admin Panel</div>
           </div>
         </div>
 
@@ -164,6 +179,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="px-3 space-y-0.5">
             {navItems.map((item) => {
               const active = isActive(item.href)
+              const a = accents[item.accent]
               return (
                 <Link
                   key={item.href}
@@ -171,29 +187,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   onClick={() => setSidebarOpen(false)}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150"
                   style={{
-                    color:      active ? 'white'                    : 'rgba(255,255,255,0.55)',
-                    background: active ? 'rgba(74,158,31,0.35)'     : 'transparent',
-                    borderLeft: active ? '3px solid #4a9e1f'        : '3px solid transparent',
+                    color:      active ? 'white' : theme.textSecondary,
+                    background: active ? a.soft : 'transparent',
+                    border:     active ? `1px solid ${a.glow}` : '1px solid transparent',
+                    boxShadow:  active ? `0 0 20px ${a.glow}` : 'none',
                   }}
                   onMouseEnter={(e) => {
                     if (!active) {
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.07)'
-                      e.currentTarget.style.color = 'rgba(255,255,255,0.85)'
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
+                      e.currentTarget.style.color = '#e2e8f0'
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!active) {
                       e.currentTarget.style.background = 'transparent'
-                      e.currentTarget.style.color = 'rgba(255,255,255,0.55)'
+                      e.currentTarget.style.color = theme.textSecondary
                     }
                   }}
                 >
-                  <span className="text-base w-5 text-center flex-shrink-0">{item.icon}</span>
-                  <span className="flex-1">{item.label}</span>
+                  <span
+                    className="text-base w-6 h-6 flex items-center justify-center flex-shrink-0 rounded-lg"
+                    style={{ background: active ? a.grad : 'rgba(255,255,255,0.05)' }}
+                  >
+                    {item.icon}
+                  </span>
+                  <span className="flex-1" style={active ? { color: a.solid } : undefined}>{item.label}</span>
                   {item.label === 'Comments' && pendingComments > 0 && (
                     <span
                       className="text-xs font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
-                      style={{ background: '#dc2626', color: 'white', fontSize: '10px', minWidth: '18px', textAlign: 'center' }}
+                      style={{ background: accents.rose.grad, color: 'white', fontSize: '10px', minWidth: '18px', textAlign: 'center', boxShadow: `0 0 10px ${accents.rose.glow}` }}
                     >
                       {pendingComments}
                     </span>
@@ -201,7 +223,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   {item.label === 'Reactions' && newReactions > 0 && (
                     <span
                       className="text-xs font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
-                      style={{ background: '#dc2626', color: 'white', fontSize: '10px', minWidth: '18px', textAlign: 'center' }}
+                      style={{ background: accents.rose.grad, color: 'white', fontSize: '10px', minWidth: '18px', textAlign: 'center', boxShadow: `0 0 10px ${accents.rose.glow}` }}
                     >
                       {newReactions}
                     </span>
@@ -209,7 +231,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   {item.label === 'Messages' && unreadMsgs > 0 && (
                     <span
                       className="text-xs font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
-                      style={{ background: '#dc2626', color: 'white', fontSize: '10px', minWidth: '18px', textAlign: 'center' }}
+                      style={{ background: accents.rose.grad, color: 'white', fontSize: '10px', minWidth: '18px', textAlign: 'center', boxShadow: `0 0 10px ${accents.rose.glow}` }}
                     >
                       {unreadMsgs}
                     </span>
@@ -217,7 +239,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   {item.label === 'Newsletter' && newSubs > 0 && (
                     <span
                       className="text-xs font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
-                      style={{ background: '#c2410c', color: 'white', fontSize: '10px', minWidth: '18px', textAlign: 'center' }}
+                      style={{ background: accents.amber.grad, color: 'white', fontSize: '10px', minWidth: '18px', textAlign: 'center', boxShadow: `0 0 10px ${accents.amber.glow}` }}
                     >
                       {newSubs}
                     </span>
@@ -228,7 +250,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           {/* Divider */}
-          <div className="mx-4 my-4" style={{ height: '1px', background: 'rgba(255,255,255,0.07)' }} />
+          <div className="mx-4 my-4" style={{ height: '1px', background: theme.divider }} />
 
           {/* Back to site */}
           <div className="px-3">
@@ -238,9 +260,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               rel="noopener noreferrer"
               prefetch={false}
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; e.currentTarget.style.background = 'transparent' }}
+              style={{ color: theme.textMuted }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#e2e8f0'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = theme.textMuted; e.currentTarget.style.background = 'transparent' }}
             >
               <span className="text-base w-5 text-center">↗</span>
               View Site
@@ -251,17 +273,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Bottom user info + sign out */}
         <div
           className="px-4 py-4 flex items-center gap-3"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
+          style={{ borderTop: `1px solid ${theme.divider}` }}
         >
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0"
-            style={{ background: '#4a9e1f', color: 'white' }}
+            style={{ background: accents.violet.grad, color: 'white', boxShadow: `0 0 14px ${accents.violet.glow}` }}
           >
             {ownerName.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-bold text-white truncate">{ownerName}</div>
-            <div className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.35)' }}>Administrator</div>
+            <div className="text-xs font-bold truncate" style={{ color: theme.textPrimary }}>{ownerName}</div>
+            <div className="text-xs truncate" style={{ color: theme.textMuted }}>Administrator</div>
           </div>
           <button
             onClick={async () => {
@@ -270,9 +292,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             }}
             title="Sign out"
             className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all"
-            style={{ color: 'rgba(255,255,255,0.35)' }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,0,0,0.2)'; e.currentTarget.style.color = '#f87171' }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.35)' }}
+            style={{ color: theme.textMuted }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(244,63,94,0.15)'; e.currentTarget.style.color = accents.rose.solid }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = theme.textMuted }}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -288,9 +310,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <header
           className="sticky top-0 z-10 flex items-center justify-between px-6 py-3"
           style={{
-            background: 'white',
-            borderBottom: '1px solid #e2e8f0',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+            background: 'rgba(10,14,23,0.75)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            borderBottom: `1px solid ${theme.divider}`,
             minHeight: '60px',
           }}
         >
@@ -298,7 +321,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <button
             className="md:hidden p-2 rounded-lg"
             onClick={() => setSidebarOpen(true)}
-            style={{ color: '#64748b' }}
+            style={{ color: theme.textSecondary }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -307,10 +330,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* Page title — derived from pathname */}
           <div className="hidden md:block">
-            <h1 className="text-base font-bold" style={{ color: '#0f172a' }}>
+            <h1 className="text-base font-bold" style={{ color: theme.textPrimary }}>
               {navItems.find((n) => isActive(n.href))?.label ?? 'Admin'}
             </h1>
-            <p className="text-xs" style={{ color: '#94a3b8' }}>
+            <p className="text-xs" style={{ color: theme.textMuted }}>
               SL Muslim History · Admin Panel
             </p>
           </div>
@@ -321,9 +344,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link
                 href="/admin/news/new"
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all"
-                style={{ background: '#4a9e1f', boxShadow: '0 2px 8px rgba(74,158,31,0.3)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(74,158,31,0.4)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(74,158,31,0.3)' }}
+                style={{ background: accents.blue.grad, boxShadow: `0 2px 16px ${accents.blue.glow}` }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 4px 24px ${accents.blue.glow}` }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 2px 16px ${accents.blue.glow}` }}
               >
                 + New Post
               </Link>
@@ -331,9 +354,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link
                 href="/admin/articles/new"
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all"
-                style={{ background: '#4a9e1f', boxShadow: '0 2px 8px rgba(74,158,31,0.3)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(74,158,31,0.4)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(74,158,31,0.3)' }}
+                style={{ background: accents.violet.grad, boxShadow: `0 2px 16px ${accents.violet.glow}` }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 4px 24px ${accents.violet.glow}` }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 2px 16px ${accents.violet.glow}` }}
               >
                 + New Article
               </Link>
