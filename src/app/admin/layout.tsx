@@ -8,21 +8,26 @@ import { getAdminConfig } from '@/lib/adminConfig'
 import { getUnreadCount } from '@/lib/db/contact'
 import { getSiteSettings } from '@/lib/db/siteSettings'
 import { getAuthClient } from '@/lib/supabase-auth'
+import { AdminPermissions } from '@/lib/permissions'
 import { theme, accents } from './adminTheme'
 
-const navItems = [
-  { label: 'Dashboard',   href: '/admin',              icon: '📊', accent: 'violet' as const },
-  { label: 'Backup',      href: '/admin/backup',        icon: '🗄️', accent: 'blue' as const },
-  { label: 'Articles',    href: '/admin/articles',      icon: '📝', accent: 'violet' as const },
-  { label: 'News',        href: '/admin/news',          icon: '📰', accent: 'blue' as const },
-  { label: 'Categories',  href: '/admin/categories',    icon: '🗂️', accent: 'pink' as const },
-  { label: 'Authors',     href: '/admin/authors',        icon: '✍️', accent: 'cyan' as const },
-  { label: 'Comments',    href: '/admin/comments',      icon: '💬', accent: 'cyan' as const },
-  { label: 'Reactions',   href: '/admin/reactions',     icon: '⭐', accent: 'amber' as const },
-  { label: 'Messages',    href: '/admin/messages',      icon: '✉️', accent: 'rose' as const },
-  { label: 'Ads',          href: '/admin/ads',            icon: '📢', accent: 'pink' as const },
-  { label: 'Newsletter',  href: '/admin/newsletter',    icon: '📬', accent: 'emerald' as const },
-  { label: 'Settings',    href: '/admin/settings',      icon: '⚙️', accent: 'violet' as const },
+// perm: undefined = always visible (Dashboard); string[] = visible if ANY
+// of these permission flags is granted; 'owner' = hidden entirely from
+// anyone who isn't the site owner (team management itself).
+const navItems: { label: string; href: string; icon: string; accent: string; perm?: string[] | 'owner' }[] = [
+  { label: 'Dashboard',   href: '/admin',              icon: '📊', accent: 'violet' },
+  { label: 'Team',       href: '/admin/team',           icon: '👥', accent: 'emerald', perm: 'owner' },
+  { label: 'Backup',      href: '/admin/backup',        icon: '🗄️', accent: 'blue', perm: ['can_backup'] },
+  { label: 'Articles',    href: '/admin/articles',      icon: '📝', accent: 'violet', perm: ['can_articles'] },
+  { label: 'News',        href: '/admin/news',          icon: '📰', accent: 'blue', perm: ['can_news_special', 'can_news_janaza'] },
+  { label: 'Categories',  href: '/admin/categories',    icon: '🗂️', accent: 'pink', perm: ['can_categories'] },
+  { label: 'Authors',     href: '/admin/authors',        icon: '✍️', accent: 'cyan', perm: ['can_authors'] },
+  { label: 'Comments',    href: '/admin/comments',      icon: '💬', accent: 'cyan', perm: ['can_comments'] },
+  { label: 'Reactions',   href: '/admin/reactions',     icon: '⭐', accent: 'amber', perm: ['can_reactions'] },
+  { label: 'Messages',    href: '/admin/messages',      icon: '✉️', accent: 'rose', perm: ['can_messages'] },
+  { label: 'Ads',          href: '/admin/ads',            icon: '📢', accent: 'pink', perm: ['can_ads'] },
+  { label: 'Newsletter',  href: '/admin/newsletter',    icon: '📬', accent: 'emerald', perm: ['can_newsletter'] },
+  { label: 'Settings',    href: '/admin/settings',      icon: '⚙️', accent: 'violet', perm: ['can_settings'] },
 ]
 
 // Sidebar sits on a dark purple backdrop, so its nav "boxes" use their own
@@ -49,6 +54,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [newSubs,       setNewSubs]       = useState(0)
   const [pendingComments, setPendingComments] = useState(0)
   const [newReactions,  setNewReactions]  = useState(0)
+  // null = owner (no permissions row exists for them, so they see everything)
+  const [myPerms, setMyPerms] = useState<AdminPermissions | null>(null)
+  const [permsLoaded, setPermsLoaded] = useState(false)
+
+  // A row in admin_permissions means this login is a limited team member,
+  // not the owner — RLS only lets each user read their own row, so an
+  // empty result here means "no row" (owner) rather than "no access".
+  useEffect(() => {
+    getAuthClient().auth.getUser().then(({ data: { user } }) => {
+      if (!user) { setPermsLoaded(true); return }
+      getAuthClient().from('admin_permissions').select('*').eq('user_id', user.id).maybeSingle()
+        .then(({ data }) => { setMyPerms(data as AdminPermissions | null); setPermsLoaded(true) })
+    })
+  }, [])
 
   // Load owner name from config (fall back to authenticated user's email)
   useEffect(() => {
@@ -138,6 +157,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isActive = (href: string) =>
     href === '/admin' ? pathname === '/admin' : pathname.startsWith(href)
 
+  // Owner (no permissions row) sees everything. A limited team member only
+  // sees Dashboard plus whatever sections they've been granted — this is
+  // just UX (the real gate is the RLS policies), so it's safe to compute
+  // client-side.
+  const visibleNavItems = navItems.filter((item) => {
+    if (!item.perm) return true
+    if (!permsLoaded) return true // avoid a flash of missing items while loading
+    if (!myPerms) return true // owner (no permissions row) sees everything, including Team
+    if (item.perm === 'owner') return false
+    return item.perm.some((key) => Boolean((myPerms as unknown as Record<string, boolean>)[key]))
+  })
+
   return (
     <div className="min-h-screen flex" style={{ background: theme.pageBgLayers, fontFamily: "'Inter', sans-serif" }}>
 
@@ -182,7 +213,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Nav */}
         <nav className="flex-1 py-4 overflow-y-auto">
           <div className="px-3 space-y-1.5">
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const active = isActive(item.href)
               const glow  = navGlow[item.accent]
               const solid = navSolid[item.accent]
@@ -332,7 +363,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Page title — derived from pathname */}
           <div className="hidden md:block">
             <h1 className="text-base font-bold" style={{ color: theme.textPrimary }}>
-              {navItems.find((n) => isActive(n.href))?.label ?? 'Admin'}
+              {visibleNavItems.find((n) => isActive(n.href))?.label ?? 'Admin'}
             </h1>
             <p className="text-xs" style={{ color: theme.textMuted }}>
               SL Muslim History · Admin Panel
