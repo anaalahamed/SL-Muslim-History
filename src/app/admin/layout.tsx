@@ -11,6 +11,7 @@ import { getAuthClient } from '@/lib/supabase-auth'
 
 const navItems = [
   { label: 'Dashboard',   href: '/admin',              icon: '📊' },
+  { label: 'Backup',      href: '/admin/backup',        icon: '🗄️' },
   { label: 'Articles',    href: '/admin/articles',      icon: '📝' },
   { label: 'News',        href: '/admin/news',          icon: '📰' },
   { label: 'Categories',  href: '/admin/categories',    icon: '🗂️' },
@@ -20,7 +21,6 @@ const navItems = [
   { label: 'Messages',    href: '/admin/messages',      icon: '✉️' },
   { label: 'Ads',          href: '/admin/ads',            icon: '📢' },
   { label: 'Newsletter',  href: '/admin/newsletter',    icon: '📬' },
-  { label: 'Backup',      href: '/admin/backup',        icon: '🗄️' },
   { label: 'Settings',    href: '/admin/settings',      icon: '⚙️' },
 ]
 
