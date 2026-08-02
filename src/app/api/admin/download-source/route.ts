@@ -35,13 +35,19 @@ export async function GET(request: NextRequest) {
 
   const upstream = await fetch(`https://api.github.com/repos/${REPO}/zipball/${BRANCH}`, {
     headers: {
-      Authorization: `Bearer ${githubToken}`,
+      Authorization: `token ${githubToken}`,
       Accept: 'application/vnd.github+json',
       'X-GitHub-Api-Version': '2022-11-28',
+      'User-Agent': 'sl-muslim-history-backup',
     },
   })
   if (!upstream.ok) {
-    return NextResponse.json({ error: 'Could not fetch the source code from GitHub. Please try again.' }, { status: 502 })
+    const detail = await upstream.text().catch(() => '')
+    console.error('[download-source] GitHub fetch failed:', upstream.status, detail.slice(0, 500))
+    return NextResponse.json(
+      { error: `Could not fetch the source code from GitHub (status ${upstream.status}). Please try again.` },
+      { status: 502 },
+    )
   }
 
   // The repo is small (well under 1MB zipped), so fetching it fully here
