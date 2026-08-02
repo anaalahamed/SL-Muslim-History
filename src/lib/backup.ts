@@ -2,6 +2,8 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Every table that holds real site content — kept in one place so a new
 // table added later just needs adding here to be covered by backups too.
+// Media files aren't a table — they live in Supabase Storage, and are
+// backed up separately below via the storage list API.
 export const BACKUP_TABLES = [
   'articles',
   'news',
@@ -14,7 +16,6 @@ export const BACKUP_TABLES = [
   'contact_messages',
   'newsletter_subscribers',
   'site_settings',
-  'media',
 ] as const
 
 export interface BackupResult {
@@ -41,6 +42,24 @@ export async function downloadFullBackup(client: SupabaseClient): Promise<Backup
     }
     data[table] = rows ?? []
     countsByTable[table] = rows?.length ?? 0
+  }
+
+  // Media files live in Supabase Storage, not a database table — list the
+  // bucket's contents (name, size, URL) instead of querying a "media" table.
+  try {
+    const { data: files, error } = await client.storage.from('media').list('', { limit: 1000 })
+    if (error) throw error
+    data.media = (files ?? [])
+      .filter((f) => f.id !== null)
+      .map((f) => ({
+        name: f.name,
+        size: f.metadata?.size ?? null,
+        uploaded: f.created_at,
+        url: client.storage.from('media').getPublicUrl(f.name).data.publicUrl,
+      }))
+    countsByTable.media = data.media.length
+  } catch {
+    failedTables.push('media')
   }
 
   if (Object.keys(data).length === 0) {
