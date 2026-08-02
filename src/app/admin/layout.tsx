@@ -25,6 +25,21 @@ const navItems = [
   { label: 'Settings',    href: '/admin/settings',      icon: '⚙️', accent: 'violet' as const },
 ]
 
+// Sidebar sits on a dark purple backdrop, so its nav "boxes" use their own
+// brighter neon-style glow palette instead of the light-mode accents used
+// by the rest of the (white) admin panel.
+const navGlow: Record<string, string> = {
+  violet: 'rgba(167,139,250,0.55)', blue: 'rgba(96,165,250,0.55)', pink: 'rgba(244,114,182,0.55)',
+  cyan: 'rgba(34,211,238,0.55)', amber: 'rgba(251,191,36,0.55)', emerald: 'rgba(52,211,153,0.55)', rose: 'rgba(251,113,133,0.55)',
+}
+const navSolid: Record<string, string> = {
+  violet: '#c4b5fd', blue: '#93c5fd', pink: '#f9a8d4', cyan: '#67e8f9', amber: '#fcd34d', emerald: '#6ee7b7', rose: '#fda4af',
+}
+const navGrad: Record<string, string> = {
+  violet: 'linear-gradient(135deg,#8b5cf6,#6d28d9)', blue: 'linear-gradient(135deg,#3b82f6,#1d4ed8)', pink: 'linear-gradient(135deg,#ec4899,#be185d)',
+  cyan: 'linear-gradient(135deg,#06b6d4,#0e7490)', amber: 'linear-gradient(135deg,#f59e0b,#b45309)', emerald: 'linear-gradient(135deg,#10b981,#047857)', rose: 'linear-gradient(135deg,#f43f5e,#be123c)',
+}
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname  = usePathname()
   const router    = useRouter()
@@ -141,33 +156,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }`}
         style={{
           width: '240px',
-          background: theme.sidebarBg,
-          boxShadow: '4px 0 32px rgba(124,58,237,0.15)',
+          background: 'linear-gradient(180deg, #2e1065 0%, #1a0b3d 55%, #120829 100%)',
+          boxShadow: '4px 0 32px rgba(46,16,101,0.4)',
         }}
       >
         {/* Logo */}
         <div
           className="flex items-center gap-3 px-5 py-5"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.18)' }}
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}
         >
           <div
             className="rounded-xl overflow-hidden flex-shrink-0"
-            style={{ background: 'white', padding: '4px', boxShadow: '0 2px 12px rgba(0,0,0,0.15)' }}
+            style={{ background: 'white', padding: '4px', boxShadow: '0 0 20px rgba(167,139,250,0.4)' }}
           >
             <Image src="/logo.png" alt="SL Muslim History" width={36} height={36} style={{ height: '36px', width: 'auto', display: 'block' }} />
           </div>
           <div>
             <div className="text-xs font-black leading-tight text-white">SL Muslim</div>
-            <div className="text-xs font-black leading-tight" style={{ color: '#fde68a' }}>History</div>
-            <div className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.7)', fontSize: '10px' }}>Admin Panel</div>
+            <div className="text-xs font-black leading-tight" style={{ color: '#fcd34d' }}>History</div>
+            <div className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>Admin Panel</div>
           </div>
         </div>
 
         {/* Nav */}
         <nav className="flex-1 py-4 overflow-y-auto">
-          <div className="px-3 space-y-0.5">
+          <div className="px-3 space-y-1.5">
             {navItems.map((item) => {
               const active = isActive(item.href)
+              const glow  = navGlow[item.accent]
+              const solid = navSolid[item.accent]
+              const grad  = navGrad[item.accent]
               return (
                 <Link
                   key={item.href}
@@ -175,24 +193,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   onClick={() => setSidebarOpen(false)}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150"
                   style={{
-                    color:      'white',
-                    background: active ? 'rgba(255,255,255,0.22)' : 'transparent',
-                    boxShadow:  active ? '0 2px 10px rgba(0,0,0,0.1)' : 'none',
+                    color:      active ? solid : 'rgba(255,255,255,0.75)',
+                    background: active ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.025)',
+                    border:     active ? `1px solid ${glow}` : '1px solid rgba(255,255,255,0.06)',
+                    boxShadow:  active ? `0 0 18px ${glow}` : 'none',
                   }}
                   onMouseEnter={(e) => {
-                    if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.12)'
+                    if (!active) { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)' }
                   }}
                   onMouseLeave={(e) => {
-                    if (!active) e.currentTarget.style.background = 'transparent'
+                    if (!active) { e.currentTarget.style.background = 'rgba(255,255,255,0.025)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' }
                   }}
                 >
                   <span
                     className="text-base w-6 h-6 flex items-center justify-center flex-shrink-0 rounded-lg"
-                    style={{ background: active ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.12)' }}
+                    style={{ background: active ? grad : 'rgba(255,255,255,0.08)' }}
                   >
                     {item.icon}
                   </span>
-                  <span className="flex-1" style={{ opacity: active ? 1 : 0.85 }}>{item.label}</span>
+                  <span className="flex-1">{item.label}</span>
                   {item.label === 'Comments' && pendingComments > 0 && (
                     <span
                       className="text-xs font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
