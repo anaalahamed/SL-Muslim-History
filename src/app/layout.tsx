@@ -93,7 +93,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {supabaseOrigin && <link rel="preconnect" href={supabaseOrigin} />}
         {/* Inline critical font fallbacks — no blocking network request */}
         <style dangerouslySetInnerHTML={{ __html: criticalCSS }} />
-        <link rel="stylesheet" href={FONT_URL} />
+        {/* Load the font stylesheet without blocking rendering: media="print"
+            makes the browser fetch it at high priority without waiting for
+            it before painting, then the inline script flips it to "all" once
+            it's loaded. This is the standard non-render-blocking pattern for
+            an externally hosted stylesheet (can't use next/font here since
+            these are loaded via the Google Fonts CSS API, not self-hosted).
+            <noscript> covers the no-JS case. */}
+        <link rel="preload" as="style" href={FONT_URL} />
+        <link rel="stylesheet" href={FONT_URL} media="print" id="google-fonts-css" />
+        <script
+          dangerouslySetInnerHTML={{ __html: `document.getElementById('google-fonts-css').media='all'` }}
+        />
+        <noscript>
+          <link rel="stylesheet" href={FONT_URL} />
+        </noscript>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd()) }}
