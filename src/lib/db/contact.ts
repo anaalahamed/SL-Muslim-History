@@ -13,15 +13,18 @@ export async function getMessages(client?: SupabaseClient): Promise<ContactMessa
   return data as ContactMessage[]
 }
 
-export async function saveMessage(data: Omit<ContactMessage, 'id' | 'received_at' | 'read'>): Promise<ContactMessage | null> {
-  if (!supabase) return null
-  const { data: saved, error } = await supabase
+// Anon visitors can only INSERT into contact_messages (not read it back —
+// otherwise they could read other people's messages), so this must NOT
+// chain .select()/.single() after the insert: Postgres RLS treats
+// INSERT...RETURNING as needing SELECT visibility on the new row, and
+// rejects (rolls back) the whole insert when that's missing. A plain
+// insert with no RETURNING isn't subject to that check.
+export async function saveMessage(data: Omit<ContactMessage, 'id' | 'received_at' | 'read'>): Promise<boolean> {
+  if (!supabase) return false
+  const { error } = await supabase
     .from('contact_messages')
     .insert({ ...data, received_at: new Date().toISOString(), read: false })
-    .select()
-    .single()
-  if (error) return null
-  return saved as ContactMessage
+  return !error
 }
 
 export async function markRead(id: string, client?: SupabaseClient): Promise<void> {

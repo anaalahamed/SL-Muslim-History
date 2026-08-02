@@ -32,7 +32,7 @@ const reasons = [
   { icon: '💬', label: 'General Enquiry' },
 ]
 
-type FormState = 'idle' | 'sending' | 'sent'
+type FormState = 'idle' | 'sending' | 'sent' | 'error'
 
 function FAQ() {
   const [open, setOpen] = useState<number | null>(null)
@@ -105,8 +105,8 @@ export default function ContactClient() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setStatus('sending')
-    await saveMessage({ name: form.name, email: form.email, reason: form.reason, message: form.message })
-    setStatus('sent')
+    const ok = await saveMessage({ name: form.name, email: form.email, reason: form.reason, message: form.message })
+    setStatus(ok ? 'sent' : 'error')
   }
 
   return (
@@ -165,6 +165,13 @@ export default function ContactClient() {
                       <label className="block text-xs font-bold mb-1.5" style={{ color: 'var(--dark)' }}>Message <span style={{ color: '#dc2626' }}>*</span></label>
                       <textarea required rows={5} placeholder="Write your message here..." value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none" style={{ border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', transition: 'border-color 0.2s, box-shadow 0.2s' }} onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--green)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(74,158,31,0.12)' }} onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none' }} />
                     </div>
+
+                    {status === 'error' && (
+                      <div className="rounded-xl px-4 py-3 flex items-center gap-3 text-sm font-semibold" style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626' }}>
+                        <span>⚠️</span>
+                        <span>Something went wrong sending your message. Please try again in a moment.</span>
+                      </div>
+                    )}
 
                     <button type="submit" disabled={status === 'sending'} className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all" style={{ background: status === 'sending' ? 'var(--muted)' : 'var(--green)', color: 'white', boxShadow: status === 'sending' ? 'none' : '0 4px 14px rgba(74,158,31,0.3)', cursor: status === 'sending' ? 'not-allowed' : 'pointer' }}>
                       {status === 'sending' ? (<><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Sending...</>) : ('Send Message →')}
