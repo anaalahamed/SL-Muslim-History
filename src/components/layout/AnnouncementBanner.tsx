@@ -16,9 +16,16 @@ export default function AnnouncementBanner() {
 
   useEffect(() => {
     const local = getAdminConfig()
+    // Apply the cached (localStorage) value immediately, before the network
+    // round-trip resolves. For returning visitors this is usually already
+    // correct, so the banner doesn't pop in and push the page down a moment
+    // after it's already visible — same "layout shift" the maintenance
+    // check used to cause, just further down the page.
+    setAnnouncement(local.announcement)
+    if (sessionStorage.getItem(`slmh_announce_dismissed_${local.announcement.text}`)) setDismissed(true)
+
     mergeSharedConfigFromSupabase(local).then((cfg) => {
       setAnnouncement(cfg.announcement)
-      // Check if dismissed in this session
       const key = `slmh_announce_dismissed_${cfg.announcement.text}`
       if (sessionStorage.getItem(key)) setDismissed(true)
     })
