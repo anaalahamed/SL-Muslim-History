@@ -105,13 +105,20 @@ export default function HeroSlider({ slides }: Props) {
                   Only the active slide's image is mounted — all 5 sit stacked
                   in the same viewport spot regardless of opacity, so rendering
                   every <Image> at once made the browser fetch all 5 full-size
-                  photos concurrently, competing with the actual LCP image. */}
+                  photos concurrently, competing with the actual LCP image.
+                  priority is unconditional (not just the first slide) because
+                  this is the only <Image> ever mounted at a time — every time
+                  the slider auto-rotates, a fresh image mounts, and without
+                  priority it loads as a lazy/low-priority request. Since a
+                  rotating carousel can keep re-registering as the page's
+                  largest paint, an unprioritized later slide can single-
+                  handedly blow up LCP by several seconds. */}
               {article.featured_image && i === cur && (
                 <Image
                   src={article.featured_image}
                   alt={article.title}
                   fill
-                  priority={i === 0}
+                  priority
                   sizes="(max-width: 900px) 100vw, 65vw"
                   style={{ objectFit: 'contain', opacity: 0.55 }}
                 />
