@@ -1,92 +1,24 @@
-'use client'
+import { unstable_cache } from 'next/cache'
+import { getSiteSettings } from '@/lib/db/siteSettings'
+import { Announcement } from '@/lib/adminConfig'
+import AnnouncementBannerClient from './AnnouncementBannerClient'
 
-import { useState, useEffect } from 'react'
-import { getAdminConfig, mergeSharedConfigFromSupabase } from '@/lib/adminConfig'
+// Cached the same way BreakingTicker caches special news — this lets the
+// banner be fetched and rendered on the server (no client pop-in / layout
+// shift once loaded) without forcing every page that renders it to become
+// fully dynamic, since unstable_cache decouples the fetch from per-request
+// rendering instead of making it a live no-store call.
+const getCachedAnnouncement = unstable_cache(
+  async (): Promise<Announcement> => {
+    const settings = await getSiteSettings()
+    return settings?.announcement ?? { enabled: false, text: '', link: '', color: 'green' }
+  },
+  ['announcement-banner'],
+  { revalidate: 60 },
+)
 
-const colorMap = {
-  green: { bg: '#4a9e1f', text: 'white',   hover: '#3a8010' },
-  gold:  { bg: '#c9a84c', text: 'white',   hover: '#a8893a' },
-  red:   { bg: '#dc2626', text: 'white',   hover: '#b91c1c' },
-  blue:  { bg: '#1d4ed8', text: 'white',   hover: '#1e40af' },
-}
-
-export default function AnnouncementBanner() {
-  const [announcement, setAnnouncement] = useState({ enabled: false, text: '', link: '', color: 'green' as 'green' | 'gold' | 'red' | 'blue' })
-  const [dismissed, setDismissed] = useState(false)
-
-  useEffect(() => {
-    const local = getAdminConfig()
-    // Apply the cached (localStorage) value immediately, before the network
-    // round-trip resolves. For returning visitors this is usually already
-    // correct, so the banner doesn't pop in and push the page down a moment
-    // after it's already visible — same "layout shift" the maintenance
-    // check used to cause, just further down the page.
-    setAnnouncement(local.announcement)
-    if (sessionStorage.getItem(`slmh_announce_dismissed_${local.announcement.text}`)) setDismissed(true)
-
-    mergeSharedConfigFromSupabase(local).then((cfg) => {
-      setAnnouncement(cfg.announcement)
-      const key = `slmh_announce_dismissed_${cfg.announcement.text}`
-      if (sessionStorage.getItem(key)) setDismissed(true)
-    })
-  }, [])
-
-  function dismiss() {
-    const key = `slmh_announce_dismissed_${announcement.text}`
-    sessionStorage.setItem(key, '1')
-    setDismissed(true)
-  }
-
-  if (!announcement.enabled || !announcement.text || dismissed) return null
-
-  const colors = colorMap[announcement.color]
-
-  const inner = (
-    <div className="flex items-center justify-center gap-3 px-4 py-2.5 flex-wrap">
-      <span className="text-sm font-semibold leading-snug text-center" style={{ color: colors.text }}>
-        {announcement.text}
-      </span>
-      {announcement.link && (
-        <span
-          className="text-xs font-bold px-3 py-1 rounded-full flex-shrink-0"
-          style={{ background: 'rgba(255,255,255,0.25)', color: colors.text }}
-        >
-          Read more →
-        </span>
-      )}
-    </div>
-  )
-
-  return (
-    <div
-      className="relative w-full"
-      style={{ background: colors.bg }}
-    >
-      {announcement.link ? (
-        <a
-          href={announcement.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block transition-all"
-          style={{ background: colors.bg }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = colors.hover }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = colors.bg }}
-        >
-          {inner}
-        </a>
-      ) : (
-        <div>{inner}</div>
-      )}
-      <button
-        onClick={dismiss}
-        aria-label="Dismiss"
-        className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all"
-        style={{ color: colors.text, background: 'rgba(255,255,255,0.15)' }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.3)' }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)' }}
-      >
-        ✕
-      </button>
-    </div>
-  )
+export default async function AnnouncementBanner() {
+  const announcement = await getCachedAnnouncement()
+  if (!announcement.enabled || !announcement.text) return null
+  return <AnnouncementBannerClient announcement={announcement} />
 }

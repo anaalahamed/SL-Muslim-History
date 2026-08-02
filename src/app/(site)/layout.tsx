@@ -30,7 +30,9 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
 
         {/* ── Entire site content — header → footer ── */}
         <div className="portal-center">
-          <AnnouncementBanner />
+          <Suspense fallback={null}>
+            <AnnouncementBanner />
+          </Suspense>
           <Header />
           {/* Reserve 36px so layout doesn't shift when ticker data arrives */}
           <Suspense fallback={<div style={{ height: '36px', background: 'var(--green-dark)' }} />}>
