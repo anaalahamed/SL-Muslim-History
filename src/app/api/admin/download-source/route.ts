@@ -15,7 +15,10 @@ export async function GET(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const adminUUID = process.env.ADMIN_UUID
-  const githubToken = process.env.GITHUB_TOKEN
+  // .trim() guards against a stray trailing newline/space from copy-pasting
+  // the token into Vercel's env var field, which would otherwise make
+  // GitHub reject an otherwise-valid token with 401.
+  const githubToken = process.env.GITHUB_TOKEN?.trim()
 
   if (!supabaseUrl || !supabaseKey || !adminUUID || !githubToken) {
     return NextResponse.json({ error: 'Not configured' }, { status: 500 })
@@ -35,7 +38,7 @@ export async function GET(request: NextRequest) {
 
   const upstream = await fetch(`https://api.github.com/repos/${REPO}/zipball/${BRANCH}`, {
     headers: {
-      Authorization: `token ${githubToken}`,
+      Authorization: `Bearer ${githubToken}`,
       Accept: 'application/vnd.github+json',
       'X-GitHub-Api-Version': '2022-11-28',
       'User-Agent': 'sl-muslim-history-backup',
