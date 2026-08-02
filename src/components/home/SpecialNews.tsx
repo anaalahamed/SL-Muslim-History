@@ -2,20 +2,13 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
-import { getSpecialNews } from '@/lib/db/news'
 import { NewsPost } from '@/lib/types'
 
-const LIMIT = 6
+interface Props {
+  items: NewsPost[]
+}
 
-export default function SpecialNews() {
-  const [items, setItems]     = useState<NewsPost[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    getSpecialNews(LIMIT).then((items) => { setItems(items); setLoading(false) })
-  }, [])
-
+export default function SpecialNews({ items }: Props) {
   return (
     <div>
       {/* Label */}
@@ -32,14 +25,7 @@ export default function SpecialNews() {
           சிறப்புச் செய்திகள்
         </div>
 
-        {loading
-          ? Array.from({ length: LIMIT }).map((_, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'stretch', minHeight: '60px', borderBottom: '1px solid var(--border)', padding: '8px 10px', gap: '8px' }}>
-                <div className="animate-shimmer-light" style={{ flex: 1, borderRadius: '2px' }} />
-                <div className="animate-shimmer-light" style={{ width: '76px', borderRadius: '2px' }} />
-              </div>
-            ))
-          : items.map((item, i) => (
+        {items.map((item, i) => (
             <Link
               key={item.id}
               href={`/news/${item.slug}`}

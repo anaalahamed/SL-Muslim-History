@@ -34,13 +34,21 @@ const BG_FALLBACKS = [
   'linear-gradient(135deg,#0a1020,#1a2040)',
 ]
 
-export default function AllArticles() {
-  const [articles, setArticles] = useState<Article[]>([])
-  const [total, setTotal]       = useState(0)
-  const [page, setPage]         = useState(1)
-  const [loading, setLoading]   = useState(true)
+interface Props {
+  initialArticles: Article[]
+  initialTotal: number
+}
 
+export default function AllArticles({ initialArticles, initialTotal }: Props) {
+  const [articles, setArticles] = useState<Article[]>(initialArticles)
+  const [total, setTotal]       = useState(initialTotal)
+  const [page, setPage]         = useState(1)
+  const [loading, setLoading]   = useState(false)
+
+  // Page 1 arrives pre-fetched from the server (see props above) so the
+  // list is in the initial HTML. Only page changes trigger a client fetch.
   useEffect(() => {
+    if (page === 1) return
     setLoading(true)
     getArticlesPaginated(page, ITEMS_PER_PAGE).then(({ articles, total }) => {
       setArticles(articles)

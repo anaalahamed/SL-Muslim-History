@@ -2,8 +2,6 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
-import { getJanazaNews } from '@/lib/db/news'
 import { NewsPost } from '@/lib/types'
 
 const BG_FALLBACKS = [
@@ -14,16 +12,11 @@ const BG_FALLBACKS = [
   'linear-gradient(135deg,#1a2d3d,#2a4060)',
 ]
 
-const LIMIT = 5
+interface Props {
+  items: NewsPost[]
+}
 
-export default function JanazaNews() {
-  const [items, setItems]     = useState<NewsPost[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    getJanazaNews(LIMIT).then((items) => { setItems(items); setLoading(false) })
-  }, [])
-
+export default function JanazaNews({ items }: Props) {
   return (
     <div>
       {/* Section label */}
@@ -35,17 +28,7 @@ export default function JanazaNews() {
       </div>
 
       <div style={{ background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
-        {loading
-          ? Array.from({ length: LIMIT }).map((_, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'stretch', minHeight: '54px', borderBottom: '1px solid var(--border)', gap: 0 }}>
-                <div className="animate-shimmer-light" style={{ width: '60px', flexShrink: 0 }} />
-                <div style={{ flex: 1, padding: '8px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <div className="animate-shimmer-light" style={{ height: '10px', width: '90%', borderRadius: '2px' }} />
-                  <div className="animate-shimmer-light" style={{ height: '10px', width: '60%', borderRadius: '2px' }} />
-                </div>
-              </div>
-            ))
-          : items.map((item, i) => {
+        {items.map((item, i) => {
             const isLast = i === items.length - 1
             return (
               <Link

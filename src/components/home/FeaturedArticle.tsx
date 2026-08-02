@@ -2,8 +2,6 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
-import { getFeaturedArticles } from '@/lib/db/articles'
 import { Article } from '@/lib/types'
 import { formatDate, getExcerpt } from '@/lib/utils'
 
@@ -26,20 +24,14 @@ const BG_FALLBACKS = [
   'linear-gradient(140deg,#1a2d3d,#2a4060)',
 ]
 
-export default function FeaturedArticle() {
-  const [articles, setArticles] = useState<Article[]>([])
-  const [loading,  setLoading]  = useState(true)
+interface Props {
+  articles: Article[]
+}
 
-  useEffect(() => {
-    getFeaturedArticles().then((data) => { setArticles(data); setLoading(false) })
-  }, [])
-
+export default function FeaturedArticle({ articles }: Props) {
   const cat = (name: string) => CAT_COLORS[name] ?? { bg: '#f1f5f9', text: '#475569' }
 
-  // Return null while loading so the section header never flashes when
-  // no articles are pinned as featured. The section appears only once we
-  // have confirmed there is at least one featured article to display.
-  if (loading || articles.length === 0) return null
+  if (articles.length === 0) return null
 
   return (
     <div>
@@ -56,17 +48,7 @@ export default function FeaturedArticle() {
       </div>
 
       <div style={{ background: 'var(--white)', border: '1px solid var(--border)', borderLeft: '3px solid var(--gold)', borderRadius: '3px', overflow: 'hidden' }}>
-        {loading
-          ? Array.from({ length: 2 }).map((_, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'stretch', minHeight: '72px', borderBottom: i === 0 ? '1px solid var(--border)' : 'none', gap: 0 }}>
-                <div className="animate-shimmer-light" style={{ width: '90px', flexShrink: 0 }} />
-                <div style={{ flex: 1, padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <div className="animate-shimmer-light" style={{ height: '12px', width: '55%', borderRadius: '2px' }} />
-                  <div className="animate-shimmer-light" style={{ height: '10px', width: '90%', borderRadius: '2px' }} />
-                </div>
-              </div>
-            ))
-          : articles.map((article, i) => {
+        {articles.map((article, i) => {
             const c = cat(article.category)
             const isLast = i === articles.length - 1
             return (

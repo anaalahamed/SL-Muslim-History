@@ -2,8 +2,6 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
-import { getMostReadArticles } from '@/lib/db/articles'
 import { Article } from '@/lib/types'
 
 const RANK_COLORS = [
@@ -21,19 +19,11 @@ const BG_FALLBACKS = [
   'linear-gradient(135deg,#1a2d3d,#2a4060)',
 ]
 
-const LIMIT = 5
+interface Props {
+  articles: Article[]
+}
 
-export default function MostRead() {
-  const [articles, setArticles] = useState<Article[]>([])
-  const [loading, setLoading]   = useState(true)
-
-  useEffect(() => {
-    getMostReadArticles(LIMIT).then((top) => {
-      setArticles(top)
-      setLoading(false)
-    })
-  }, [])
-
+export default function MostRead({ articles }: Props) {
   return (
     <div>
       {/* Section label */}
@@ -44,18 +34,7 @@ export default function MostRead() {
       </div>
 
       <div style={{ background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
-        {loading
-          ? Array.from({ length: LIMIT }).map((_, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'stretch', minHeight: '54px', borderBottom: '1px solid var(--border)', gap: 0 }}>
-                <div className="animate-shimmer-light" style={{ width: '22px', flexShrink: 0 }} />
-                <div className="animate-shimmer-light" style={{ width: '52px', flexShrink: 0 }} />
-                <div style={{ flex: 1, padding: '8px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <div className="animate-shimmer-light" style={{ height: '10px', width: '90%', borderRadius: '2px' }} />
-                  <div className="animate-shimmer-light" style={{ height: '9px', width: '30%', borderRadius: '2px' }} />
-                </div>
-              </div>
-            ))
-          : articles.map((article, i) => {
+        {articles.map((article, i) => {
             const rank = RANK_COLORS[i] ?? RANK_COLORS[4]
             const isLast = i === articles.length - 1
             return (

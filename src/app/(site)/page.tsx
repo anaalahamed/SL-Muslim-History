@@ -8,7 +8,9 @@ import SidebarAd from '@/components/home/SidebarAd'
 import AdBanner from '@/components/ui/AdBanner'
 import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
 import { getSiteSettings } from '@/lib/db/siteSettings'
-import { getRecentArticles } from '@/lib/db/articles'
+import { getRecentArticles, getFeaturedArticles, getArticlesPaginated, getMostReadArticles } from '@/lib/db/articles'
+import { getSpecialNews, getJanazaNews } from '@/lib/db/news'
+import { getSidebarAd } from '@/lib/db/ads'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,10 +50,22 @@ const FollowUs     = lazyLoad(() => import('@/components/home/FollowUs'))
 const CategoryGrid = lazyLoad(() => import('@/components/home/CategoryGrid'))
 const DonationCTA  = lazyLoad(() => import('@/components/home/DonationCTA'))
 
+const ARTICLES_PER_PAGE = 10
+
 export default async function HomePage() {
-  // Fetched server-side so the hero (the page's LCP element) is present in
-  // the initial HTML instead of waiting for a client-side fetch after hydration.
-  const heroSlides = await getRecentArticles(5)
+  // Fetched server-side so every above-the-fold box (hero, featured,
+  // article list, special/janaza news, most read, sidebar ad) is present
+  // in the initial HTML instead of each one waiting on its own client-side
+  // fetch after hydration.
+  const [heroSlides, featured, articlesPage, specialNews, janazaNews, mostRead, sidebarAd] = await Promise.all([
+    getRecentArticles(5),
+    getFeaturedArticles(),
+    getArticlesPaginated(1, ARTICLES_PER_PAGE),
+    getSpecialNews(6),
+    getJanazaNews(5),
+    getMostReadArticles(5),
+    getSidebarAd(),
+  ])
 
   return (
     <>
@@ -65,17 +79,17 @@ export default async function HomePage() {
               its own grid track, overflowing the viewport on mobile. */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0 }}>
             <HeroSlider slides={heroSlides} />
-            <FeaturedArticle />
-            <AllArticles />
+            <FeaturedArticle articles={featured} />
+            <AllArticles initialArticles={articlesPage.articles} initialTotal={articlesPage.total} />
             <AdBanner position="homepage-bottom" />
           </div>
 
           {/* RIGHT SIDEBAR */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignSelf: 'start', minWidth: 0 }}>
-            <SpecialNews />
-            <SidebarAd />
-            <JanazaNews />
-            <MostRead />
+            <SpecialNews items={specialNews} />
+            <SidebarAd ad={sidebarAd} />
+            <JanazaNews items={janazaNews} />
+            <MostRead articles={mostRead} />
             <FollowUs />
             <CategoryGrid />
           </div>

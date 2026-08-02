@@ -4,10 +4,22 @@ import { useState, useEffect } from 'react'
 import { getSidebarAd } from '@/lib/db/ads'
 import { Advertisement } from '@/lib/types'
 
-export default function SidebarAd() {
-  const [ad, setAd] = useState<Advertisement | null>(null)
+interface Props {
+  // Pass this when the parent already fetched it server-side (the homepage
+  // does). Omit it and the component fetches it itself on mount, same as
+  // before — used by pages like ArticleDetail that render this client-side.
+  ad?: Advertisement | null
+}
 
-  useEffect(() => { getSidebarAd().then(setAd) }, [])
+export default function SidebarAd({ ad: adProp }: Props) {
+  const [fetched, setFetched] = useState<Advertisement | null>(null)
+
+  useEffect(() => {
+    if (adProp !== undefined) return
+    getSidebarAd().then(setFetched)
+  }, [adProp])
+
+  const ad = adProp !== undefined ? adProp : fetched
 
   if (!ad) return null
 
