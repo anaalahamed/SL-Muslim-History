@@ -142,35 +142,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         style={{
           width: '240px',
           background: theme.sidebarBg,
-          borderRight: '1px solid rgba(255,255,255,0.06)',
-          boxShadow: '4px 0 32px rgba(0,0,0,0.4)',
+          boxShadow: '4px 0 32px rgba(124,58,237,0.15)',
         }}
       >
         {/* Logo */}
         <div
           className="flex items-center gap-3 px-5 py-5"
-          style={{ borderBottom: `1px solid ${theme.divider}` }}
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.18)' }}
         >
           <div
             className="rounded-xl overflow-hidden flex-shrink-0"
-            style={{ background: 'white', padding: '4px', boxShadow: `0 0 20px ${accents.violet.glow}` }}
+            style={{ background: 'white', padding: '4px', boxShadow: '0 2px 12px rgba(0,0,0,0.15)' }}
           >
             <Image src="/logo.png" alt="SL Muslim History" width={36} height={36} style={{ height: '36px', width: 'auto', display: 'block' }} />
           </div>
           <div>
-            <div
-              className="text-xs font-black leading-tight"
-              style={{
-                background: 'linear-gradient(90deg,#a78bfa,#60a5fa)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              SL Muslim
-            </div>
-            <div className="text-xs font-black leading-tight" style={{ color: accents.amber.solid }}>History</div>
-            <div className="text-xs mt-0.5" style={{ color: theme.textMuted, fontSize: '10px' }}>Admin Panel</div>
+            <div className="text-xs font-black leading-tight text-white">SL Muslim</div>
+            <div className="text-xs font-black leading-tight" style={{ color: '#fde68a' }}>History</div>
+            <div className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.7)', fontSize: '10px' }}>Admin Panel</div>
           </div>
         </div>
 
@@ -179,7 +168,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="px-3 space-y-0.5">
             {navItems.map((item) => {
               const active = isActive(item.href)
-              const a = accents[item.accent]
               return (
                 <Link
                   key={item.href}
@@ -187,35 +175,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   onClick={() => setSidebarOpen(false)}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150"
                   style={{
-                    color:      active ? 'white' : theme.textSecondary,
-                    background: active ? a.soft : 'transparent',
-                    border:     active ? `1px solid ${a.glow}` : '1px solid transparent',
-                    boxShadow:  active ? `0 0 20px ${a.glow}` : 'none',
+                    color:      'white',
+                    background: active ? 'rgba(255,255,255,0.22)' : 'transparent',
+                    boxShadow:  active ? '0 2px 10px rgba(0,0,0,0.1)' : 'none',
                   }}
                   onMouseEnter={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
-                      e.currentTarget.style.color = '#e2e8f0'
-                    }
+                    if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.12)'
                   }}
                   onMouseLeave={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.background = 'transparent'
-                      e.currentTarget.style.color = theme.textSecondary
-                    }
+                    if (!active) e.currentTarget.style.background = 'transparent'
                   }}
                 >
                   <span
                     className="text-base w-6 h-6 flex items-center justify-center flex-shrink-0 rounded-lg"
-                    style={{ background: active ? a.grad : 'rgba(255,255,255,0.05)' }}
+                    style={{ background: active ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.12)' }}
                   >
                     {item.icon}
                   </span>
-                  <span className="flex-1" style={active ? { color: a.solid } : undefined}>{item.label}</span>
+                  <span className="flex-1" style={{ opacity: active ? 1 : 0.85 }}>{item.label}</span>
                   {item.label === 'Comments' && pendingComments > 0 && (
                     <span
                       className="text-xs font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
-                      style={{ background: accents.rose.grad, color: 'white', fontSize: '10px', minWidth: '18px', textAlign: 'center', boxShadow: `0 0 10px ${accents.rose.glow}` }}
+                      style={{ background: '#fde047', color: '#78350f', fontSize: '10px', minWidth: '18px', textAlign: 'center' }}
                     >
                       {pendingComments}
                     </span>
@@ -223,7 +204,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   {item.label === 'Reactions' && newReactions > 0 && (
                     <span
                       className="text-xs font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
-                      style={{ background: accents.rose.grad, color: 'white', fontSize: '10px', minWidth: '18px', textAlign: 'center', boxShadow: `0 0 10px ${accents.rose.glow}` }}
+                      style={{ background: '#fde047', color: '#78350f', fontSize: '10px', minWidth: '18px', textAlign: 'center' }}
                     >
                       {newReactions}
                     </span>
@@ -231,7 +212,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   {item.label === 'Messages' && unreadMsgs > 0 && (
                     <span
                       className="text-xs font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
-                      style={{ background: accents.rose.grad, color: 'white', fontSize: '10px', minWidth: '18px', textAlign: 'center', boxShadow: `0 0 10px ${accents.rose.glow}` }}
+                      style={{ background: '#fde047', color: '#78350f', fontSize: '10px', minWidth: '18px', textAlign: 'center' }}
                     >
                       {unreadMsgs}
                     </span>
@@ -239,7 +220,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   {item.label === 'Newsletter' && newSubs > 0 && (
                     <span
                       className="text-xs font-black px-1.5 py-0.5 rounded-full flex-shrink-0"
-                      style={{ background: accents.amber.grad, color: 'white', fontSize: '10px', minWidth: '18px', textAlign: 'center', boxShadow: `0 0 10px ${accents.amber.glow}` }}
+                      style={{ background: '#fde047', color: '#78350f', fontSize: '10px', minWidth: '18px', textAlign: 'center' }}
                     >
                       {newSubs}
                     </span>
@@ -250,7 +231,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           {/* Divider */}
-          <div className="mx-4 my-4" style={{ height: '1px', background: theme.divider }} />
+          <div className="mx-4 my-4" style={{ height: '1px', background: 'rgba(255,255,255,0.18)' }} />
 
           {/* Back to site */}
           <div className="px-3">
@@ -260,9 +241,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               rel="noopener noreferrer"
               prefetch={false}
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150"
-              style={{ color: theme.textMuted }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = '#e2e8f0'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = theme.textMuted; e.currentTarget.style.background = 'transparent' }}
+              style={{ color: 'rgba(255,255,255,0.75)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'white'; e.currentTarget.style.background = 'rgba(255,255,255,0.12)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; e.currentTarget.style.background = 'transparent' }}
             >
               <span className="text-base w-5 text-center">↗</span>
               View Site
@@ -273,17 +254,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Bottom user info + sign out */}
         <div
           className="px-4 py-4 flex items-center gap-3"
-          style={{ borderTop: `1px solid ${theme.divider}` }}
+          style={{ borderTop: '1px solid rgba(255,255,255,0.18)' }}
         >
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0"
-            style={{ background: accents.violet.grad, color: 'white', boxShadow: `0 0 14px ${accents.violet.glow}` }}
+            style={{ background: 'rgba(255,255,255,0.25)', color: 'white' }}
           >
             {ownerName.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-bold truncate" style={{ color: theme.textPrimary }}>{ownerName}</div>
-            <div className="text-xs truncate" style={{ color: theme.textMuted }}>Administrator</div>
+            <div className="text-xs font-bold truncate text-white">{ownerName}</div>
+            <div className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.65)' }}>Administrator</div>
           </div>
           <button
             onClick={async () => {
@@ -292,9 +273,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             }}
             title="Sign out"
             className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all"
-            style={{ color: theme.textMuted }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(244,63,94,0.15)'; e.currentTarget.style.color = accents.rose.solid }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = theme.textMuted }}
+            style={{ color: 'rgba(255,255,255,0.65)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.color = 'white' }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)' }}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -310,7 +291,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <header
           className="sticky top-0 z-10 flex items-center justify-between px-6 py-3"
           style={{
-            background: 'rgba(10,14,23,0.75)',
+            background: 'rgba(255,255,255,0.85)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
             borderBottom: `1px solid ${theme.divider}`,

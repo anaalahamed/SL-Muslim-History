@@ -99,38 +99,37 @@ export default function AdminDashboard() {
       <div
         className="rounded-2xl px-5 sm:px-7 py-5 sm:py-6 flex flex-wrap items-center justify-between gap-4 relative overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, #1e1240 0%, #0f1b3d 60%, #0a0e17 100%)',
-          border: '1px solid rgba(139,92,246,0.25)',
-          boxShadow: `0 8px 40px ${accents.violet.glow}`,
+          background: 'linear-gradient(120deg, #7c3aed 0%, #6366f1 50%, #ec4899 100%)',
+          boxShadow: '0 8px 32px rgba(124,58,237,0.3)',
         }}
       >
-        <div style={{ position: 'absolute', top: '-60px', right: '-40px', width: '220px', height: '220px', borderRadius: '50%', background: `radial-gradient(circle, ${accents.violet.glow} 0%, transparent 70%)`, pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-50px', left: '20%', width: '180px', height: '180px', borderRadius: '50%', background: `radial-gradient(circle, ${accents.pink.glow} 0%, transparent 70%)`, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '-60px', right: '-40px', width: '220px', height: '220px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-50px', left: '20%', width: '180px', height: '180px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div className="relative">
-          <h2 className="text-xl font-extrabold mb-1" style={{ color: theme.textPrimary }}>Welcome back, {ownerName} 👋</h2>
-          <p className="text-sm" style={{ color: theme.textSecondary }}>
+          <h2 className="text-xl font-extrabold mb-1 text-white">Welcome back, {ownerName} 👋</h2>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
             Here&apos;s what&apos;s happening with SL Muslim History today.
           </p>
         </div>
         <div className="relative hidden sm:flex items-center gap-4 text-center">
           <div>
-            <div className="text-2xl font-black" style={{ color: accents.amber.solid, textShadow: `0 0 20px ${accents.amber.glow}` }}>{formatViews(totalViews)}</div>
-            <div className="text-xs" style={{ color: theme.textMuted }}>Total Views</div>
+            <div className="text-2xl font-black text-white">{formatViews(totalViews)}</div>
+            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Total Views</div>
           </div>
-          <div style={{ width: '1px', height: '40px', background: theme.divider }} />
+          <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.25)' }} />
           <div title="Real (organic) article views">
-            <div className="text-2xl font-black" style={{ color: accents.violet.solid, textShadow: `0 0 20px ${accents.violet.glow}` }}>{formatViews(realArticleViews)}</div>
-            <div className="text-xs" style={{ color: theme.textMuted }}>Articles</div>
+            <div className="text-2xl font-black text-white">{formatViews(realArticleViews)}</div>
+            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Articles</div>
           </div>
-          <div style={{ width: '1px', height: '40px', background: theme.divider }} />
+          <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.25)' }} />
           <div title="Real (organic) special news views">
-            <div className="text-2xl font-black" style={{ color: accents.blue.solid, textShadow: `0 0 20px ${accents.blue.glow}` }}>{formatViews(realSpecialViews)}</div>
-            <div className="text-xs" style={{ color: theme.textMuted }}>Special</div>
+            <div className="text-2xl font-black text-white">{formatViews(realSpecialViews)}</div>
+            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Special</div>
           </div>
-          <div style={{ width: '1px', height: '40px', background: theme.divider }} />
+          <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.25)' }} />
           <div title="Real (organic) janaza news views">
-            <div className="text-2xl font-black" style={{ color: accents.cyan.solid, textShadow: `0 0 20px ${accents.cyan.glow}` }}>{formatViews(realJanazaViews)}</div>
-            <div className="text-xs" style={{ color: theme.textMuted }}>Janaza</div>
+            <div className="text-2xl font-black text-white">{formatViews(realJanazaViews)}</div>
+            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Janaza</div>
           </div>
         </div>
       </div>
