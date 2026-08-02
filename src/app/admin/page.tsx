@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { getArticles } from '@/lib/db/articles'
 import { getNews } from '@/lib/db/news'
 import { getCategories } from '@/lib/db/categories'
+import { getMessages } from '@/lib/db/contact'
 import { Article } from '@/lib/types'
 import { NewsPost } from '@/lib/types'
 import { formatDate, formatViews } from '@/lib/utils'
@@ -37,6 +38,7 @@ export default function AdminDashboard() {
   const [subscribers,     setSubscribers]     = useState<SubscriberRow[]>([])
   const [comments,        setComments]        = useState<CommentRow[]>([])
   const [reactions,       setReactions]       = useState<ReactionRow[]>([])
+  const [messages,        setMessages]        = useState<{ read: boolean }[]>([])
   const [hoveredMonth,    setHoveredMonth]     = useState<number | null>(null)
 
   useEffect(() => {
@@ -50,6 +52,7 @@ export default function AdminDashboard() {
         .then(({ data }) => setComments(data ?? []))
     getAuthClient().from('reactions').select('emoji, created_at')
         .then(({ data }) => setReactions((data ?? []).filter((r) => r.emoji))) // exclude removed reactions
+    getMessages(getAuthClient()).then(setMessages)
   }, [])
 
   const totalViews     = articles.reduce((s, a) => s + a.views, 0)
@@ -67,6 +70,8 @@ export default function AdminDashboard() {
   const reactionsThisMonth = reactions.filter((r) => isWithinLast30Days(r.created_at)).length
   const subsAccepted       = subscribers.filter((s) => s.status === 'accepted').length
   const subsPending        = subscribers.filter((s) => s.status === 'pending').length
+  const messagesRead       = messages.filter((m) => m.read).length
+  const messagesPending    = messages.filter((m) => !m.read).length
 
   // Ranked by real (organic) views, not the boosted total, so an admin-set
   // boost can't make an article look more popular than it actually is here.
@@ -87,9 +92,9 @@ export default function AdminDashboard() {
   const maxMonthlyCount = Math.max(1, ...monthlyPublished.map((m) => m.count))
 
   const statCards: { label: string; value: number; icon: string; accent: AccentKey; href: string; change: string }[] = [
-    { label: 'Total Articles', value: articles.length,   icon: '📝', accent: 'violet', href: '/admin/articles',   change: `+${articlesThisMonth} this month` },
-    { label: 'News Posts',     value: news.length,       icon: '📰', accent: 'blue',   href: '/admin/news',        change: `+${newsThisMonth} this month` },
-    { label: 'Categories',     value: categoryCount,     icon: '🗂️', accent: 'pink',   href: '/admin/categories',  change: 'Active' },
+    { label: 'Articles',   value: articles.length,   icon: '📝', accent: 'violet', href: '/admin/articles',   change: `+${articlesThisMonth} mo.` },
+    { label: 'News Posts', value: news.length,       icon: '📰', accent: 'blue',   href: '/admin/news',        change: `+${newsThisMonth} mo.` },
+    { label: 'Categories', value: categoryCount,     icon: '🗂️', accent: 'pink',   href: '/admin/categories',  change: 'Active' },
   ]
 
   return (
@@ -135,23 +140,23 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stat cards — all six in one compact row: heading, then emoji + count + this-month */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
         {statCards.map((s) => {
           const a = accents[s.accent]
           return (
             <Link
               key={s.label}
               href={s.href}
-              className="rounded-xl p-3 transition-all duration-200 min-w-0"
+              className="rounded-xl p-2.5 transition-all duration-200 min-w-0"
               style={cardStyle}
               onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = a.glow; e.currentTarget.style.boxShadow = `0 8px 24px ${a.glow}` }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = 'none' }}
             >
               <div className="text-xs font-semibold truncate mb-1.5" style={{ color: theme.textSecondary }}>{s.label}</div>
-              <div className="flex items-baseline gap-1.5 flex-wrap">
+              <div className="flex items-baseline gap-1 flex-wrap">
                 <span className="text-sm">{s.icon}</span>
                 <span className="text-lg font-black" style={{ color: theme.textPrimary }}>{s.value}</span>
-                <span className="text-xs font-bold" style={{ color: a.solid }}>{s.change}</span>
+                <span className="text-xs font-bold truncate" style={{ color: a.solid }}>{s.change}</span>
               </div>
             </Link>
           )
@@ -160,12 +165,12 @@ export default function AdminDashboard() {
         {/* Newsletter Subs — three counts squeezed into the same compact card */}
         <Link
           href="/admin/newsletter"
-          className="rounded-xl p-3 transition-all duration-200 min-w-0"
+          className="rounded-xl p-2.5 transition-all duration-200 min-w-0"
           style={cardStyle}
           onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = accents.emerald.glow; e.currentTarget.style.boxShadow = `0 8px 24px ${accents.emerald.glow}` }}
           onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = 'none' }}
         >
-          <div className="text-xs font-semibold truncate mb-1.5" style={{ color: theme.textSecondary }}>Newsletter Subs</div>
+          <div className="text-xs font-semibold truncate mb-1.5" style={{ color: theme.textSecondary }}>Newsletter</div>
           <div className="flex items-baseline gap-1 flex-wrap">
             <span className="text-sm">📬</span>
             <span className="text-lg font-black" style={{ color: theme.textPrimary }}>{subscribers.length}</span>
@@ -177,7 +182,7 @@ export default function AdminDashboard() {
         {/* Comments — three counts squeezed into the same compact card */}
         <Link
           href="/admin/comments"
-          className="rounded-xl p-3 transition-all duration-200 min-w-0"
+          className="rounded-xl p-2.5 transition-all duration-200 min-w-0"
           style={cardStyle}
           onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = accents.cyan.glow; e.currentTarget.style.boxShadow = `0 8px 24px ${accents.cyan.glow}` }}
           onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = 'none' }}
@@ -191,19 +196,36 @@ export default function AdminDashboard() {
           </div>
         </Link>
 
+        {/* Messages — three counts squeezed into the same compact card */}
+        <Link
+          href="/admin/messages"
+          className="rounded-xl p-2.5 transition-all duration-200 min-w-0"
+          style={cardStyle}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = accents.rose.glow; e.currentTarget.style.boxShadow = `0 8px 24px ${accents.rose.glow}` }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = 'none' }}
+        >
+          <div className="text-xs font-semibold truncate mb-1.5" style={{ color: theme.textSecondary }}>Messages</div>
+          <div className="flex items-baseline gap-1 flex-wrap">
+            <span className="text-sm">✉️</span>
+            <span className="text-lg font-black" style={{ color: theme.textPrimary }}>{messages.length}</span>
+            <span className="text-xs font-bold" style={{ color: accents.emerald.solid }}>✓{messagesRead}</span>
+            <span className="text-xs font-bold" style={{ color: accents.amber.solid }}>⏳{messagesPending}</span>
+          </div>
+        </Link>
+
         {/* Reactions */}
         <Link
           href="/admin/reactions"
-          className="rounded-xl p-3 transition-all duration-200 min-w-0"
+          className="rounded-xl p-2.5 transition-all duration-200 min-w-0"
           style={cardStyle}
           onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = accents.amber.glow; e.currentTarget.style.boxShadow = `0 8px 24px ${accents.amber.glow}` }}
           onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = 'none' }}
         >
           <div className="text-xs font-semibold truncate mb-1.5" style={{ color: theme.textSecondary }}>Reactions</div>
-          <div className="flex items-baseline gap-1.5 flex-wrap">
+          <div className="flex items-baseline gap-1 flex-wrap">
             <span className="text-sm">⭐</span>
             <span className="text-lg font-black" style={{ color: theme.textPrimary }}>{reactions.length}</span>
-            <span className="text-xs font-bold" style={{ color: accents.rose.solid }}>+{reactionsThisMonth} this month</span>
+            <span className="text-xs font-bold truncate" style={{ color: accents.rose.solid }}>+{reactionsThisMonth} mo.</span>
           </div>
         </Link>
       </div>
@@ -289,11 +311,11 @@ export default function AdminDashboard() {
             <h3 className="font-extrabold text-sm" style={{ color: theme.textPrimary }}>Publishing Activity</h3>
             <p className="text-xs mt-0.5" style={{ color: theme.textMuted }}>Articles published per month</p>
           </div>
-          <div className="px-5 py-6 flex items-end justify-between gap-2" style={{ height: 160 }}>
+          <div className="px-8 py-6 flex items-end justify-center gap-6 sm:gap-10" style={{ height: 160 }}>
             {monthlyPublished.map((m, i) => {
               const barHeight = m.count === 0 ? 3 : Math.max(10, (m.count / maxMonthlyCount) * 110)
               return (
-                <div key={`${m.label}-${m.year}`} className="flex-1 flex flex-col items-center gap-2" style={{ position: 'relative' }}>
+                <div key={`${m.label}-${m.year}`} className="flex flex-col items-center gap-2" style={{ position: 'relative', width: 40 }}>
                   {hoveredMonth === i && (
                     <div
                       role="tooltip"
@@ -315,12 +337,11 @@ export default function AdminDashboard() {
                     onMouseLeave={() => setHoveredMonth(null)}
                     style={{
                       width: '100%',
-                      maxWidth: 28,
                       height: barHeight,
                       background: hoveredMonth === i
                         ? 'linear-gradient(180deg,#a78bfa,#3b82f6)'
                         : 'linear-gradient(180deg,#8b5cf6,#3b82f6)',
-                      borderRadius: '4px 4px 0 0',
+                      borderRadius: '8px 8px 0 0',
                       boxShadow: hoveredMonth === i ? `0 0 16px ${accents.violet.glow}` : 'none',
                       transition: 'box-shadow 0.15s',
                       cursor: 'default',
