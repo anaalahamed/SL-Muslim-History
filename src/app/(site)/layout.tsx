@@ -30,9 +30,12 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
 
         {/* ── Entire site content — header → footer ── */}
         <div className="portal-center">
-          <Suspense fallback={null}>
-            <AnnouncementBanner />
-          </Suspense>
+          {/* Not Suspense-wrapped (unlike BreakingTicker below, whose fallback
+              height matches its real content exactly): this component is
+              either absent or has real height, so streaming it in after the
+              initial paint would just relocate the same layout-shift bug.
+              unstable_cache still keeps this from forcing the route dynamic. */}
+          <AnnouncementBanner />
           <Header />
           {/* Reserve 36px so layout doesn't shift when ticker data arrives */}
           <Suspense fallback={<div style={{ height: '36px', background: 'var(--green-dark)' }} />}>
