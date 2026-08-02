@@ -132,7 +132,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [pathname])
 
   // Don't render layout on login page
-  if (pathname === '/admin/login') return <>{children}</>
+  const publicAdminPages = ['/admin/login', '/admin/forgot-password', '/admin/reset-password']
+  if (publicAdminPages.includes(pathname)) return <>{children}</>
 
   const isActive = (href: string) =>
     href === '/admin' ? pathname === '/admin' : pathname.startsWith(href)

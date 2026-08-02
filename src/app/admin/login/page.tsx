@@ -145,6 +145,17 @@ export default function AdminLoginPage() {
                 </div>
               </div>
 
+              {/* Forgot password */}
+              <div className="text-right -mt-1">
+                <a
+                  href="/admin/forgot-password"
+                  className="text-xs font-semibold transition-colors"
+                  style={{ color: '#4a9e1f' }}
+                >
+                  Forgot password?
+                </a>
+              </div>
+
               {/* Error */}
               {error && (
                 <div
