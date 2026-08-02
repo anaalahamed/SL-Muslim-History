@@ -13,10 +13,10 @@ import { theme, accents } from './adminTheme'
 
 // perm: undefined = always visible (Dashboard); string[] = visible if ANY
 // of these permission flags is granted; 'owner' = hidden entirely from
-// anyone who isn't the site owner (team management itself).
+// anyone who isn't the site owner. (Team Access itself lives inside
+// Settings -> Account, not as its own sidebar entry.)
 const navItems: { label: string; href: string; icon: string; accent: string; perm?: string[] | 'owner' }[] = [
   { label: 'Dashboard',   href: '/admin',              icon: '📊', accent: 'violet' },
-  { label: 'Team',       href: '/admin/team',           icon: '👥', accent: 'emerald', perm: 'owner' },
   { label: 'Backup',      href: '/admin/backup',        icon: '🗄️', accent: 'blue', perm: ['can_backup'] },
   { label: 'Articles',    href: '/admin/articles',      icon: '📝', accent: 'violet', perm: ['can_articles'] },
   { label: 'News',        href: '/admin/news',          icon: '📰', accent: 'blue', perm: ['can_news_special', 'can_news_janaza'] },

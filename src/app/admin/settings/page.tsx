@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getAdminConfig, saveAdminConfig, saveSharedConfigToSupabase, mergeSharedConfigFromSupabase, defaultConfig, AdminConfig, TeamMember, Stat } from '@/lib/adminConfig'
 import { getAuthClient } from '@/lib/supabase-auth'
+import TeamAccessPanel from '@/components/admin/TeamAccessPanel'
 
 
 export default function SettingsPage() {
@@ -14,6 +15,18 @@ export default function SettingsPage() {
   const [newPwd,    setNewPwd]    = useState('')
   const [confirmPwd,setConfirmPwd]= useState('')
   const [pwdMsg,    setPwdMsg]    = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  // No admin_permissions row => this login is the site owner (Team Access
+  // itself must stay owner-only, even for a team member who was granted
+  // Settings access — otherwise they could grant themselves more power).
+  const [isOwner, setIsOwner] = useState(false)
+
+  useEffect(() => {
+    getAuthClient().auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      getAuthClient().from('admin_permissions').select('user_id').eq('user_id', user.id).maybeSingle()
+        .then(({ data }) => setIsOwner(!data))
+    })
+  }, [])
 
   useEffect(() => {
     const local = getAdminConfig()
@@ -728,6 +741,12 @@ export default function SettingsPage() {
             </div>
           </div>
         </form>
+      )}
+
+      {tab === 'account' && isOwner && (
+        <div className="mt-6">
+          <TeamAccessPanel />
+        </div>
       )}
 
     </div>
