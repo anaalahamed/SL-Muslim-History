@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { getSidebarAd } from '@/lib/db/ads'
 import { Advertisement } from '@/lib/types'
 
@@ -36,12 +37,15 @@ export default function SidebarAd({ ad: adProp }: Props) {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      position: 'relative',
     }}>
       {ad.image_url ? (
-        <img
+        <Image
           src={ad.image_url}
           alt={ad.title}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          fill
+          sizes="(max-width: 900px) 100vw, 300px"
+          style={{ objectFit: 'cover' }}
         />
       ) : (
         <div style={{ padding: '16px', textAlign: 'center' }}>
