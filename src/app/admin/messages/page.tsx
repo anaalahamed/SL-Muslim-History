@@ -21,7 +21,7 @@ export default function MessagesPage() {
   const [deleting,  setDeleting]  = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    const msgs = await getMessages()
+    const msgs = await getMessages(getAuthClient())
     setMessages(msgs)
   }, [])
   useEffect(() => { load() }, [load])

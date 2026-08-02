@@ -12,7 +12,7 @@ export default function EditAdPage() {
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState<string | null>(null)
   useEffect(() => {
-    getAllAds().then((all) => {
+    getAllAds(getAuthClient()).then((all) => {
       const found = all.find((a) => a.id === id) ?? null
       setAd(found)
     })
