@@ -8,14 +8,22 @@ import { Advertisement } from '@/lib/types'
 interface Props {
   position: 'sidebar' | 'banner' | 'homepage-bottom'
   className?: string
+  // Pass this when the parent already fetched it server-side (the homepage
+  // does, for position="homepage-bottom"). Omit it and the component
+  // fetches it itself on mount, same as before — used by every other page
+  // that renders this client-side.
+  initialAds?: Advertisement[]
 }
 
-export default function AdBanner({ position, className = '' }: Props) {
-  const [ads, setAds] = useState<Advertisement[]>([])
+export default function AdBanner({ position, className = '', initialAds }: Props) {
+  const [fetched, setFetched] = useState<Advertisement[]>([])
 
   useEffect(() => {
-    getAds(position).then(setAds)
-  }, [position])
+    if (initialAds !== undefined) return
+    getAds(position).then(setFetched)
+  }, [position, initialAds])
+
+  const ads = initialAds !== undefined ? initialAds : fetched
 
   if (ads.length === 0) return null
 

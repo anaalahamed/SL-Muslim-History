@@ -10,7 +10,7 @@ import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
 import { getSiteSettings } from '@/lib/db/siteSettings'
 import { getRecentArticles, getFeaturedArticles, getArticlesPaginated, getMostReadArticles } from '@/lib/db/articles'
 import { getSpecialNews, getJanazaNews } from '@/lib/db/news'
-import { getSidebarAd } from '@/lib/db/ads'
+import { getSidebarAd, getAds } from '@/lib/db/ads'
 
 export const dynamic = 'force-dynamic'
 
@@ -57,7 +57,7 @@ export default async function HomePage() {
   // article list, special/janaza news, most read, sidebar ad) is present
   // in the initial HTML instead of each one waiting on its own client-side
   // fetch after hydration.
-  const [heroSlides, featured, articlesPage, specialNews, janazaNews, mostRead, sidebarAd] = await Promise.all([
+  const [heroSlides, featured, articlesPage, specialNews, janazaNews, mostRead, sidebarAd, bottomAds] = await Promise.all([
     getRecentArticles(5),
     getFeaturedArticles(),
     getArticlesPaginated(1, ARTICLES_PER_PAGE),
@@ -65,6 +65,7 @@ export default async function HomePage() {
     getJanazaNews(5),
     getMostReadArticles(5),
     getSidebarAd(),
+    getAds('homepage-bottom'),
   ])
 
   return (
@@ -81,7 +82,7 @@ export default async function HomePage() {
             <HeroSlider slides={heroSlides} />
             <FeaturedArticle articles={featured} />
             <AllArticles initialArticles={articlesPage.articles} initialTotal={articlesPage.total} />
-            <AdBanner position="homepage-bottom" />
+            <AdBanner position="homepage-bottom" initialAds={bottomAds} />
           </div>
 
           {/* RIGHT SIDEBAR */}
