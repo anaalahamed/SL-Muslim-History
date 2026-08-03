@@ -119,6 +119,7 @@ export default function HeroSlider({ slides }: Props) {
                   alt={article.title}
                   fill
                   priority
+                  fetchPriority="high"
                   sizes="(max-width: 900px) 100vw, 65vw"
                   style={{ objectFit: 'contain', opacity: 0.55 }}
                 />
