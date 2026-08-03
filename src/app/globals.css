@@ -334,6 +334,23 @@ img, video, iframe, embed, object {
   }
 }
 
+/* Reserve roughly the homepage's real rendered height up front. All of its
+   content is server-rendered and present in the initial HTML already (no
+   client-side pop-in left to fix) — but on a throttled mobile connection,
+   simply downloading/parsing that much HTML takes a few seconds, during
+   which the browser paints progressively top-down. Since the footer sits
+   right after this grid, it visibly sits too high for those few seconds
+   and then jumps down once the grid's real content finishes painting —
+   confirmed via direct measurement (PageSpeed attributed ~0.86 of the
+   ~0.88 total mobile CLS to exactly this). Reserving the space up front
+   means the footer starts in roughly its final position from frame one,
+   regardless of how long the content above it takes to finish painting. */
+@media (max-width: 768px) {
+  .home-content-grid {
+    min-height: 3400px;
+  }
+}
+
 @media (max-width: 768px) {
 
   /* ── Base typography ── */
