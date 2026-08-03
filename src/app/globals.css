@@ -406,6 +406,16 @@ footer {
   footer {
     padding-left: 16px !important;
     padding-right: 16px !important;
+    /* The base contain-intrinsic-size (0 400px) reserves 400px while the
+       footer is off-screen and un-rendered (content-visibility: auto).
+       That's a reasonable estimate on desktop, where its columns sit
+       side-by-side and the real height stays close to 400px — but on
+       mobile the footer's columns stack vertically (see .footer-main-grid
+       above) and its real height is closer to 930px. That ~530px mismatch
+       is exactly what showed up as a large, deterministic Cumulative
+       Layout Shift on mobile PageSpeed tests: the browser reserves 400px,
+       then snaps to the real ~930px once it actually measures the footer. */
+    contain-intrinsic-size: 0 930px !important;
   }
 
   /* ── Footer grids: collapse on mobile ── */
