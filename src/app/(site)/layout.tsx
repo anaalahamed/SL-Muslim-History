@@ -1,12 +1,10 @@
 import { Suspense } from 'react'
-import dynamic from 'next/dynamic'
 import Header from '@/components/layout/Header'
 import AnnouncementBanner from '@/components/layout/AnnouncementBanner'
 import MaintenanceGate from '@/components/layout/MaintenanceGate'
 import BreakingTicker from '@/components/layout/BreakingTicker'
 import SidePanelAd from '@/components/layout/SidePanelAd'
-
-const Footer = dynamic(() => import('@/components/layout/Footer'))
+import Footer from '@/components/layout/Footer'
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
