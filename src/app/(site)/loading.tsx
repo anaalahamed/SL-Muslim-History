@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 export default function Loading() {
   return (
     <div
@@ -26,12 +28,18 @@ export default function Loading() {
               animation: 'pulseRing 2s ease-out 0.4s infinite',
             }}
           />
-          {/* Logo */}
-          <img
+          {/* Logo — next/image instead of a raw <img> so the browser gets a
+              small, properly-sized file instead of the full 500x500 source
+              (Lighthouse measured 108KB wasted here alone: the same PNG
+              downloaded at full size just to be shown at 64x64px). */}
+          <Image
             src="/logo.png"
             alt="SL Muslim History"
+            width={64}
+            height={64}
             className="relative"
-            style={{ width: '64px', height: '64px', objectFit: 'contain' }}
+            style={{ objectFit: 'contain' }}
+            priority
           />
         </div>
 
