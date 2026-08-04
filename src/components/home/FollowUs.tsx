@@ -1,9 +1,5 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { getAdminConfig } from '@/lib/adminConfig'
-import { getSiteSettings } from '@/lib/db/siteSettings'
-
 const PLATFORMS = [
   {
     key: 'facebook',
@@ -87,46 +83,15 @@ const PLATFORMS = [
   },
 ]
 
-interface ActiveLink { label: string; href: string; color: string; icon: React.ReactNode }
+interface Props {
+  activeSocial: Record<string, string>
+}
 
-export default function FollowUs() {
-  const [links,   setLinks]   = useState<ActiveLink[]>([])
-  const [loading, setLoading] = useState(true)
+export default function FollowUs({ activeSocial }: Props) {
+  const links = PLATFORMS
+    .filter((p) => !!activeSocial[p.key])
+    .map((p) => ({ label: p.label, href: activeSocial[p.key], color: p.color, icon: p.icon }))
 
-  useEffect(() => {
-    async function load() {
-      let cfg: Record<string, string> = {}
-
-      // Try Supabase first (works across all devices)
-      const sc = await getSiteSettings()
-      if (sc) cfg = sc as Record<string, string>
-
-      // Fallback to localStorage (admin's own device)
-      if (!Object.values(cfg).some(Boolean)) {
-        const local = getAdminConfig()
-        cfg = {
-          facebook:  local.facebook,
-          youtube:   local.youtube,
-          whatsapp:  local.whatsapp,
-          twitter:   local.twitter,
-          instagram: local.instagram,
-          telegram:  local.telegram,
-          reddit:    local.reddit,
-          pinterest: local.pinterest,
-        }
-      }
-
-      const active = PLATFORMS
-        .filter((p) => !!cfg[p.key])
-        .map((p) => ({ label: p.label, href: cfg[p.key], color: p.color, icon: p.icon }))
-
-      setLinks(active)
-      setLoading(false)
-    }
-    load()
-  }, [])
-
-  if (loading) return null
   if (links.length === 0) return null
 
   return (

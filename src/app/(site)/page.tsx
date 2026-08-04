@@ -11,6 +11,9 @@ import { getSiteSettings } from '@/lib/db/siteSettings'
 import { getRecentArticles, getFeaturedArticles, getArticlesPaginated, getMostReadArticles } from '@/lib/db/articles'
 import { getSpecialNews, getJanazaNews } from '@/lib/db/news'
 import { getSidebarAd, getAds } from '@/lib/db/ads'
+import { getCategories } from '@/lib/db/categories'
+
+const SOCIAL_KEYS = ['facebook', 'youtube', 'whatsapp', 'twitter', 'instagram', 'telegram', 'reddit', 'pinterest'] as const
 
 export const dynamic = 'force-dynamic'
 
@@ -57,7 +60,7 @@ export default async function HomePage() {
   // article list, special/janaza news, most read, sidebar ad) is present
   // in the initial HTML instead of each one waiting on its own client-side
   // fetch after hydration.
-  const [heroSlides, featured, articlesPage, specialNews, janazaNews, mostRead, sidebarAd, bottomAds] = await Promise.all([
+  const [heroSlides, featured, articlesPage, specialNews, janazaNews, mostRead, sidebarAd, bottomAds, categories, settings] = await Promise.all([
     getRecentArticles(5),
     getFeaturedArticles(),
     getArticlesPaginated(1, ARTICLES_PER_PAGE),
@@ -66,7 +69,11 @@ export default async function HomePage() {
     getMostReadArticles(5),
     getSidebarAd(),
     getAds('homepage-bottom'),
+    getCategories(),
+    getSiteSettings(),
   ])
+
+  const activeSocial = Object.fromEntries(SOCIAL_KEYS.map((key) => [key, settings?.[key] || '']))
 
   return (
     <>
@@ -91,8 +98,8 @@ export default async function HomePage() {
             <SidebarAd ad={sidebarAd} />
             <JanazaNews items={janazaNews} />
             <MostRead articles={mostRead} />
-            <FollowUs />
-            <CategoryGrid />
+            <FollowUs activeSocial={activeSocial} />
+            <CategoryGrid categories={categories} />
           </div>
 
         </div>
