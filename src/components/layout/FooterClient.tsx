@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 
 type Stat = { id: string; icon: string; value: string; label: string }
 type SocialKey = 'facebook' | 'youtube' | 'whatsapp' | 'twitter' | 'instagram' | 'telegram' | 'reddit' | 'pinterest'
@@ -54,6 +53,11 @@ export default function FooterClient({ stats, activeSocial }: Props) {
     e.preventDefault()
     if (!email.trim()) return
     setSubStatus('loading')
+    // Dynamically imported so the full @supabase/supabase-js SDK (it bundles
+    // its whole auth module regardless of runtime config) isn't part of the
+    // footer's — and therefore every page's — initial JS. It's only fetched
+    // once someone actually submits this form.
+    const { supabase } = await import('@/lib/supabase')
     if (supabase) {
       const { error } = await supabase
         .from('newsletter_subscribers')

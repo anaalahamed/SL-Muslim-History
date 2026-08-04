@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { getSidebarAd } from '@/lib/db/ads'
 import { Advertisement } from '@/lib/types'
 
 interface Props {
@@ -17,7 +16,10 @@ export default function SidebarAd({ ad: adProp }: Props) {
 
   useEffect(() => {
     if (adProp !== undefined) return
-    getSidebarAd().then(setFetched)
+    // Dynamically imported so the (client-only) fallback fetch path doesn't
+    // pull the full @supabase/supabase-js SDK — auth module included — into
+    // the initial JS of every page that renders this component.
+    import('@/lib/db/ads').then(({ getSidebarAd }) => getSidebarAd().then(setFetched))
   }, [adProp])
 
   const ad = adProp !== undefined ? adProp : fetched

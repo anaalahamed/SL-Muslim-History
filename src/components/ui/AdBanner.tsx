@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { getAds } from '@/lib/db/ads'
 import { Advertisement } from '@/lib/types'
 
 interface Props {
@@ -20,7 +19,10 @@ export default function AdBanner({ position, className = '', initialAds }: Props
 
   useEffect(() => {
     if (initialAds !== undefined) return
-    getAds(position).then(setFetched)
+    // Dynamically imported so the (client-only) fallback fetch path doesn't
+    // pull the full @supabase/supabase-js SDK — auth module included — into
+    // the initial JS of every page that renders this component.
+    import('@/lib/db/ads').then(({ getAds }) => getAds(position).then(setFetched))
   }, [position, initialAds])
 
   const ads = initialAds !== undefined ? initialAds : fetched

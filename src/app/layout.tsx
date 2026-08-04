@@ -101,7 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             these are loaded via the Google Fonts CSS API, not self-hosted).
             <noscript> covers the no-JS case. */}
         <link rel="preload" as="style" href={FONT_URL} />
-        <link rel="stylesheet" href={FONT_URL} media="print" id="google-fonts-css" />
+        <link rel="stylesheet" href={FONT_URL} media="print" id="google-fonts-css" suppressHydrationWarning />
         <script
           dangerouslySetInnerHTML={{ __html: `document.getElementById('google-fonts-css').media='all'` }}
         />

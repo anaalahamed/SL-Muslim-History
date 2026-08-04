@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { getArticlesPaginated } from '@/lib/db/articles'
 import { Article } from '@/lib/types'
 import { formatDate, getExcerpt } from '@/lib/utils'
 
@@ -50,11 +49,17 @@ export default function AllArticles({ initialArticles, initialTotal }: Props) {
   useEffect(() => {
     if (page === 1) return
     setLoading(true)
-    getArticlesPaginated(page, ITEMS_PER_PAGE).then(({ articles, total }) => {
-      setArticles(articles)
-      setTotal(total)
-      setLoading(false)
-    })
+    // Dynamically imported so the full @supabase/supabase-js SDK — auth
+    // module included — isn't part of the homepage's initial JS just
+    // because pagination *could* be used; it's only fetched once someone
+    // actually clicks to another page.
+    import('@/lib/db/articles').then(({ getArticlesPaginated }) =>
+      getArticlesPaginated(page, ITEMS_PER_PAGE).then(({ articles, total }) => {
+        setArticles(articles)
+        setTotal(total)
+        setLoading(false)
+      })
+    )
   }, [page])
 
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE)
