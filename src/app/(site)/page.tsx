@@ -8,10 +8,7 @@ import SidebarAd from '@/components/home/SidebarAd'
 import AdBanner from '@/components/ui/AdBanner'
 import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
 import { getSiteSettings } from '@/lib/db/siteSettings'
-import { getRecentArticles, getFeaturedArticles, getArticlesPaginated, getMostReadArticles } from '@/lib/db/articles'
-import { getSpecialNews, getJanazaNews } from '@/lib/db/news'
-import { getSidebarAd, getAds } from '@/lib/db/ads'
-import { getCategories } from '@/lib/db/categories'
+import { getHomepageData } from '@/lib/db/homepage'
 
 const SOCIAL_KEYS = ['facebook', 'youtube', 'whatsapp', 'twitter', 'instagram', 'telegram', 'reddit', 'pinterest'] as const
 
@@ -53,25 +50,16 @@ const FollowUs     = lazyLoad(() => import('@/components/home/FollowUs'))
 const CategoryGrid = lazyLoad(() => import('@/components/home/CategoryGrid'))
 const DonationCTA  = lazyLoad(() => import('@/components/home/DonationCTA'))
 
-const ARTICLES_PER_PAGE = 10
-
 export default async function HomePage() {
-  // Fetched server-side so every above-the-fold box (hero, featured,
-  // article list, special/janaza news, most read, sidebar ad) is present
-  // in the initial HTML instead of each one waiting on its own client-side
-  // fetch after hydration.
-  const [heroSlides, featured, articlesPage, specialNews, janazaNews, mostRead, sidebarAd, bottomAds, categories, settings] = await Promise.all([
-    getRecentArticles(5),
-    getFeaturedArticles(),
-    getArticlesPaginated(1, ARTICLES_PER_PAGE),
-    getSpecialNews(6),
-    getJanazaNews(5),
-    getMostReadArticles(5),
-    getSidebarAd(),
-    getAds('homepage-bottom'),
-    getCategories(),
-    getSiteSettings(),
-  ])
+  // One round-trip to Supabase (get_homepage_data RPC) instead of ~10
+  // separate queries — see supabase/migrations/015_homepage_rpc.sql and
+  // lib/db/homepage.ts. Falls back to the old multi-query path
+  // automatically if the RPC isn't available yet.
+  const {
+    heroArticles: heroSlides, featuredArticles: featured, articlesPage,
+    specialNews, janazaNews, mostReadArticles: mostRead, sidebarAd, bottomAds,
+    categories, siteSettings: settings,
+  } = await getHomepageData()
 
   const activeSocial = Object.fromEntries(SOCIAL_KEYS.map((key) => [key, settings?.[key] || '']))
 
