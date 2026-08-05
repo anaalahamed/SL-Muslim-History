@@ -7,7 +7,6 @@ import AllArticles from '@/components/home/AllArticles'
 import SidebarAd from '@/components/home/SidebarAd'
 import AdBanner from '@/components/ui/AdBanner'
 import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
-import { getSiteSettings } from '@/lib/db/siteSettings'
 import { getHomepageData } from '@/lib/db/homepage'
 
 const SOCIAL_KEYS = ['facebook', 'youtube', 'whatsapp', 'twitter', 'instagram', 'telegram', 'reddit', 'pinterest'] as const
@@ -15,9 +14,11 @@ const SOCIAL_KEYS = ['facebook', 'youtube', 'whatsapp', 'twitter', 'instagram', 
 export const dynamic = 'force-dynamic'
 
 // Admin-editable via Settings > SEO — same fallback behavior as before
-// when nothing's been saved there yet.
+// when nothing's been saved there yet. Uses the same cached
+// getHomepageData() the page component calls below — React's cache()
+// dedupes this to a single underlying fetch per request instead of two.
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings()
+  const { siteSettings: settings } = await getHomepageData()
   const description = settings?.metaDescription || SITE_DESCRIPTION
   const ogImage = settings?.ogImage || `${BASE_URL}/og-image.jpg`
 

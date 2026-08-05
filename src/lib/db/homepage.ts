@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { supabase } from '../supabase'
 import { Article } from '../types'
 import { NewsPost } from '../types'
@@ -32,7 +33,12 @@ const ARTICLES_PER_PAGE = 10
 // hasn't been run yet — so this is safe to deploy before or after that
 // migration is applied; it starts using the fast path the moment the
 // function exists, with no further deploy needed.
-export async function getHomepageData(): Promise<HomepageData> {
+//
+// Wrapped in React's cache() so calling it from both generateMetadata()
+// and the page component (which both need it — metadata only for
+// metaDescription/ogImage) reuses the same in-flight request instead of
+// hitting Supabase twice for the same render.
+export const getHomepageData = cache(async (): Promise<HomepageData> => {
   if (!supabase) return getHomepageDataFallback()
 
   const { data, error } = await supabase.rpc('get_homepage_data')
@@ -53,7 +59,7 @@ export async function getHomepageData(): Promise<HomepageData> {
     categories: data.categories ?? [],
     siteSettings: data.siteSettings ?? null,
   }
-}
+})
 
 async function getHomepageDataFallback(): Promise<HomepageData> {
   const [
