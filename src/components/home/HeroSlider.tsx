@@ -138,7 +138,15 @@ export default function HeroSlider({ slides }: Props) {
                 }}>
                   {article.category}
                 </span>
-                <h2 style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '17px', fontWeight: 700, color: '#fff', lineHeight: 1.55, marginBottom: '8px', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
+                {/* minHeight reserves space for 3 wrapped lines up front —
+                    confirmed via PageSpeed's desktop CLS report that the
+                    Tamil web font (Noto Sans Tamil) swapping in after the
+                    fallback font renders first changes this text's
+                    wrapped height, since the two fonts' glyph metrics
+                    differ. Reserving the worst-case height means that
+                    swap re-wraps text inside an already-fixed-size box
+                    instead of visibly resizing it. */}
+                <h2 style={{ fontFamily: "'Noto Sans Tamil','Lato',sans-serif", fontSize: '17px', fontWeight: 700, color: '#fff', lineHeight: 1.55, minHeight: '80px', marginBottom: '8px', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
                   {article.title}
                 </h2>
                 <div style={{ width: '28px', height: '2px', background: 'var(--gold)', marginBottom: '10px' }} />
