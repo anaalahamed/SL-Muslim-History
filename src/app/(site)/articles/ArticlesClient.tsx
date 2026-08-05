@@ -296,7 +296,10 @@ export default function ArticlesClient() {
                       </div>
                     </div>
 
-                    {/* Thumbnail — fixed 16:9 */}
+                    {/* Thumbnail — fixed 16:9, showing the full photo
+                        uncropped (matching the article detail page) instead
+                        of zooming/cropping it, which was cutting the tops
+                        off portrait-oriented photos (e.g. a person's head). */}
                     <div
                       className="relative hidden md:block flex-shrink-0 rounded-xl overflow-hidden"
                       style={{
@@ -312,7 +315,7 @@ export default function ArticlesClient() {
                           alt={article.title}
                           fill
                           sizes="224px"
-                          style={{ objectFit: 'cover' }}
+                          style={{ objectFit: 'contain' }}
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-5xl">🕌</div>
