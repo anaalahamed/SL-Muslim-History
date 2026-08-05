@@ -46,7 +46,7 @@ export default function JanazaNews({ items }: Props) {
                 {/* Thumbnail */}
                 <div style={{ width: '60px', flexShrink: 0, alignSelf: 'stretch', position: 'relative', background: 'var(--green-light)' }}>
                   {item.featured_image ? (
-                    <Image src={item.featured_image} alt={item.title} fill sizes="60px" style={{ objectFit: 'cover' }} />
+                    <Image src={item.featured_image} alt={item.title} fill sizes="60px" quality={60} style={{ objectFit: 'cover' }} />
                   ) : (
                     <div style={{ position: 'absolute', inset: 0, background: BG_FALLBACKS[i % BG_FALLBACKS.length] }} />
                   )}

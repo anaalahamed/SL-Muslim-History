@@ -75,7 +75,7 @@ export default function FeaturedArticle({ articles }: Props) {
                 {/* Thumbnail */}
                 <div style={{ width: '90px', flexShrink: 0, alignSelf: 'stretch', position: 'relative', background: 'var(--green-light)' }}>
                   {article.featured_image ? (
-                    <Image src={article.featured_image} alt={article.title} fill sizes="90px" style={{ objectFit: 'cover' }} />
+                    <Image src={article.featured_image} alt={article.title} fill sizes="90px" quality={60} style={{ objectFit: 'cover' }} />
                   ) : (
                     <div style={{ position: 'absolute', inset: 0, background: BG_FALLBACKS[i % BG_FALLBACKS.length] }} />
                   )}

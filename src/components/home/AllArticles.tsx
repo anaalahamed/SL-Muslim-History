@@ -127,7 +127,7 @@ export default function AllArticles({ initialArticles, initialTotal }: Props) {
                 {/* Thumbnail */}
                 <div className="art-card-thumb" style={{ flexShrink: 0, alignSelf: 'stretch', position: 'relative', background: 'var(--green-light)' }}>
                   {article.featured_image ? (
-                    <Image src={article.featured_image} alt={article.title} fill sizes="110px" style={{ objectFit: 'cover' }} />
+                    <Image src={article.featured_image} alt={article.title} fill sizes="110px" quality={60} style={{ objectFit: 'cover' }} />
                   ) : (
                     <div style={{ position: 'absolute', inset: 0, background: BG_FALLBACKS[i % BG_FALLBACKS.length] }} />
                   )}

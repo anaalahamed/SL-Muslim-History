@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
     deviceSizes: [390, 640, 750, 828, 1080, 1200, 1920],
     imageSizes: [52, 80, 90, 128, 256, 384],
     minimumCacheTTL: 31536000,
+    // 60 is used for small (<=110px) list thumbnails — imperceptible at
+    // that size, real byte savings. 75 (the default) stays available for
+    // everything else (hero, article detail images, etc).
+    qualities: [60, 75],
   },
   async headers() {
     return [

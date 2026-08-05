@@ -56,6 +56,7 @@ export default function SpecialNews({ items }: Props) {
                     alt={item.title}
                     fill
                     sizes="80px"
+                    quality={60}
                     style={{ objectFit: 'cover' }}
                   />
                 ) : (
