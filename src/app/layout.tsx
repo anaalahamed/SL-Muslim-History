@@ -10,11 +10,25 @@ import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS, websiteJsonLd, or
 // `&display=swap` in the URL means text still paints immediately with the
 // criticalCSS fallback fonts below and swaps in once this loads — this
 // change makes it load *sooner*, it doesn't make anything render-blocking.
-const FONT_URL =
+//
+// Noto Sans Tamil is a separate request on display=optional rather than
+// swap: PageSpeed's CLS trace (mobile and desktop) explicitly attributed
+// large layout shifts to "Web font" on Tamil text throughout the page —
+// this site has dozens of Tamil text blocks, and swapping the fallback
+// font for the real one changes enough glyph metrics to reflow all of
+// them at once, and whichever element that reflow happens to push around
+// varies between page loads. display=optional tells the browser to skip
+// the swap entirely if the font isn't ready almost immediately, using the
+// fallback for that visit instead — once cached (after the first
+// request), it's used instantly on every later visit with no swap at
+// all. Latin fonts don't have this problem, so they keep display=swap.
+const LATIN_FONT_URL =
   'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700' +
   '&family=Lato:wght@400;700;900' +
-  '&family=Noto+Sans+Tamil:wght@400;500;600;700;800' +
   '&display=swap'
+const TAMIL_FONT_URL =
+  'https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700;800' +
+  '&display=optional'
 
 // Every page loads data from Supabase; preconnecting to its origin lets the
 // browser start the DNS/TLS handshake immediately instead of paying that
@@ -99,13 +113,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             an externally hosted stylesheet (can't use next/font here since
             these are loaded via the Google Fonts CSS API, not self-hosted).
             <noscript> covers the no-JS case. */}
-        <link rel="preload" as="style" href={FONT_URL} />
-        <link rel="stylesheet" href={FONT_URL} media="print" id="google-fonts-css" suppressHydrationWarning />
+        <link rel="preload" as="style" href={LATIN_FONT_URL} />
+        <link rel="stylesheet" href={LATIN_FONT_URL} media="print" id="latin-fonts-css" suppressHydrationWarning />
+        <link rel="preload" as="style" href={TAMIL_FONT_URL} />
+        <link rel="stylesheet" href={TAMIL_FONT_URL} media="print" id="tamil-font-css" suppressHydrationWarning />
         <script
-          dangerouslySetInnerHTML={{ __html: `document.getElementById('google-fonts-css').media='all'` }}
+          dangerouslySetInnerHTML={{ __html: `document.getElementById('latin-fonts-css').media='all';document.getElementById('tamil-font-css').media='all'` }}
         />
         <noscript>
-          <link rel="stylesheet" href={FONT_URL} />
+          <link rel="stylesheet" href={LATIN_FONT_URL} />
+          <link rel="stylesheet" href={TAMIL_FONT_URL} />
         </noscript>
         <script
           type="application/ld+json"
