@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-import { Suspense } from 'react'
 import './globals.css'
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import AnalyticsPageView from '@/components/analytics/AnalyticsPageView'
@@ -118,9 +117,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
-        <Suspense>
-          <AnalyticsPageView />
-        </Suspense>
+        <AnalyticsPageView />
         {children}
         <GoogleAnalytics />
       </body>
