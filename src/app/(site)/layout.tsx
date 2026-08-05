@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 import Header from '@/components/layout/Header'
 import AnnouncementBanner from '@/components/layout/AnnouncementBanner'
 import MaintenanceGate from '@/components/layout/MaintenanceGate'
@@ -35,10 +34,20 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
               unstable_cache still keeps this from forcing the route dynamic. */}
           <AnnouncementBanner />
           <Header />
-          {/* Reserve 36px so layout doesn't shift when ticker data arrives */}
-          <Suspense fallback={<div style={{ height: '36px', background: 'var(--green-dark)' }} />}>
-            <BreakingTicker />
-          </Suspense>
+          {/* Not Suspense-wrapped: React/Next.js's streaming SSR marks a
+              Suspense boundary's placement with a <template> tag that gets
+              removed once streaming completes. Direct measurement (a
+              document-wide MutationObserver + PerformanceObserver trace on
+              the live site) showed that exact <template> removal firing at
+              the same millisecond as window's load event, immediately
+              followed by a large layout-shift entry reporting the footer's
+              rect as (0,0,0) for one frame — a browser-level quirk of that
+              cleanup, unrelated to any real content change (BreakingTicker's
+              own fetch is unstable_cache-backed and fast regardless).
+              Removing this boundary means the whole page — including the
+              ticker — renders as one atomic unit, with no <template>
+              marker ever inserted, eliminating the shift outright. */}
+          <BreakingTicker />
           <main className="flex-1">
             {children}
           </main>
