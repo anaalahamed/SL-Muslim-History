@@ -84,7 +84,7 @@ export default function NewsTypeClient({ newsType, badge, title, subtitle }: Pro
                     alt={featured.title}
                     fill
                     sizes="(max-width: 768px) 100vw, 288px"
-                    style={{ objectFit: 'cover' }}
+                    style={{ objectFit: 'contain' }}
                   />
                 ) : (
                   <div
@@ -241,7 +241,7 @@ export default function NewsTypeClient({ newsType, badge, title, subtitle }: Pro
                             alt={item.title}
                             fill
                             sizes="(max-width: 640px) 100vw, (max-width: 768px) 176px, 208px"
-                            style={{ objectFit: 'cover' }}
+                            style={{ objectFit: 'contain' }}
                           />
                         ) : (
                           <div

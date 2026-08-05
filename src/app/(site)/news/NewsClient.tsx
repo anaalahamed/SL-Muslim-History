@@ -76,7 +76,7 @@ export default function NewsClient() {
                   alt={featured.title}
                   fill
                   sizes="(max-width: 768px) 100vw, 288px"
-                  style={{ objectFit: 'cover' }}
+                  style={{ objectFit: 'contain' }}
                 />
               ) : (
                 <div
@@ -259,7 +259,7 @@ export default function NewsClient() {
                             alt={news.title}
                             fill
                             sizes="(max-width: 640px) 100vw, (max-width: 768px) 176px, 208px"
-                            style={{ objectFit: 'cover' }}
+                            style={{ objectFit: 'contain' }}
                           />
                         ) : (
                           <div

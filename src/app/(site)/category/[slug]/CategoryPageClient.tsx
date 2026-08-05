@@ -167,7 +167,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
                       style={{ background: categoryColors[featured.category] ?? 'var(--green-light)' }}
                     >
                       {featured.featured_image ? (
-                        <Image src={featured.featured_image} alt={featured.title} fill sizes="(max-width: 768px) 100vw, 320px" style={{ objectFit: 'cover' }} />
+                        <Image src={featured.featured_image} alt={featured.title} fill sizes="(max-width: 768px) 100vw, 320px" style={{ objectFit: 'contain' }} />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-7xl">{category.icon}</div>
                       )}
@@ -254,7 +254,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
                             style={{ background: categoryColors[article.category] ?? 'var(--green-light)' }}
                           >
                             {article.featured_image ? (
-                              <Image src={article.featured_image} alt={article.title} fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: 'cover' }} />
+                              <Image src={article.featured_image} alt={article.title} fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: 'contain' }} />
                             ) : (
                               <div className="absolute inset-0 flex items-center justify-center text-5xl">{category.icon}</div>
                             )}
