@@ -287,7 +287,7 @@ export default function AdminDashboard() {
                   >
                     {article.is_featured ? '✦ Featured' : 'Regular'}
                   </span>
-                  <span className="hidden sm:inline text-xs" style={{ color: theme.textMuted }}>👁 {formatViews(article.views)}</span>
+                  <span className="hidden sm:inline text-xs" style={{ color: theme.textMuted }} title="Real (organic) views">👁 {formatViews(article.real_views ?? article.views)}</span>
                   <Link
                     href={`/admin/articles/${article.id}`}
                     className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
