@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getArticles } from '@/lib/db/articles'
 import { getNews } from '@/lib/db/news'
-import { Article, NewsPost } from '@/lib/types'
+import { Article, NewsPost, Advertisement } from '@/lib/types'
 import PageHero from '@/components/ui/PageHero'
 import AnimateIn from '@/components/ui/AnimateIn'
 import { formatDate, getExcerpt } from '@/lib/utils'
@@ -15,15 +15,19 @@ import AdBanner from '@/components/ui/AdBanner'
 
 type Tab = 'all' | 'articles' | 'news'
 
-export default function SearchClient() {
+interface Props {
+  initialBannerAds: Advertisement[]
+}
+
+export default function SearchClient({ initialBannerAds }: Props) {
   return (
     <Suspense fallback={<SearchSkeleton />}>
-      <SearchResults />
+      <SearchResults initialBannerAds={initialBannerAds} />
     </Suspense>
   )
 }
 
-function SearchResults() {
+function SearchResults({ initialBannerAds }: Props) {
   const params = useSearchParams()
   const q      = params.get('q') ?? ''
 
@@ -72,7 +76,7 @@ function SearchResults() {
       />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
-        <AdBanner position="banner" />
+        <AdBanner position="banner" initialAds={initialBannerAds} />
       </div>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
 

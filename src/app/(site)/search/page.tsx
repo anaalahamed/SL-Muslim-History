@@ -1,6 +1,21 @@
 import type { Metadata } from 'next'
+import { unstable_cache } from 'next/cache'
 import { BASE_URL, SITE_NAME } from '@/lib/seo'
+import { getAds } from '@/lib/db/ads'
 import SearchClient from './SearchClient'
+
+// The search results themselves depend on the ?q= query and stay
+// client-fetched (interactive, changes without a full navigation), but
+// the "banner" AdBanner doesn't depend on the query at all — PageSpeed
+// traced this page's poor LCP to exactly that ad being client-only and
+// lazy-loaded despite sitting above the fold, same as every other
+// listing page fixed this session. unstable_cache keeps this route
+// statically generated with 1-minute ISR instead of becoming dynamic.
+const getCachedSearchBannerAds = unstable_cache(
+  () => getAds('banner'),
+  ['search-page-banner-ads'],
+  { revalidate: 60 },
+)
 
 export const metadata: Metadata = {
   title: 'Search',
@@ -23,6 +38,7 @@ export const metadata: Metadata = {
   },
 }
 
-export default function SearchPage() {
-  return <SearchClient />
+export default async function SearchPage() {
+  const bannerAds = await getCachedSearchBannerAds()
+  return <SearchClient initialBannerAds={bannerAds} />
 }
