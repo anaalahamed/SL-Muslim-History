@@ -1,6 +1,6 @@
 import { supabase } from '../supabase'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { TeamMember, Stat, Announcement } from '../adminConfig'
+import type { TeamMember, Stat, Milestone, Announcement } from '../adminConfig'
 
 export interface SiteSettingsConfig {
   facebook?:  string
@@ -15,6 +15,7 @@ export interface SiteSettingsConfig {
   // rest of AdminConfig which still only lives in the admin's own browser.
   teamMembers?: TeamMember[]
   stats?:       Stat[]
+  milestones?:  Milestone[]
   mission?:     string
   // SEO — falls back to the hardcoded defaults in lib/seo.ts when unset
   metaDescription?: string

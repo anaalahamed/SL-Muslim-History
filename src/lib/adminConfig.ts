@@ -19,6 +19,12 @@ export interface Stat {
   icon: string      // emoji
 }
 
+export interface Milestone {
+  id: string
+  year: string   // e.g. '2026'
+  event: string  // e.g. 'New website launched'
+}
+
 export interface Announcement {
   enabled: boolean
   text: string
@@ -51,6 +57,7 @@ export interface AdminConfig {
   mission: string
   teamMembers: TeamMember[]
   stats: Stat[]
+  milestones: Milestone[]
   // SEO
   seo: SEO
   // Announcement banner
@@ -86,6 +93,14 @@ export const defaultConfig: AdminConfig = {
     { id: '3', value: '1,400', label: 'Years of History',      icon: '📜' },
     { id: '4', value: '20+',   label: 'Research Contributors', icon: '🎓' },
   ],
+  milestones: [
+    { id: '1', year: '2010', event: 'SL Muslim History founded as a small research blog' },
+    { id: '2', year: '2013', event: 'First printed booklet on Beruwala mosque history published' },
+    { id: '3', year: '2016', event: 'Partnership with University of Colombo history department' },
+    { id: '4', year: '2019', event: 'Reached 50,000 monthly readers across Sri Lanka and diaspora' },
+    { id: '5', year: '2022', event: 'Digital archive of 500+ historical photographs launched' },
+    { id: '6', year: '2026', event: 'New website launched with full Tamil content and modern design' },
+  ],
   seo: {
     metaDescription: SITE_DESCRIPTION,
     ogImage: '/og-image.jpg',
@@ -120,6 +135,7 @@ export async function saveSharedConfigToSupabase(config: AdminConfig, client?: i
       pinterest: config.pinterest || '',
       teamMembers: config.teamMembers,
       stats:       config.stats,
+      milestones:  config.milestones,
       mission:     config.mission,
       metaDescription: config.seo.metaDescription || '',
       ogImage:         config.seo.ogImage || '',
@@ -154,6 +170,7 @@ export async function mergeSharedConfigFromSupabase(config: AdminConfig): Promis
       pinterest: shared.pinterest ?? config.pinterest,
       teamMembers: shared.teamMembers ?? config.teamMembers,
       stats:       shared.stats       ?? config.stats,
+      milestones:  shared.milestones  ?? config.milestones,
       mission:     shared.mission     ?? config.mission,
       seo: {
         ...config.seo,
@@ -183,6 +200,7 @@ export function getAdminConfig(): AdminConfig {
       // Ensure arrays / objects always have defaults if missing
       teamMembers:        parsed.teamMembers        ?? defaultConfig.teamMembers,
       stats:              parsed.stats              ?? defaultConfig.stats,
+      milestones:         parsed.milestones         ?? defaultConfig.milestones,
       seo:         { ...defaultConfig.seo,          ...(parsed.seo         ?? {}) },
       announcement:{ ...defaultConfig.announcement, ...(parsed.announcement ?? {}) },
     }

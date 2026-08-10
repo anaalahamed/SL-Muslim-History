@@ -7,15 +7,6 @@ import AnimateIn from '@/components/ui/AnimateIn'
 import PageHero from '@/components/ui/PageHero'
 import { getAdminConfig, mergeSharedConfigFromSupabase, defaultConfig, AdminConfig } from '@/lib/adminConfig'
 
-const milestones = [
-  { year: '2010', event: 'SL Muslim History founded as a small research blog' },
-  { year: '2013', event: 'First printed booklet on Beruwala mosque history published' },
-  { year: '2016', event: 'Partnership with University of Colombo history department' },
-  { year: '2019', event: 'Reached 50,000 monthly readers across Sri Lanka and diaspora' },
-  { year: '2022', event: 'Digital archive of 500+ historical photographs launched' },
-  { year: '2026', event: 'New website launched with full Tamil content and modern design' },
-]
-
 const values = [
   { icon: '📜', title: 'Historical Accuracy', desc: 'Every article is researched from primary sources, manuscripts, and verified academic references.' },
   { icon: '🤝', title: 'Community First', desc: 'We serve the Sri Lankan Muslim community and preserve their heritage for future generations.' },
@@ -36,6 +27,7 @@ export default function AboutClient() {
 
   const team       = config.teamMembers
   const stats      = config.stats
+  const milestones = config.milestones
   const missionParagraphs = config.mission.split('\n\n').map((p) => p.trim()).filter(Boolean)
 
   return (
@@ -118,7 +110,7 @@ export default function AboutClient() {
                 <div className="absolute left-16 top-0 bottom-0 w-0.5" style={{ background: 'var(--border)' }} />
                 <div className="space-y-6">
                   {milestones.map((m, i) => (
-                    <AnimateIn key={m.year} direction="left" delay={i * 80}>
+                    <AnimateIn key={m.id} direction="left" delay={i * 80}>
                       <div className="flex items-start gap-6">
                         <div className="flex-shrink-0 w-16 text-right">
                           <span

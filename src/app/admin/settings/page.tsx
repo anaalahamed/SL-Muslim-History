@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getAdminConfig, saveAdminConfig, saveSharedConfigToSupabase, mergeSharedConfigFromSupabase, defaultConfig, AdminConfig, TeamMember, Stat } from '@/lib/adminConfig'
+import { getAdminConfig, saveAdminConfig, saveSharedConfigToSupabase, mergeSharedConfigFromSupabase, defaultConfig, AdminConfig, TeamMember, Stat, Milestone } from '@/lib/adminConfig'
 import { getAuthClient } from '@/lib/supabase-auth'
 import TeamAccessPanel from '@/components/admin/TeamAccessPanel'
 
@@ -98,6 +98,20 @@ export default function SettingsPage() {
       ...config,
       stats: config.stats.map((s) => s.id === id ? { ...s, [field]: value } : s),
     })
+  }
+
+  function addMilestone() {
+    const m: Milestone = { id: Date.now().toString(), year: '', event: '' }
+    setConfig({ ...config, milestones: [...config.milestones, m] })
+  }
+  function updateMilestone(id: string, field: keyof Milestone, value: string) {
+    setConfig({
+      ...config,
+      milestones: config.milestones.map((m) => m.id === id ? { ...m, [field]: value } : m),
+    })
+  }
+  function removeMilestone(id: string) {
+    setConfig({ ...config, milestones: config.milestones.filter((m) => m.id !== id) })
   }
 
   const inputClass = "w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all"
@@ -390,6 +404,75 @@ export default function SettingsPage() {
               </div>
             </div>
           </form>
+
+          {/* Our Journey (timeline) */}
+          <div className="rounded-2xl overflow-hidden" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
+            <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
+              <div>
+                <h2 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Our Journey</h2>
+                <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>The timeline shown on the About page.</p>
+              </div>
+              <button
+                type="button"
+                onClick={addMilestone}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white"
+                style={{ background: '#4a9e1f' }}
+              >
+                + Add Milestone
+              </button>
+            </div>
+            <div className="p-6 space-y-3">
+              {config.milestones.map((m) => (
+                <div key={m.id} className="flex items-start gap-3">
+                  <input
+                    type="text"
+                    value={m.year}
+                    onChange={(e) => updateMilestone(m.id, 'year', e.target.value)}
+                    placeholder="2026"
+                    className="w-24 flex-shrink-0 px-3 py-2.5 rounded-xl text-sm outline-none font-bold"
+                    style={{ border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a' }}
+                  />
+                  <input
+                    type="text"
+                    value={m.event}
+                    onChange={(e) => updateMilestone(m.id, 'event', e.target.value)}
+                    placeholder="What happened this year..."
+                    className="flex-1 px-3 py-2.5 rounded-xl text-sm outline-none"
+                    style={{ border: '1px solid #e2e8f0', background: '#f8fafc', color: '#1e293b' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeMilestone(m.id)}
+                    className="flex-shrink-0 px-3 py-2.5 rounded-xl text-xs font-bold transition-all"
+                    style={{ background: '#fef2f2', color: '#dc2626' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.color = 'white' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.color = '#dc2626' }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              {config.milestones.length === 0 && (
+                <p className="text-sm text-center py-4" style={{ color: '#94a3b8' }}>No milestones yet — click &quot;+ Add Milestone&quot; to start.</p>
+              )}
+            </div>
+            <div className="px-6 py-4 flex items-center gap-3" style={{ borderTop: '1px solid #f1f5f9' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  saveAdminConfig(config)
+                  saveSharedConfigToSupabase(config, getAuthClient())
+                  setSaved(true)
+                  setTimeout(() => setSaved(false), 2500)
+                }}
+                className="px-6 py-2.5 rounded-xl text-sm font-bold text-white"
+                style={{ background: '#4a9e1f' }}
+              >
+                Save Journey
+              </button>
+              {saved && <span className="text-sm font-semibold" style={{ color: '#4a9e1f' }}>✅ Saved successfully</span>}
+            </div>
+          </div>
 
           {/* Stats */}
           <form onSubmit={handleSave}>
