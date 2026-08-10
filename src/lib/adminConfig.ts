@@ -21,8 +21,9 @@ export interface Stat {
 
 export interface Milestone {
   id: string
-  year: string   // e.g. '2026'
-  event: string  // e.g. 'New website launched'
+  year: string        // e.g. '2026'
+  event: string       // English — e.g. 'New website launched'
+  eventTamil?: string // Tamil translation, shown below the English line
 }
 
 export interface Announcement {
@@ -94,12 +95,36 @@ export const defaultConfig: AdminConfig = {
     { id: '4', value: '20+',   label: 'Research Contributors', icon: '🎓' },
   ],
   milestones: [
-    { id: '1', year: '2010', event: 'SL Muslim History founded as a small research blog' },
-    { id: '2', year: '2013', event: 'First printed booklet on Beruwala mosque history published' },
-    { id: '3', year: '2016', event: 'Partnership with University of Colombo history department' },
-    { id: '4', year: '2019', event: 'Reached 50,000 monthly readers across Sri Lanka and diaspora' },
-    { id: '5', year: '2022', event: 'Digital archive of 500+ historical photographs launched' },
-    { id: '6', year: '2026', event: 'New website launched with full Tamil content and modern design' },
+    {
+      id: '1', year: '2018',
+      event: "SL Muslim History founded to document, preserve, and share the history of Sri Lanka's Muslim community, in Tamil.",
+      eventTamil: 'இலங்கை முஸ்லிம்களின் வரலாற்றை பதிவு செய்யவும், பாதுகாக்கவும், தமிழில் பகிரவும் "SL Muslim History" 2018-ல் தொடங்கப்பட்டது.',
+    },
+    {
+      id: '2', year: '2018',
+      event: 'Reported accurately on the anti-Muslim riots in Kandy District (Digana, Teldeniya) — where mob violence, amid hate speech and widely criticized police inaction, destroyed or damaged hundreds of Muslim homes, shops, and mosques — and faced backlash for refusing to stay silent.',
+      eventTamil: 'கண்டி மாவட்டத்தில் (டிகானா, தெல்தெனிய) நடந்த முஸ்லிம் எதிர்ப்பு கலவரங்களை — வெறுப்பு பேச்சுகளுக்கும், காவல்துறையின் தாமத நடவடிக்கை குறித்த கடும் விமர்சனங்களுக்கும் மத்தியில், நூற்றுக்கணக்கான முஸ்லிம் வீடுகள், கடைகள், பள்ளிவாசல்கள் அழிந்த/சேதமடைந்த நிகழ்வை — உண்மைக்கு மாறாமல் வெளியிட்டோம். மௌனமாக இருக்க மறுத்ததற்காக எதிர்ப்புகளை சந்தித்தோம்.',
+    },
+    {
+      id: '3', year: '2020',
+      event: "During the COVID-19 pandemic, reported openly on the Sri Lankan government's forced cremation of Muslim COVID-19 victims — going against Islamic burial rites and widely condemned internationally — without hiding or softening the story, at a time few platforms dared to cover it directly.",
+      eventTamil: 'கொரோனா காலத்தில், இலங்கை அரசு முஸ்லிம் பாதிக்கப்பட்டவர்களின் உடல்களை — இஸ்லாமிய அடக்க முறைக்கு முரணாக, உலகளவில் கண்டிக்கப்பட்ட வகையில் — கட்டாயமாக எரிக்க வைத்த விவகாரத்தை, யாரும் நேரடியாக சொல்ல தயங்கிய நேரத்தில், மறைக்காமல் வெளிப்படையாக வெளியிட்டோம்.',
+    },
+    {
+      id: '4', year: '2020–2025',
+      event: 'Faced repeated challenges and pushback for reporting sensitive community issues honestly. Each year brought new struggles, and each year we found a way to continue.',
+      eventTamil: 'சமூகத்தை பாதிக்கும் முக்கியமான விஷயங்களை நேர்மையாக வெளியிட்டதற்காக, தொடர்ந்து பல சவால்களையும் எதிர்ப்புகளையும் சந்தித்தோம். ஒவ்வொரு வருடமும் புதிய சிக்கல்கள் வந்தாலும், ஒவ்வொரு முறையும் தொடர வழி கண்டோம்.',
+    },
+    {
+      id: '5', year: '2026',
+      event: 'New website launched with full Tamil content and modern design.',
+      eventTamil: 'முழு தமிழ் உள்ளடக்கத்துடனும், புதிய வடிவமைப்புடனும் புதிய இணையதளம் தொடங்கப்பட்டது.',
+    },
+    {
+      id: '6', year: 'Today',
+      event: 'Still growing, and still relying on the support and contributions of the community to continue this work.',
+      eventTamil: 'இன்றும் தொடர்ந்து வளர்ந்து வருகிறோம், இந்த பணியை தொடர சமூகத்தின் ஆதரவும் பங்களிப்பும் இன்றியமையாதது.',
+    },
   ],
   seo: {
     metaDescription: SITE_DESCRIPTION,

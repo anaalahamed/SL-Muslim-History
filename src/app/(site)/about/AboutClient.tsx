@@ -131,16 +131,26 @@ export default function AboutClient() {
                             boxShadow: '0 0 0 2px var(--border)',
                           }}
                         />
-                        <p
-                          className="text-sm pb-4"
-                          style={{
-                            color: i === milestones.length - 1 ? 'var(--dark)' : 'var(--muted)',
-                            fontWeight: i === milestones.length - 1 ? 600 : 400,
-                            lineHeight: '1.7',
-                          }}
-                        >
-                          {m.event}
-                        </p>
+                        <div className="pb-4">
+                          <p
+                            className="text-sm"
+                            style={{
+                              color: i === milestones.length - 1 ? 'var(--dark)' : 'var(--muted)',
+                              fontWeight: i === milestones.length - 1 ? 600 : 400,
+                              lineHeight: '1.7',
+                            }}
+                          >
+                            {m.event}
+                          </p>
+                          {m.eventTamil && (
+                            <p
+                              className="tamil-text text-sm mt-1"
+                              style={{ color: 'var(--muted)', lineHeight: '1.8' }}
+                            >
+                              {m.eventTamil}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </AnimateIn>
                   ))}

@@ -421,35 +421,46 @@ export default function SettingsPage() {
                 + Add Milestone
               </button>
             </div>
-            <div className="p-6 space-y-3">
+            <div className="p-6 space-y-4">
               {config.milestones.map((m) => (
-                <div key={m.id} className="flex items-start gap-3">
-                  <input
-                    type="text"
-                    value={m.year}
-                    onChange={(e) => updateMilestone(m.id, 'year', e.target.value)}
-                    placeholder="2026"
-                    className="w-24 flex-shrink-0 px-3 py-2.5 rounded-xl text-sm outline-none font-bold"
-                    style={{ border: '1px solid #e2e8f0', background: '#f8fafc', color: '#0f172a' }}
-                  />
-                  <input
-                    type="text"
+                <div key={m.id} className="rounded-xl p-4 space-y-2" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      value={m.year}
+                      onChange={(e) => updateMilestone(m.id, 'year', e.target.value)}
+                      placeholder="2026"
+                      className="w-28 flex-shrink-0 px-3 py-2 rounded-lg text-sm outline-none font-bold"
+                      style={{ border: '1px solid #e2e8f0', background: 'white', color: '#0f172a' }}
+                    />
+                    <div className="flex-1" />
+                    <button
+                      type="button"
+                      onClick={() => removeMilestone(m.id)}
+                      className="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                      style={{ background: '#fef2f2', color: '#dc2626' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.color = 'white' }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.color = '#dc2626' }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <textarea
+                    rows={2}
                     value={m.event}
                     onChange={(e) => updateMilestone(m.id, 'event', e.target.value)}
-                    placeholder="What happened this year..."
-                    className="flex-1 px-3 py-2.5 rounded-xl text-sm outline-none"
-                    style={{ border: '1px solid #e2e8f0', background: '#f8fafc', color: '#1e293b' }}
+                    placeholder="What happened this year (English)..."
+                    className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                    style={{ border: '1px solid #e2e8f0', background: 'white', color: '#1e293b', resize: 'vertical', lineHeight: '1.6' }}
                   />
-                  <button
-                    type="button"
-                    onClick={() => removeMilestone(m.id)}
-                    className="flex-shrink-0 px-3 py-2.5 rounded-xl text-xs font-bold transition-all"
-                    style={{ background: '#fef2f2', color: '#dc2626' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.color = 'white' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.color = '#dc2626' }}
-                  >
-                    Remove
-                  </button>
+                  <textarea
+                    rows={2}
+                    value={m.eventTamil ?? ''}
+                    onChange={(e) => updateMilestone(m.id, 'eventTamil', e.target.value)}
+                    placeholder="தமிழ் மொழிபெயர்ப்பு (Tamil translation)..."
+                    className="tamil-text w-full px-3 py-2 rounded-lg text-sm outline-none"
+                    style={{ border: '1px solid #e2e8f0', background: 'white', color: '#1e293b', resize: 'vertical', lineHeight: '1.8' }}
+                  />
                 </div>
               ))}
               {config.milestones.length === 0 && (
