@@ -1,6 +1,28 @@
 import type { Metadata } from 'next'
+import { unstable_cache } from 'next/cache'
 import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
+import { getArticles } from '@/lib/db/articles'
+import { getCategories } from '@/lib/db/categories'
+import { getAds } from '@/lib/db/ads'
 import ArticlesClient from './ArticlesClient'
+
+// unstable_cache (same pattern as BreakingTicker/AnnouncementBanner) lets
+// this page keep its static generation + 1-minute ISR revalidation
+// instead of becoming fully dynamic — Supabase's client forces
+// cache:'no-store' on every request, which would otherwise force this
+// route to server-render on every single visit.
+const getCachedArticlesPageData = unstable_cache(
+  async () => {
+    const [articles, categories, bannerAds] = await Promise.all([
+      getArticles(),
+      getCategories(),
+      getAds('banner'),
+    ])
+    return { articles, categories, bannerAds }
+  },
+  ['articles-page-data'],
+  { revalidate: 60 },
+)
 
 export const metadata: Metadata = {
   title: 'Articles',
@@ -24,6 +46,13 @@ export const metadata: Metadata = {
   },
 }
 
-export default function ArticlesPage() {
-  return <ArticlesClient />
+export default async function ArticlesPage() {
+  // Fetched server-side so the article list and banner ad are present in
+  // the initial HTML instead of the whole page starting empty and
+  // client-fetching everything after hydration — PageSpeed traced this
+  // page's poor LCP to the banner ad specifically being client-only and
+  // lazy-loaded despite sitting above the fold.
+  const { articles, categories, bannerAds } = await getCachedArticlesPageData()
+
+  return <ArticlesClient initialArticles={articles} initialCategories={categories} initialBannerAds={bannerAds} />
 }

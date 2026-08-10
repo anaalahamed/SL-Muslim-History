@@ -3,13 +3,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { getArticles } from '@/lib/db/articles'
-import { getCategories } from '@/lib/db/categories'
-import { Article, Category } from '@/lib/types'
+import { Article, Category, Advertisement } from '@/lib/types'
 import { formatViews, readingTime } from '@/lib/utils'
 import AnimateIn from '@/components/ui/AnimateIn'
 import PageHero from '@/components/ui/PageHero'
-import { ArticleListSkeleton } from '@/components/ui/Skeleton'
 import AdBanner from '@/components/ui/AdBanner'
 
 
@@ -36,22 +33,23 @@ const SORT_OPTIONS = [
 
 const PER_PAGE = 12
 
-export default function ArticlesClient() {
+interface Props {
+  initialArticles: Article[]
+  initialCategories: Category[]
+  initialBannerAds: Advertisement[]
+}
+
+export default function ArticlesClient({ initialArticles, initialCategories, initialBannerAds }: Props) {
   const [activeCategory, setActiveCategory] = useState('all')
   const [sortBy, setSortBy] = useState('newest')
   const [searchQuery, setSearchQuery] = useState('')
-  const [articles, setArticles] = useState<Article[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
   const [page, setPage] = useState(1)
-  const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    Promise.all([getArticles(), getCategories()]).then(([a, c]) => {
-      setArticles(a)
-      setCategories(c)
-      setLoading(false)
-    })
-  }, [])
+  // Server-fetched, present from the first paint — search/filter/sort/
+  // pagination below all operate on this in-memory list client-side, same
+  // as before, just without waiting on a client-side fetch to get it.
+  const articles = initialArticles
+  const categories = initialCategories
 
   // Reset to page 1 when filters change
   useEffect(() => { setPage(1) }, [activeCategory, sortBy, searchQuery])
@@ -82,7 +80,7 @@ export default function ArticlesClient() {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-2">
-        <AdBanner position="banner" />
+        <AdBanner position="banner" initialAds={initialBannerAds} />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
@@ -173,11 +171,7 @@ export default function ArticlesClient() {
         </AnimateIn>
 
         {/* Articles — editorial magazine style */}
-        {loading ? (
-          <div className="flex flex-col gap-4">
-            {Array.from({ length: PER_PAGE }).map((_, i) => <ArticleListSkeleton key={i} />)}
-          </div>
-        ) : filtered.length === 0 ? (
+        {filtered.length === 0 ? (
           <AnimateIn direction="up" className="text-center py-24">
             <div className="text-5xl mb-4">🔍</div>
             <p className="text-lg font-bold" style={{ color: 'var(--dark)' }}>No articles found</p>
