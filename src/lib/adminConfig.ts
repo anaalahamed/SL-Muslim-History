@@ -86,12 +86,11 @@ export const defaultConfig: AdminConfig = {
   mission: "Sri Lanka's Muslim community has a history stretching back over 1,400 years — predating the arrival of colonial powers and deeply intertwined with the island's culture, trade, and society. Yet much of this history remains undocumented or scattered across fragmented sources.\n\nOur mission is to change that. We bring together historians, researchers, and community contributors to create a comprehensive, accessible, and beautifully presented record of this heritage — in Tamil, for the community.",
   quote: 'History is the witness that testifies to the passing of time. It illuminates reality, vitalizes memory, and provides guidance in daily life.',
   quoteAuthor: 'Cicero',
-  teamMembers: [
-    { id: '1', name: 'டாக்டர் A. முஹம்மட்', role: 'Chief Editor & Historian',  bio: 'PhD in Islamic History from the University of Colombo. Over 20 years of research into Sri Lanka Muslim heritage.', initials: 'AM', color: '#1d4ed8' },
-    { id: '2', name: 'Z. அபூபக்கர்',          role: 'Senior Researcher',          bio: 'Specialist in mosque architecture and Islamic sacred sites across Sri Lanka. Author of 3 published books.',          initials: 'ZA', color: '#15803d' },
-    { id: '3', name: 'I. ஹமீட்',              role: 'Cultural Historian',          bio: 'Expert in Sufi traditions and Tamil-Muslim cultural heritage. Contributor to national heritage preservation programs.',  initials: 'IH', color: '#7c3aed' },
-    { id: '4', name: 'F. அமீனா',              role: 'Content Writer',              bio: 'Specialises in documenting Muslim food heritage, traditions, and community life in Sri Lanka.',                          initials: 'FA', color: '#c2410c' },
-  ],
+  // No made-up placeholder people here (this used to list fictional team
+  // members with fabricated credentials) — the real team is entered once
+  // via Settings and lives in Supabase from then on, which this default
+  // is only ever a fallback for on a brand-new install with nothing saved yet.
+  teamMembers: [],
   stats: [
     { id: '1', value: '175+',  label: 'Articles Published',    icon: '📝' },
     { id: '2', value: '50k+',  label: 'Monthly Readers',       icon: '👥' },
