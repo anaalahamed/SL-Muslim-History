@@ -1,6 +1,24 @@
 import type { Metadata } from 'next'
+import { unstable_cache } from 'next/cache'
 import { BASE_URL, SITE_NAME, SITE_KEYWORDS } from '@/lib/seo'
+import { getAllNewsByType } from '@/lib/db/news'
+import { getAds } from '@/lib/db/ads'
 import NewsTypeClient from '../NewsTypeClient'
+
+// unstable_cache keeps this route statically generated with 1-minute ISR
+// instead of becoming fully dynamic — see the same pattern's comment in
+// articles/page.tsx for why (Supabase's client forces cache:'no-store').
+const getCachedJanazaData = unstable_cache(
+  async () => {
+    const [news, bannerAds] = await Promise.all([
+      getAllNewsByType('janaza'),
+      getAds('banner'),
+    ])
+    return { news, bannerAds }
+  },
+  ['janaza-news-page-data'],
+  { revalidate: 60 },
+)
 
 export const metadata: Metadata = {
   title: 'Janaza News | ஜனாஸா செய்திகள்',
@@ -32,13 +50,16 @@ export const metadata: Metadata = {
   },
 }
 
-export default function JanazaNewsPage() {
+export default async function JanazaNewsPage() {
+  const { news, bannerAds } = await getCachedJanazaData()
   return (
     <NewsTypeClient
       newsType="janaza"
       badge="Janaza News"
       title="ஜனாஸா செய்திகள்"
       subtitle="Janaza notices and funeral announcements from Sri Lanka's Muslim community."
+      initialNews={news}
+      initialBannerAds={bannerAds}
     />
   )
 }

@@ -2,13 +2,11 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
-import { getAllNewsByType } from '@/lib/db/news'
-import { NewsPost } from '@/lib/types'
+import { useState } from 'react'
+import { NewsPost, Advertisement } from '@/lib/types'
 import { formatDate } from '@/lib/utils'
 import AnimateIn from '@/components/ui/AnimateIn'
 import PageHero from '@/components/ui/PageHero'
-import { NewsListSkeleton } from '@/components/ui/Skeleton'
 import AdBanner from '@/components/ui/AdBanner'
 
 const PER_PAGE = 12
@@ -18,16 +16,13 @@ interface Props {
   badge: string
   title: string
   subtitle: string
+  initialNews: NewsPost[]
+  initialBannerAds: Advertisement[]
 }
 
-export default function NewsTypeClient({ newsType, badge, title, subtitle }: Props) {
-  const [news, setNews]       = useState<NewsPost[]>([])
-  const [page, setPage]       = useState(1)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    getAllNewsByType(newsType).then((d) => { setNews(d); setLoading(false) })
-  }, [newsType])
+export default function NewsTypeClient({ newsType, badge, title, subtitle, initialNews, initialBannerAds }: Props) {
+  const [page, setPage] = useState(1)
+  const news = initialNews
 
   // Only show a featured story when the admin explicitly marks one (is_featured === true).
   // Strict === true guards against null/undefined returned by Supabase when the column is new.
@@ -49,13 +44,13 @@ export default function NewsTypeClient({ newsType, badge, title, subtitle }: Pro
       <PageHero badge={badge} title={title} subtitle={subtitle} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-2">
-        <AdBanner position="banner" />
+        <AdBanner position="banner" initialAds={initialBannerAds} />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
 
         {/* Top featured item */}
-        {!loading && featured && (
+        {featured && (
           <AnimateIn direction="up" className="mb-8">
             <Link
               href={`/news/${featured.slug}`}
@@ -131,7 +126,7 @@ export default function NewsTypeClient({ newsType, badge, title, subtitle }: Pro
         )}
 
         {/* Count bar */}
-        {!loading && (
+        {(
           <AnimateIn direction="up" className="mb-6">
             <div
               className="px-4 py-3 rounded-2xl flex items-center justify-between"
@@ -150,11 +145,7 @@ export default function NewsTypeClient({ newsType, badge, title, subtitle }: Pro
         )}
 
         {/* News feed */}
-        {loading ? (
-          <div className="flex flex-col gap-4">
-            {Array.from({ length: PER_PAGE }).map((_, i) => <NewsListSkeleton key={i} />)}
-          </div>
-        ) : news.length === 0 ? (
+        {news.length === 0 ? (
           <AnimateIn direction="up" className="text-center py-24">
             <div className="text-5xl mb-4">📭</div>
             <p className="text-lg font-bold" style={{ color: 'var(--dark)' }}>No stories found</p>

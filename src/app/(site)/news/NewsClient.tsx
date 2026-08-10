@@ -3,23 +3,23 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { getNews } from '@/lib/db/news'
-import { NewsPost } from '@/lib/types'
+import { NewsPost, Advertisement } from '@/lib/types'
 import { formatDate } from '@/lib/utils'
 import AnimateIn from '@/components/ui/AnimateIn'
 import PageHero from '@/components/ui/PageHero'
-import { NewsListSkeleton } from '@/components/ui/Skeleton'
 import AdBanner from '@/components/ui/AdBanner'
 
 const PER_PAGE = 12
 
-export default function NewsClient() {
-  const [filterType, setFilterType] = useState<'all' | 'special' | 'janaza'>('all')
-  const [allNews, setAllNews] = useState<NewsPost[]>([])
-  const [page, setPage] = useState(1)
-  const [loading, setLoading] = useState(true)
+interface Props {
+  initialNews: NewsPost[]
+  initialBannerAds: Advertisement[]
+}
 
-  useEffect(() => { getNews().then((d) => { setAllNews(d); setLoading(false) }) }, [])
+export default function NewsClient({ initialNews, initialBannerAds }: Props) {
+  const [filterType, setFilterType] = useState<'all' | 'special' | 'janaza'>('all')
+  const [page, setPage] = useState(1)
+  const allNews = initialNews
 
   useEffect(() => { setPage(1) }, [filterType])
 
@@ -44,7 +44,7 @@ export default function NewsClient() {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-2">
-        <AdBanner position="banner" />
+        <AdBanner position="banner" initialAds={initialBannerAds} />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
@@ -161,11 +161,7 @@ export default function NewsClient() {
         </AnimateIn>
 
         {/* News feed */}
-        {loading ? (
-          <div className="flex flex-col gap-4">
-            {Array.from({ length: PER_PAGE }).map((_, i) => <NewsListSkeleton key={i} />)}
-          </div>
-        ) : filtered.length === 0 ? (
+        {filtered.length === 0 ? (
           <AnimateIn direction="up" className="text-center py-24">
             <div className="text-5xl mb-4">📭</div>
             <p className="text-lg font-bold" style={{ color: 'var(--dark)' }}>No stories found</p>

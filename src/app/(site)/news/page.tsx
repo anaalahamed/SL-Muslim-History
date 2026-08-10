@@ -1,6 +1,24 @@
 import type { Metadata } from 'next'
+import { unstable_cache } from 'next/cache'
 import { BASE_URL, SITE_NAME, SITE_KEYWORDS } from '@/lib/seo'
+import { getNews } from '@/lib/db/news'
+import { getAds } from '@/lib/db/ads'
 import NewsClient from './NewsClient'
+
+// unstable_cache keeps this route statically generated with 1-minute ISR
+// instead of becoming fully dynamic — see the same pattern's comment in
+// articles/page.tsx for why (Supabase's client forces cache:'no-store').
+const getCachedNewsPageData = unstable_cache(
+  async () => {
+    const [news, bannerAds] = await Promise.all([
+      getNews(),
+      getAds('banner'),
+    ])
+    return { news, bannerAds }
+  },
+  ['news-page-data'],
+  { revalidate: 60 },
+)
 
 export const metadata: Metadata = {
   title: 'News & Updates',
@@ -24,6 +42,7 @@ export const metadata: Metadata = {
   },
 }
 
-export default function NewsPage() {
-  return <NewsClient />
+export default async function NewsPage() {
+  const { news, bannerAds } = await getCachedNewsPageData()
+  return <NewsClient initialNews={news} initialBannerAds={bannerAds} />
 }

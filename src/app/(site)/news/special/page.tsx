@@ -1,6 +1,24 @@
 import type { Metadata } from 'next'
+import { unstable_cache } from 'next/cache'
 import { BASE_URL, SITE_NAME, SITE_KEYWORDS } from '@/lib/seo'
+import { getAllNewsByType } from '@/lib/db/news'
+import { getAds } from '@/lib/db/ads'
 import NewsTypeClient from '../NewsTypeClient'
+
+// unstable_cache keeps this route statically generated with 1-minute ISR
+// instead of becoming fully dynamic — see the same pattern's comment in
+// articles/page.tsx for why (Supabase's client forces cache:'no-store').
+const getCachedSpecialData = unstable_cache(
+  async () => {
+    const [news, bannerAds] = await Promise.all([
+      getAllNewsByType('special'),
+      getAds('banner'),
+    ])
+    return { news, bannerAds }
+  },
+  ['special-news-page-data'],
+  { revalidate: 60 },
+)
 
 export const metadata: Metadata = {
   title: 'சிறப்புச் செய்திகள் | Special News',
@@ -31,13 +49,16 @@ export const metadata: Metadata = {
   },
 }
 
-export default function SpecialNewsPage() {
+export default async function SpecialNewsPage() {
+  const { news, bannerAds } = await getCachedSpecialData()
   return (
     <NewsTypeClient
       newsType="special"
       badge="Special News"
       title="சிறப்புச் செய்திகள்"
       subtitle="Special announcements, community updates, and notable news from Sri Lanka's Muslim community."
+      initialNews={news}
+      initialBannerAds={bannerAds}
     />
   )
 }
