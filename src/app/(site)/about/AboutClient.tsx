@@ -107,17 +107,18 @@ export default function AboutClient() {
             </div>
             <div className="max-w-3xl">
               <div className="relative">
-                <div className="absolute left-16 top-0 bottom-0 w-0.5" style={{ background: 'var(--border)' }} />
+                <div className="absolute left-24 top-0 bottom-0 w-0.5" style={{ background: 'var(--border)' }} />
                 <div className="space-y-6">
                   {milestones.map((m, i) => (
                     <AnimateIn key={m.id} direction="left" delay={i * 80}>
                       <div className="flex items-start gap-6">
-                        <div className="flex-shrink-0 w-16 text-right">
+                        <div className="flex-shrink-0 w-24 text-right">
                           <span
                             className="text-xs font-black px-2 py-1 rounded-lg"
                             style={{
                               background: i === milestones.length - 1 ? 'var(--green)' : 'var(--green-light)',
                               color: i === milestones.length - 1 ? 'white' : 'var(--green)',
+                              whiteSpace: 'nowrap',
                             }}
                           >
                             {m.year}
