@@ -1,13 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
-import { getCategories } from '@/lib/db/categories'
-import { getArticles } from '@/lib/db/articles'
 import { Category } from '@/lib/types'
+import { Stat } from '@/lib/adminConfig'
 import AnimateIn from '@/components/ui/AnimateIn'
 import PageHero from '@/components/ui/PageHero'
-import { getAdminConfig, mergeSharedConfigFromSupabase, defaultConfig } from '@/lib/adminConfig'
 
 const categoryDescriptions: Record<string, string> = {
   'early-history':       'Explore the origins of Islam in Sri Lanka, from the first Arab traders to the establishment of Muslim communities across the island.',
@@ -27,17 +24,13 @@ const categoryGradients: Record<string, string> = {
   'community-society':   'linear-gradient(135deg, #0369a1 0%, #075985 100%)',
 }
 
-export default function CategoryIndexClient() {
-  const [categories, setCategories] = useState<Category[]>([])
-  const [totalArticles, setTotalArticles] = useState(0)
-  const [stats, setStats] = useState(defaultConfig.stats)
+interface Props {
+  categories: Category[]
+  totalArticles: number
+  stats: Stat[]
+}
 
-  useEffect(() => {
-    getCategories().then(setCategories)
-    getArticles().then((a) => setTotalArticles(a.length))
-    const local = getAdminConfig()
-    mergeSharedConfigFromSupabase(local).then((cfg) => setStats(cfg.stats))
-  }, [])
+export default function CategoryIndexClient({ categories, totalArticles, stats }: Props) {
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>

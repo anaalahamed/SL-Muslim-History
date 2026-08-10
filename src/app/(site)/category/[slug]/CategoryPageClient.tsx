@@ -2,14 +2,9 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { notFound } from 'next/navigation'
-import { useState, useEffect, use } from 'react'
-import { getCategoryBySlug, getCategories } from '@/lib/db/categories'
-import { getArticles } from '@/lib/db/articles'
-import { Category, Article } from '@/lib/types'
+import { Category, Article, Advertisement } from '@/lib/types'
 import { formatDate, formatViews, getExcerpt } from '@/lib/utils'
 import AnimateIn from '@/components/ui/AnimateIn'
-import { CategoryPageSkeleton } from '@/components/ui/Skeleton'
 import AdBanner from '@/components/ui/AdBanner'
 
 const categoryColors: Record<string, string> = {
@@ -37,25 +32,15 @@ const categoryGradients: Record<string, string> = {
   'community-society':   'linear-gradient(135deg, #0369a1 0%, #075985 100%)',
 }
 
-export default function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params)
-  const [category, setCategory] = useState<Category | null | undefined>(undefined)
-  const [articles, setArticles] = useState<Article[]>([])
-  const [allCategories, setAllCategories] = useState<Category[]>([])
+interface Props {
+  category: Category
+  articles: Article[]
+  allCategories: Category[]
+  sidebarAds: Advertisement[]
+}
 
-  useEffect(() => {
-    getCategoryBySlug(slug).then((cat) => {
-      setCategory(cat ?? null)
-    })
-    getArticles().then((all) => {
-      setArticles(all.filter((a) => a.category_slug === slug))
-    })
-    getCategories().then(setAllCategories)
-  }, [slug])
-
-  if (category === undefined) return <CategoryPageSkeleton />
-  if (!category) notFound()
-
+export default function CategoryPage({ category, articles, allCategories, sidebarAds }: Props) {
+  const slug = category.slug
   const [featured, ...rest] = articles
 
   const otherCategories = allCategories.filter((c) => c.slug !== slug)
@@ -374,7 +359,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
                   </div>
                 </AnimateIn>
 
-                <AdBanner position="sidebar" />
+                <AdBanner position="sidebar" initialAds={sidebarAds} />
 
               </div>
             </div>

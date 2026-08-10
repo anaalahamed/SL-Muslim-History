@@ -1,6 +1,31 @@
 import type { Metadata } from 'next'
+import { unstable_cache } from 'next/cache'
 import { BASE_URL, SITE_NAME, SITE_KEYWORDS } from '@/lib/seo'
+import { getCategories } from '@/lib/db/categories'
+import { getArticles } from '@/lib/db/articles'
+import { getSiteSettings } from '@/lib/db/siteSettings'
+import { defaultConfig } from '@/lib/adminConfig'
 import CategoryIndexClient from './CategoryIndexClient'
+
+// unstable_cache keeps this route statically generated with 1-minute ISR
+// instead of becoming fully dynamic — see the same pattern's comment in
+// articles/page.tsx for why (Supabase's client forces cache:'no-store').
+const getCachedCategoryIndexData = unstable_cache(
+  async () => {
+    const [categories, articles, settings] = await Promise.all([
+      getCategories(),
+      getArticles(),
+      getSiteSettings(),
+    ])
+    return {
+      categories,
+      totalArticles: articles.length,
+      stats: settings?.stats && settings.stats.length > 0 ? settings.stats : defaultConfig.stats,
+    }
+  },
+  ['category-index-page-data'],
+  { revalidate: 60 },
+)
 
 export const metadata: Metadata = {
   title: 'Browse by Category',
@@ -24,6 +49,7 @@ export const metadata: Metadata = {
   },
 }
 
-export default function CategoryPage() {
-  return <CategoryIndexClient />
+export default async function CategoryPage() {
+  const { categories, totalArticles, stats } = await getCachedCategoryIndexData()
+  return <CategoryIndexClient categories={categories} totalArticles={totalArticles} stats={stats} />
 }
