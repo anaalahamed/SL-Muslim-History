@@ -405,6 +405,50 @@ export default function SettingsPage() {
             </div>
           </form>
 
+          {/* Mission Quote — the small box next to the mission text */}
+          <form onSubmit={handleSave}>
+            <div className="rounded-2xl overflow-hidden" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
+              <div className="px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
+                <h2 className="font-extrabold text-sm" style={{ color: '#0f172a' }}>Mission Quote</h2>
+                <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>Shown in the small box next to the mission text, below the logo.</p>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: '#334155' }}>Quote</label>
+                  <textarea
+                    rows={3}
+                    value={config.quote}
+                    onChange={(e) => setConfig({ ...config, quote: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all"
+                    style={{ border: '1px solid #e2e8f0', background: '#f8fafc', color: '#1e293b', resize: 'vertical', lineHeight: '1.8' }}
+                    onFocus={(e) => Object.assign(e.currentTarget.style, focusStyle)}
+                    onBlur={(e) => Object.assign(e.currentTarget.style, { border: '1px solid #e2e8f0', background: '#f8fafc', color: '#1e293b' })}
+                    placeholder="A short, inspiring quote about history..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: '#334155' }}>Attributed To</label>
+                  <input
+                    type="text"
+                    value={config.quoteAuthor}
+                    onChange={(e) => setConfig({ ...config, quoteAuthor: e.target.value })}
+                    className={inputClass}
+                    style={inputStyle}
+                    onFocus={(e) => Object.assign(e.currentTarget.style, focusStyle)}
+                    onBlur={(e) => Object.assign(e.currentTarget.style, inputStyle)}
+                    placeholder="e.g. Cicero"
+                  />
+                </div>
+              </div>
+              <div className="px-6 py-4 flex items-center gap-3" style={{ borderTop: '1px solid #f1f5f9' }}>
+                <button type="submit" className="px-6 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: '#4a9e1f' }}>
+                  Save Quote
+                </button>
+                {saved && <span className="text-sm font-semibold" style={{ color: '#4a9e1f' }}>✅ Saved successfully</span>}
+              </div>
+            </div>
+          </form>
+
           {/* Our Journey (timeline) */}
           <div className="rounded-2xl overflow-hidden" style={{ background: 'white', border: '1px solid #e2e8f0' }}>
             <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>

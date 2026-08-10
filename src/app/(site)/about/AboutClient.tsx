@@ -65,10 +65,11 @@ export default function AboutClient() {
                   className="tamil-text text-base italic"
                   style={{ color: 'var(--green-dark)', lineHeight: '1.9' }}
                 >
-                  &ldquo;History is the witness that testifies to the passing of time. It illuminates reality,
-                  vitalizes memory, and provides guidance in daily life.&rdquo;
+                  &ldquo;{config.quote}&rdquo;
                 </blockquote>
-                <p className="text-xs mt-3 font-semibold" style={{ color: 'var(--muted)' }}>— Cicero</p>
+                {config.quoteAuthor && (
+                  <p className="text-xs mt-3 font-semibold" style={{ color: 'var(--muted)' }}>— {config.quoteAuthor}</p>
+                )}
               </div>
             </div>
           </div>

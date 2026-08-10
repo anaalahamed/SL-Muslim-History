@@ -17,6 +17,8 @@ export interface SiteSettingsConfig {
   stats?:       Stat[]
   milestones?:  Milestone[]
   mission?:     string
+  quote?:       string
+  quoteAuthor?: string
   // SEO — falls back to the hardcoded defaults in lib/seo.ts when unset
   metaDescription?: string
   ogImage?:         string
