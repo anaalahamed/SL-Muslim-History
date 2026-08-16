@@ -10,19 +10,30 @@ interface Props {
   className?: string
   // Pass this when the parent already fetched it server-side. Omit it and
   // the component fetches it itself on mount, same as before — used by
-  // every other page that renders this client-side. Ignored entirely for
-  // position="homepage-bottom" (see below).
+  // every other page that renders this client-side. Only actually used for
+  // position="homepage-bottom" when the admin has switched that slot to
+  // "manual" (Settings → Ads → Homepage — Below Articles) — the default is
+  // the Google ad below.
   initialAds?: Advertisement[]
 }
 
 export default function AdBanner({ position, className = '', initialAds }: Props) {
   const [fetched, setFetched] = useState<Advertisement[]>([])
+  // Defaults to 'google' (matches what's live) until the admin's saved
+  // choice loads, so most visitors never see a flash of the wrong source.
+  // Irrelevant for "sidebar"/"banner", which always use the manual ads.
+  const [source, setSource] = useState<'google' | 'manual'>('google')
 
   useEffect(() => {
-    // "homepage-bottom" (ad position #6) always shows the Google ad unit
-    // now, so there's nothing to fetch for it — this only ever runs for
-    // "sidebar"/"banner", which stay on the site's own manual ad images.
-    if (position === 'homepage-bottom') return
+    if (position !== 'homepage-bottom') return
+    import('@/lib/db/siteSettings').then(({ getSiteSettings }) =>
+      getSiteSettings().then((s) => {
+        if (s?.adSlotSource?.homepageBottom === 'manual') setSource('manual')
+      })
+    )
+  }, [position])
+
+  useEffect(() => {
     if (initialAds !== undefined) return
     // Dynamically imported so the (client-only) fallback fetch path doesn't
     // pull the full @supabase/supabase-js SDK — auth module included — into
@@ -30,8 +41,8 @@ export default function AdBanner({ position, className = '', initialAds }: Props
     import('@/lib/db/ads').then(({ getAds }) => getAds(position).then(setFetched))
   }, [position, initialAds])
 
-  /* ── Homepage — Below Articles: Google ad unit ── */
-  if (position === 'homepage-bottom') {
+  /* ── Homepage — Below Articles: Google ad unit (default) ── */
+  if (position === 'homepage-bottom' && source === 'google') {
     return (
       <div className={`w-full ${className}`}>
         <div className="flex items-center justify-center gap-3 mb-2">
@@ -42,8 +53,8 @@ export default function AdBanner({ position, className = '', initialAds }: Props
           <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
         </div>
         <div
-          className="w-full overflow-hidden rounded-xl flex items-center justify-center"
-          style={{ border: '1px solid var(--border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', minHeight: '90px' }}
+          className="overflow-hidden rounded-xl flex items-center justify-center"
+          style={{ border: '1px solid var(--border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', minHeight: '90px', maxWidth: '728px', margin: '0 auto' }}
         >
           <GoogleAdUnit slot="4364322771" style={{ width: '100%', minHeight: '90px' }} />
         </div>
@@ -55,8 +66,9 @@ export default function AdBanner({ position, className = '', initialAds }: Props
 
   if (ads.length === 0) return null
 
-  /* ── Full-width leaderboard banner ── */
-  if (position === 'banner') {
+  /* ── Full-width leaderboard banner (also used for homepage-bottom when
+       switched to "manual") ── */
+  if (position === 'banner' || position === 'homepage-bottom') {
     return (
       <div className={`w-full ${className}`}>
         <div className="flex items-center justify-center gap-3 mb-2">

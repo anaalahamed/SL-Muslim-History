@@ -33,6 +33,14 @@ export interface SiteSettingsConfig {
   // on the browser that happened to view it.
   reactionsLastViewed?:  string
   newsletterLastViewed?: string
+  // Which source powers the two AdSense-capable slots. 'google' (the
+  // default, matches what's live) shows the Google ad unit; 'manual' shows
+  // this position's own uploaded ad image instead, same as every other
+  // position. Missing/undefined is treated as 'google'.
+  adSlotSource?: {
+    betweenNews?:     'google' | 'manual'
+    homepageBottom?:  'google' | 'manual'
+  }
 }
 
 /**

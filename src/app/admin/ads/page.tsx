@@ -4,16 +4,39 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { getAllAds, deleteAd, toggleAdActive } from '@/lib/db/ads'
+import { getSiteSettings, updateSiteSettings } from '@/lib/db/siteSettings'
 import { Advertisement } from '@/lib/types'
 import { formatDate } from '@/lib/utils'
 import { getAuthClient } from '@/lib/supabase-auth'
+
+type AdSource = 'google' | 'manual'
 
 export default function AdminAdsPage() {
   const [ads,        setAds]      = useState<Advertisement[]>([])
   const [deleteId,   setDeleteId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [betweenNewsSource,    setBetweenNewsSource]    = useState<AdSource>('google')
+  const [homepageBottomSource, setHomepageBottomSource] = useState<AdSource>('google')
+  const [sourceLoaded, setSourceLoaded] = useState(false)
 
   useEffect(() => { getAllAds(getAuthClient()).then(setAds) }, [])
+
+  useEffect(() => {
+    getSiteSettings().then((s) => {
+      setBetweenNewsSource(s?.adSlotSource?.betweenNews === 'manual' ? 'manual' : 'google')
+      setHomepageBottomSource(s?.adSlotSource?.homepageBottom === 'manual' ? 'manual' : 'google')
+      setSourceLoaded(true)
+    })
+  }, [])
+
+  async function handleSourceChange(slot: 'betweenNews' | 'homepageBottom', value: AdSource) {
+    if (slot === 'betweenNews') setBetweenNewsSource(value)
+    else setHomepageBottomSource(value)
+    const current = (await getSiteSettings()) ?? {}
+    await updateSiteSettings({
+      adSlotSource: { ...current.adSlotSource, [slot]: value },
+    }, getAuthClient())
+  }
 
   async function handleToggle(id: string, current: boolean) {
     await toggleAdActive(id, !current, getAuthClient())
@@ -106,6 +129,15 @@ export default function AdminAdsPage() {
         </div>
       </div>
 
+      {/* Between-news: Google AdSense vs your own picture */}
+      {sourceLoaded && (
+        <AdSourceCard
+          title="Between News (Ad #1)"
+          value={betweenNewsSource}
+          onChange={(v) => handleSourceChange('betweenNews', v)}
+        />
+      )}
+
       {/* Between-news ads */}
       <AdSection title="Between News Ads" ads={betweenNews} onToggle={handleToggle} onDelete={setDeleteId} />
 
@@ -120,6 +152,15 @@ export default function AdminAdsPage() {
 
       {/* Right panel ads */}
       <AdSection title="Right Side Panel Ads (160px wide · desktop only)" ads={rightPanel} onToggle={handleToggle} onDelete={setDeleteId} />
+
+      {/* Homepage-bottom: Google AdSense vs your own picture */}
+      {sourceLoaded && (
+        <AdSourceCard
+          title="Homepage — Below Articles (Ad #6)"
+          value={homepageBottomSource}
+          onChange={(v) => handleSourceChange('homepageBottom', v)}
+        />
+      )}
 
       {/* Homepage-bottom ads */}
       <AdSection title="Homepage — Below Articles Ads (728×90)" ads={homepageBottom} onToggle={handleToggle} onDelete={setDeleteId} />
@@ -153,6 +194,48 @@ export default function AdminAdsPage() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// Lets the admin pick, per slot, whether this position shows the Google
+// AdSense unit (the earning option) or falls back to this position's own
+// uploaded picture. The change applies immediately — no separate save step.
+function AdSourceCard({ title, value, onChange }: {
+  title: string
+  value: 'google' | 'manual'
+  onChange: (value: 'google' | 'manual') => void
+}) {
+  return (
+    <div className="rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
+      <div>
+        <p className="font-bold text-sm" style={{ color: '#1e3a8a' }}>{title}</p>
+        <p className="text-xs mt-0.5" style={{ color: '#3b82f6' }}>
+          Choose what shows in this spot right now.
+        </p>
+      </div>
+      <div className="flex rounded-xl overflow-hidden" style={{ border: '1px solid #93c5fd' }}>
+        <button
+          onClick={() => onChange('google')}
+          className="px-4 py-2 text-xs font-bold transition-all"
+          style={{
+            background: value === 'google' ? '#2563eb' : 'white',
+            color:      value === 'google' ? 'white' : '#2563eb',
+          }}
+        >
+          Google AdSense
+        </button>
+        <button
+          onClick={() => onChange('manual')}
+          className="px-4 py-2 text-xs font-bold transition-all"
+          style={{
+            background: value === 'manual' ? '#2563eb' : 'white',
+            color:      value === 'manual' ? 'white' : '#2563eb',
+          }}
+        >
+          Your uploaded picture
+        </button>
+      </div>
     </div>
   )
 }
