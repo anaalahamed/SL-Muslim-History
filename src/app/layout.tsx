@@ -86,6 +86,9 @@ export const metadata: Metadata = {
   },
   alternates: { canonical: BASE_URL },
   verification: { google: 'MAeIaxJFGMQyiWZsaSBa9wjuTm3VvLJCc_aY8o5a24c' },
+  // Proves site ownership to Google AdSense — separate from the Search
+  // Console verification tag above (different meta name, same idea).
+  other: { 'google-adsense-account': 'ca-pub-9374080740169651' },
 }
 
 // Critical inline CSS — visible immediately, before fonts download.
