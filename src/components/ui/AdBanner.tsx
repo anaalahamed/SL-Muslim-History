@@ -3,14 +3,15 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Advertisement } from '@/lib/types'
+import GoogleAdUnit from '@/components/ui/GoogleAdUnit'
 
 interface Props {
   position: 'sidebar' | 'banner' | 'homepage-bottom'
   className?: string
-  // Pass this when the parent already fetched it server-side (the homepage
-  // does, for position="homepage-bottom"). Omit it and the component
-  // fetches it itself on mount, same as before — used by every other page
-  // that renders this client-side.
+  // Pass this when the parent already fetched it server-side. Omit it and
+  // the component fetches it itself on mount, same as before — used by
+  // every other page that renders this client-side. Ignored entirely for
+  // position="homepage-bottom" (see below).
   initialAds?: Advertisement[]
 }
 
@@ -18,6 +19,10 @@ export default function AdBanner({ position, className = '', initialAds }: Props
   const [fetched, setFetched] = useState<Advertisement[]>([])
 
   useEffect(() => {
+    // "homepage-bottom" (ad position #6) always shows the Google ad unit
+    // now, so there's nothing to fetch for it — this only ever runs for
+    // "sidebar"/"banner", which stay on the site's own manual ad images.
+    if (position === 'homepage-bottom') return
     if (initialAds !== undefined) return
     // Dynamically imported so the (client-only) fallback fetch path doesn't
     // pull the full @supabase/supabase-js SDK — auth module included — into
@@ -25,12 +30,33 @@ export default function AdBanner({ position, className = '', initialAds }: Props
     import('@/lib/db/ads').then(({ getAds }) => getAds(position).then(setFetched))
   }, [position, initialAds])
 
+  /* ── Homepage — Below Articles: Google ad unit ── */
+  if (position === 'homepage-bottom') {
+    return (
+      <div className={`w-full ${className}`}>
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+          <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: '#b0b8c1', letterSpacing: '0.12em' }}>
+            Advertisement
+          </span>
+          <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+        </div>
+        <div
+          className="w-full overflow-hidden rounded-xl flex items-center justify-center"
+          style={{ border: '1px solid var(--border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', minHeight: '90px' }}
+        >
+          <GoogleAdUnit slot="4364322771" style={{ width: '100%', minHeight: '90px' }} />
+        </div>
+      </div>
+    )
+  }
+
   const ads = initialAds !== undefined ? initialAds : fetched
 
   if (ads.length === 0) return null
 
   /* ── Full-width leaderboard banner ── */
-  if (position === 'banner' || position === 'homepage-bottom') {
+  if (position === 'banner') {
     return (
       <div className={`w-full ${className}`}>
         <div className="flex items-center justify-center gap-3 mb-2">
