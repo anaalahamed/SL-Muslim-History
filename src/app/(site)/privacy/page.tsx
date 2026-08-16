@@ -35,7 +35,7 @@ const sections = [
   },
   {
     title: 'Cookies',
-    content: `SL Muslim History does not use tracking cookies or third-party analytics cookies. We may use essential session cookies required for the basic functioning of the website.`,
+    content: `SL Muslim History uses essential cookies required for the basic functioning of the website, along with third-party cookies from Google Analytics (to understand how visitors use our site) and Google AdSense (to display and measure advertisements). Google may use these cookies to serve ads based on your visits to this and other websites. You can learn more about how Google uses this data, and manage your ad personalization settings, at policies.google.com/technologies/ads and adssettings.google.com.`,
   },
   {
     title: 'Data Retention',
@@ -43,7 +43,7 @@ const sections = [
   },
   {
     title: 'Third-Party Services',
-    content: `Our website is hosted on Vercel. We use Supabase for data storage. Both services maintain their own privacy policies and security standards. We do not embed third-party advertising or tracking scripts.`,
+    content: `Our website is hosted on Vercel. We use Supabase for data storage, Google Analytics to understand site traffic, and Google AdSense to display advertisements — including from third-party ad networks that partner with Google. Each of these services processes data according to its own privacy policy, in addition to this one.`,
   },
   {
     title: 'Your Rights',
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-14">
         <AnimateIn direction="up">
           <p className="text-xs mb-10" style={{ color: 'var(--muted)' }}>
-            Last updated: March 2026
+            Last updated: August 2026
           </p>
 
           <div className="space-y-8">
