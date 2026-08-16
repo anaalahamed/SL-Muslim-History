@@ -135,6 +135,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
         />
+        {/* Google AdSense loader — required once per page for any ad unit
+            below to render. Only manual, admin-placed ad units are used on
+            this site (see GoogleAdUnit.tsx); Auto ads is not enabled. */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374080740169651"
+          crossOrigin="anonymous"
+        />
       </head>
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
         <AnalyticsPageView />
