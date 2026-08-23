@@ -79,7 +79,7 @@ export default function Header() {
 
       {/* ── Masthead ── */}
       <div
-        className="px-4 sm:px-6 py-2.5 sm:py-3.5"
+        className="px-4 sm:px-6 py-1.5 sm:py-2.5"
         style={{
           background: 'var(--white)',
           borderBottom: '1px solid var(--border)',
@@ -115,7 +115,7 @@ export default function Header() {
                   width happens to be free next to the header buttons. */}
               இலங்கை{' '}முஸ்லிம்களின் வரலாறு
             </h1>
-            <p style={{ fontSize: '10px', color: 'var(--gold)', letterSpacing: '0.16em', textTransform: 'uppercase', marginTop: '3px', fontWeight: 700 }}>
+            <p style={{ fontSize: '10px', color: 'var(--gold)', letterSpacing: 'normal', textTransform: 'uppercase', marginTop: '3px', fontWeight: 700 }}>
               Sri Lanka Muslim History
             </p>
           </div>
