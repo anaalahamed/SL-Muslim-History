@@ -8,10 +8,21 @@ export default function NewsletterBox() {
   const [email,   setEmail]   = useState('')
   const [status,  setStatus]  = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
+  // Honeypot: an extra field real visitors never see or fill (it's
+  // positioned off-screen), but simple sign-up bots that blindly fill every
+  // input on a page do. Any value here means it wasn't a person — pretend
+  // success without actually saving anything, so the bot doesn't retry.
+  const [website, setWebsite] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!email.trim()) return
+    if (website.trim()) {
+      setStatus('success')
+      setMessage('Thank you for subscribing!')
+      setEmail('')
+      return
+    }
     setStatus('loading')
 
     if (supabase) {
@@ -81,6 +92,18 @@ export default function NewsletterBox() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '0', maxWidth: '420px', margin: '0 auto' }}>
+              {/* Honeypot — invisible to real visitors, tabIndex/aria-hidden
+                  keep it out of keyboard tabbing and screen readers too */}
+              <input
+                type="text"
+                name="website"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+              />
               <input
                 type="email"
                 required
