@@ -7,7 +7,6 @@ import { getAuthors, saveAuthor } from '@/lib/db/authors'
 import { getArticles } from '@/lib/db/articles'
 import { Article, Category, Author, GalleryImage } from '@/lib/types'
 import ImageUpload from './ImageUpload'
-import { supabase } from '@/lib/supabase'
 import { getAuthClient } from '@/lib/supabase-auth'
 
 interface Props {
@@ -115,19 +114,18 @@ export default function ArticleForm({ initial = {}, onSave, saving }: Props) {
   async function uploadGalleryFiles(files: File[]) {
     setGalleryUploading(true)
     setGalleryError(null)
+    // Storage's RLS policy requires the logged-in admin's session (the
+    // plain anon client this used to use only ever does public reads —
+    // see lib/supabase.ts — so every gallery upload was rejected with
+    // "new row violates row-level security policy").
+    const client = getAuthClient()
     for (const file of files) {
       try {
-        let url: string
-        if (supabase) {
-          const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-          const path = `${Date.now()}-${safe}`
-          const { data, error } = await supabase.storage.from('media').upload(path, file, { upsert: false })
-          if (error) { setGalleryError(error.message); continue }
-          url = supabase.storage.from('media').getPublicUrl(data.path).data.publicUrl
-        } else {
-          url = URL.createObjectURL(file)
-          setGalleryError('Supabase not connected — gallery URLs are temporary.')
-        }
+        const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+        const path = `${Date.now()}-${safe}`
+        const { data, error } = await client.storage.from('media').upload(path, file, { upsert: false })
+        if (error) { setGalleryError(error.message); continue }
+        const url = client.storage.from('media').getPublicUrl(data.path).data.publicUrl
         addGalleryImage(url)
       } catch {
         setGalleryError('Failed to upload one or more images.')
