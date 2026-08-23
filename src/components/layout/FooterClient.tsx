@@ -41,6 +41,11 @@ export default function FooterClient({ stats, activeSocial }: Props) {
   const [year,      setYear]      = useState(new Date().getFullYear())
   const [email,     setEmail]     = useState('')
   const [subStatus, setSubStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
+  // Honeypot: an extra field real visitors never see or fill (it's
+  // positioned off-screen), but simple sign-up bots that blindly fill every
+  // input on a page do. Any value here means it wasn't a person — pretend
+  // success without actually saving anything, so the bot doesn't retry.
+  const [website,   setWebsite]   = useState('')
 
   useEffect(() => {
     setYear(new Date().getFullYear())
@@ -52,6 +57,11 @@ export default function FooterClient({ stats, activeSocial }: Props) {
   async function handleSubscribe(e: React.FormEvent) {
     e.preventDefault()
     if (!email.trim()) return
+    if (website.trim()) {
+      setSubStatus('done')
+      setEmail('')
+      return
+    }
     setSubStatus('loading')
     // Dynamically imported so the full @supabase/supabase-js SDK (it bundles
     // its whole auth module regardless of runtime config) isn't part of the
@@ -207,6 +217,19 @@ export default function FooterClient({ stats, activeSocial }: Props) {
                 </div>
               ) : (
                 <form onSubmit={handleSubscribe} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {/* Honeypot — invisible to real visitors, tabIndex/
+                      aria-hidden keep it out of keyboard tabbing and screen
+                      readers too */}
+                  <input
+                    type="text"
+                    name="website"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+                  />
                   <input
                     type="email"
                     required
