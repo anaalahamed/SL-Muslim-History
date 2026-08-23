@@ -106,7 +106,7 @@ export default function Header() {
           />
           <div style={{ minWidth: 0 }}>
             <h1
-              className="serif-heading text-[10px] sm:text-[15px] md:text-[19px] lg:text-[22px]"
+              className="serif-heading text-[12px] sm:text-[15px] md:text-[19px] lg:text-[22px]"
               style={{ fontWeight: 900, color: 'var(--green-dark)', lineHeight: 1.2, letterSpacing: '-0.3px' }}
             >
               {/* Non-breaking space keeps "இலங்கை முஸ்லிம்களின்" together on
