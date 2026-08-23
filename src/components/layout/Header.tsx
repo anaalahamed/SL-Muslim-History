@@ -84,7 +84,7 @@ export default function Header() {
           background: 'var(--white)',
           borderBottom: '1px solid var(--border)',
           display: 'flex',
-          alignItems: 'flex-start',
+          alignItems: 'center',
           justifyContent: 'space-between',
           gap: '10px',
         }}
@@ -105,7 +105,11 @@ export default function Header() {
               className="serif-heading"
               style={{ fontSize: 'clamp(13px, 3.8vw, 22px)', fontWeight: 900, color: 'var(--green-dark)', lineHeight: 1.2, letterSpacing: '-0.3px' }}
             >
-              இலங்கை முஸ்லிம்களின் வரலாறு
+              {/* Non-breaking space keeps "இலங்கை முஸ்லிம்களின்" together on
+                  one line on narrow screens, with "வரலாறு" wrapping to its
+                  own line below — not left to chance based on how much
+                  width happens to be free next to the header buttons. */}
+              இலங்கை{' '}முஸ்லிம்களின் வரலாறு
             </h1>
             <p style={{ fontSize: '10px', color: 'var(--gold)', letterSpacing: '0.16em', textTransform: 'uppercase', marginTop: '3px', fontWeight: 700 }}>
               Sri Lanka Muslim History
@@ -114,7 +118,7 @@ export default function Header() {
         </Link>
 
         {/* Right: language + search + donate + mobile toggle — never shrink below icon size */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, paddingTop: '2px' }}>
+        <div className="gap-1 sm:gap-1.5" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
           {/* Tamil / English toggle — always visible, both breakpoints */}
           <LanguageToggle />
 

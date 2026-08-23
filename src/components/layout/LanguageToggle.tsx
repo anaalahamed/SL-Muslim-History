@@ -46,7 +46,7 @@ export default function LanguageToggle() {
     >
       <button
         onClick={() => lang !== 'ta' && setLang('ta')}
-        className="font-bold px-2 py-2 md:px-3 md:py-2 text-xs transition-all"
+        className="font-bold px-1.5 py-1.5 md:px-3 md:py-2 text-[10px] md:text-xs transition-all"
         style={lang === 'ta' ? activeStyle : inactiveStyle}
         aria-pressed={lang === 'ta'}
       >
@@ -55,7 +55,7 @@ export default function LanguageToggle() {
       </button>
       <button
         onClick={() => lang !== 'en' && setLang('en')}
-        className="font-bold px-2 py-2 md:px-3 md:py-2 text-xs transition-all"
+        className="font-bold px-1.5 py-1.5 md:px-3 md:py-2 text-[10px] md:text-xs transition-all"
         style={lang === 'en' ? activeStyle : inactiveStyle}
         aria-pressed={lang === 'en'}
       >
