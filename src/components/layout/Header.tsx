@@ -94,13 +94,13 @@ export default function Header() {
           <Image
             src="/logo.png"
             alt="SL Muslim History"
-            width={76}
-            height={76}
+            width={82}
+            height={82}
             className="object-contain flex-shrink-0"
             // position:relative + left pulls it into the padding space on
             // the left without shifting anything else — everything else in
             // the row (the title, the buttons) stays exactly where it was.
-            style={{ height: '60px', width: 'auto', position: 'relative', left: '-10px' }}
+            style={{ height: '65px', width: 'auto', position: 'relative', left: '-10px' }}
             priority
           />
           <div style={{ minWidth: 0 }}>
