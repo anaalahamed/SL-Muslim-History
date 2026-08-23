@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import IslamicDate from '@/components/ui/IslamicDate'
+import LanguageToggle from '@/components/layout/LanguageToggle'
 
 const navLinks = [
   { label: 'Home',       href: '/' },
@@ -112,8 +113,11 @@ export default function Header() {
           </div>
         </Link>
 
-        {/* Right: search + donate + mobile toggle — never shrink below icon size */}
+        {/* Right: language + search + donate + mobile toggle — never shrink below icon size */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, paddingTop: '2px' }}>
+          {/* Tamil / English toggle — always visible, both breakpoints */}
+          <LanguageToggle />
+
           {/* Donate — desktop */}
           <Link
             href="/donate"
@@ -132,19 +136,18 @@ export default function Header() {
             ♥ Donate
           </Link>
 
-          {/* Search toggle */}
+          {/* Search toggle — slightly smaller on mobile so it, the language
+              toggle, and the hamburger all fit comfortably in one row */}
           <button
             onClick={() => setSearchOpen(!searchOpen)}
+            className="p-2 md:p-2.5 min-w-9 min-h-9 md:min-w-10 md:min-h-10"
             style={{
-              padding: '10px 12px',
               borderRadius: '3px',
               border: '1px solid var(--border)',
               background: searchOpen ? 'var(--green-light)' : 'transparent',
               color: searchOpen ? 'var(--green-dark)' : 'var(--dark)',
               cursor: 'pointer',
               transition: 'all 0.15s',
-              minWidth: '40px',
-              minHeight: '40px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -164,16 +167,13 @@ export default function Header() {
 
           {/* Mobile hamburger */}
           <button
-            className="md:hidden"
+            className="md:hidden p-2 min-w-9 min-h-9"
             style={{
-              padding: '10px 12px',
               borderRadius: '3px',
               border: '1px solid var(--border)',
               background: menuOpen ? 'var(--green-light)' : 'transparent',
               color: menuOpen ? 'var(--green-dark)' : 'var(--dark)',
               cursor: 'pointer',
-              minWidth: '40px',
-              minHeight: '40px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

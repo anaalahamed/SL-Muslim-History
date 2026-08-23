@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import AnalyticsPageView from '@/components/analytics/AnalyticsPageView'
+import GoogleTranslate from '@/components/layout/GoogleTranslate'
 import { BASE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS, websiteJsonLd, organizationJsonLd } from '@/lib/seo'
 
 // Server-rendered so the browser discovers and starts fetching this while
@@ -148,6 +149,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AnalyticsPageView />
         {children}
         <GoogleAnalytics />
+        <GoogleTranslate />
       </body>
     </html>
   )

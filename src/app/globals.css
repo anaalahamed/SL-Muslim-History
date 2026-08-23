@@ -552,6 +552,30 @@ img {
 }
 
 /* ════════════════════════════════
+   GOOGLE TRANSLATE (Tamil ↔ English toggle)
+   Hides Google's own banner/tooltip UI — the site's own LanguageToggle
+   button is the only translate control visitors see.
+════════════════════════════════ */
+.goog-te-banner-frame,
+.goog-te-gadget-icon,
+#goog-gt-tt,
+.goog-tooltip,
+.goog-te-balloon-frame {
+  display: none !important;
+}
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+}
+body {
+  top: 0 !important;
+}
+/* Prevent Google from mangling the toggle button's own Tamil/English labels */
+.notranslate {
+  translate: no !important;
+}
+
+/* ════════════════════════════════
    PRINT
 ════════════════════════════════ */
 @media print {
