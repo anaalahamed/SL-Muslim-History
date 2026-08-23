@@ -81,6 +81,11 @@ export default function ContactClient() {
   const [form,   setForm]   = useState({ name: '', email: '', reason: '', message: '' })
   const [status, setStatus] = useState<FormState>('idle')
   const [config, setConfig] = useState<AdminConfig>(defaultConfig)
+  // Honeypot: an extra field real visitors never see or fill (it's
+  // positioned off-screen), but simple spam bots that blindly fill every
+  // input on a page do. Any value here means it wasn't a person — pretend
+  // success without actually saving anything, so the bot doesn't retry.
+  const [website, setWebsite] = useState('')
 
   useEffect(() => {
     const local = getAdminConfig()
@@ -104,6 +109,7 @@ export default function ContactClient() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (website.trim()) { setStatus('sent'); return }
     setStatus('sending')
     const ok = await saveMessage({ name: form.name, email: form.email, reason: form.reason, message: form.message })
     setStatus(ok ? 'sent' : 'error')
@@ -138,6 +144,19 @@ export default function ContactClient() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="p-8 space-y-5">
+                    {/* Honeypot — invisible to real visitors, tabIndex/
+                        aria-hidden keep it out of keyboard tabbing and
+                        screen readers too */}
+                    <input
+                      type="text"
+                      name="website"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                      tabIndex={-1}
+                      autoComplete="off"
+                      aria-hidden="true"
+                      style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+                    />
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
                         <label className="block text-xs font-bold mb-1.5" style={{ color: 'var(--dark)' }}>Your Name <span style={{ color: '#dc2626' }}>*</span></label>

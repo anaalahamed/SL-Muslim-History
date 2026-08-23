@@ -47,8 +47,22 @@ export const SITE_KEYWORDS = [
 
 // ── Metadata generators ──────────────────────────────────────────────────────
 
+// `??` only falls through on null/undefined — the admin form saves excerpt
+// as '' (not null) when left blank, so `article.excerpt?.slice(...) ?? ...`
+// was locking in an empty description for every article without a
+// hand-typed excerpt (which is most of them) instead of ever reaching the
+// content fallback. That's why shared links showed no paragraph text at
+// all: this helper checks for an actual non-empty string at each step.
+function firstNonEmpty(...values: Array<string | undefined>): string {
+  for (const v of values) {
+    const trimmed = v?.trim()
+    if (trimmed) return trimmed
+  }
+  return ''
+}
+
 export function articleMetadata(article: Article): Metadata {
-  const description = article.excerpt?.slice(0, 160) ?? article.content?.slice(0, 160) ?? ''
+  const description = firstNonEmpty(article.excerpt, article.content).slice(0, 160)
   const url = `${BASE_URL}/articles/${article.slug}`
   const images = article.featured_image
     ? [{ url: article.featured_image, width: 1200, height: 630, alt: article.title }]
@@ -82,7 +96,7 @@ export function articleMetadata(article: Article): Metadata {
 }
 
 export function newsMetadata(post: NewsPost): Metadata {
-  const rawDesc = post.content?.split('\n\n')[0]?.slice(0, 160) ?? post.title
+  const rawDesc = firstNonEmpty(post.content?.split('\n\n')[0], post.title).slice(0, 160)
   const url = `${BASE_URL}/news/${post.slug}`
   const isJanaza = post.news_type === 'janaza'
   const typeLabel = isJanaza ? 'Janaza News' : 'Special News'
@@ -150,7 +164,7 @@ export function articleJsonLd(article: Article) {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: article.title,
-    description: article.excerpt ?? article.content?.slice(0, 200),
+    description: firstNonEmpty(article.excerpt, article.content).slice(0, 200),
     image: article.featured_image || `${BASE_URL}/og-image.jpg`,
     datePublished: article.published_at,
     dateModified: article.published_at,
@@ -174,7 +188,7 @@ export function newsJsonLd(post: NewsPost) {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
     headline: post.title,
-    description: post.content?.split('\n\n')[0]?.slice(0, 200) ?? post.title,
+    description: firstNonEmpty(post.content?.split('\n\n')[0], post.title).slice(0, 200),
     image: post.featured_image || `${BASE_URL}/og-image.jpg`,
     datePublished: post.published_at,
     dateModified: post.published_at,

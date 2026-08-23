@@ -69,7 +69,20 @@ export default function ArticleDetail({ article, related, categories }: Props) {
 
   function handleShare(platform: string) {
     if (platform === 'Facebook') {
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, '_blank', 'width=600,height=400')
+      // On phones with the Facebook app installed, the OS often intercepts
+      // this facebook.com link and just opens the app to its home feed
+      // instead of a share dialog for this article — the app has no route
+      // for sharer.php, so the specific link never gets attached to anything.
+      // The device's own share sheet (Web Share API, available on
+      // essentially all mobile browsers) hands the article off as an actual
+      // "shared item" instead of a page visit, so picking Facebook there
+      // does create a post with this article's link. Desktop browsers don't
+      // support this API, so they keep the popup composer as before.
+      if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+        navigator.share({ title: article.title, url: pageUrl }).catch(() => {})
+      } else {
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, '_blank', 'width=600,height=400')
+      }
     } else if (platform === 'WhatsApp') {
       window.open(`https://wa.me/?text=${encodedTitle}%20${encodedUrl}`, '_blank')
     } else if (platform === 'Twitter/X') {
