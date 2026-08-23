@@ -12,9 +12,15 @@ function getCurrentLang(): 'ta' | 'en' {
 function setLang(lang: 'ta' | 'en') {
   const host = window.location.hostname
   if (lang === 'en') {
-    document.cookie = 'googtrans=/ta/en;path=/'
-    document.cookie = `googtrans=/ta/en;path=/;domain=${host}`
+    // 1 year — once a visitor picks English, it should stay English on
+    // their next visit too, not just for this one browser session.
+    const oneYear = 'max-age=31536000'
+    document.cookie = `googtrans=/ta/en;path=/;${oneYear}`
+    document.cookie = `googtrans=/ta/en;path=/;domain=${host};${oneYear}`
   } else {
+    // Switching back to Tamil doesn't translate anything — it just clears
+    // this cookie so Google's script does nothing at all, and the page
+    // shows its real, original Tamil content straight away.
     document.cookie = 'googtrans=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT'
     document.cookie = `googtrans=;path=/;domain=${host};expires=Thu, 01 Jan 1970 00:00:00 GMT`
   }
