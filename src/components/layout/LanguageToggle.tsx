@@ -39,14 +39,14 @@ export default function LanguageToggle() {
 
   return (
     <div
-      className="notranslate flex-shrink-0 flex items-center min-h-9 md:min-h-10"
+      className="notranslate flex-shrink-0 flex items-center"
       style={{ border: '1px solid var(--border)', borderRadius: '3px', overflow: 'hidden' }}
       role="group"
       aria-label="Language"
     >
       <button
         onClick={() => lang !== 'ta' && setLang('ta')}
-        className="font-bold px-2 md:px-3 h-full text-xs transition-all"
+        className="font-bold px-2 py-2 md:px-3 md:py-2 text-[10px] md:text-xs transition-all"
         style={lang === 'ta' ? activeStyle : inactiveStyle}
         aria-pressed={lang === 'ta'}
       >
@@ -55,7 +55,7 @@ export default function LanguageToggle() {
       </button>
       <button
         onClick={() => lang !== 'en' && setLang('en')}
-        className="font-bold px-2 md:px-3 h-full text-xs transition-all"
+        className="font-bold px-2 py-2 md:px-3 md:py-2 text-[10px] md:text-xs transition-all"
         style={lang === 'en' ? activeStyle : inactiveStyle}
         aria-pressed={lang === 'en'}
       >
