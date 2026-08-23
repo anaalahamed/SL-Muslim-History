@@ -560,7 +560,11 @@ img {
 .goog-te-gadget-icon,
 #goog-gt-tt,
 .goog-tooltip,
-.goog-te-balloon-frame {
+.goog-te-balloon-frame,
+iframe.skiptranslate,
+/* Newer versions of the widget render its top banner as this div instead
+   of an iframe — class name is Google's own generated one, not ours. */
+.VIpgJd-ZVi9od-ORHb-OEVmcd {
   display: none !important;
 }
 .goog-text-highlight {

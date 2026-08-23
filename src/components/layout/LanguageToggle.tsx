@@ -34,7 +34,7 @@ export default function LanguageToggle() {
 
   useEffect(() => { setLangState(getCurrentLang()) }, [])
 
-  const activeStyle = { background: 'var(--gold)', color: 'white' }
+  const activeStyle = { background: 'var(--green)', color: 'white' }
   const inactiveStyle = { background: 'transparent', color: 'var(--dark)' }
 
   return (
