@@ -94,10 +94,10 @@ export default function Header() {
           <Image
             src="/logo.png"
             alt="SL Muslim History"
-            width={52}
-            height={52}
+            width={64}
+            height={64}
             className="object-contain flex-shrink-0"
-            style={{ height: '44px', width: 'auto' }}
+            style={{ height: '52px', width: 'auto' }}
             priority
           />
           <div style={{ minWidth: 0 }}>
