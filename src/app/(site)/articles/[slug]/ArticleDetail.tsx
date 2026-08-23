@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { incrementArticleViews } from '@/lib/db/articles'
-import { Article, Category } from '@/lib/types'
+import { Article, Category, GalleryImage } from '@/lib/types'
 import Image from 'next/image'
 import { formatDate, formatViews, readingTime } from '@/lib/utils'
 import AnimateIn from '@/components/ui/AnimateIn'
@@ -47,6 +47,21 @@ export default function ArticleDetail({ article, related, categories }: Props) {
   useEffect(() => {
     incrementArticleViews(article.id)
   }, [article.id])
+
+  // The admin form has two separate ways to add a photo: the "Gallery"
+  // uploader (populates article.gallery, shown below) or a plain
+  // "Featured Image" field used only when no gallery photos are added —
+  // that second path leaves gallery empty, so an article with a single
+  // photo added that way had no gallery section at all. Falling back to
+  // showing the featured image as a one-photo gallery here means the
+  // gallery section appears consistently either way, matching what
+  // articles with an actual gallery already looked like.
+  const galleryImages: GalleryImage[] =
+    article.gallery && article.gallery.length > 0
+      ? article.gallery
+      : article.featured_image
+        ? [{ id: 'featured', url: article.featured_image, caption: '', order: 0, is_featured: true }]
+        : []
 
   const pageUrl = typeof window !== 'undefined' ? window.location.href : `${BASE_URL}/articles/${article.slug}`
   const encodedUrl   = encodeURIComponent(pageUrl)
@@ -221,11 +236,11 @@ export default function ArticleDetail({ article, related, categories }: Props) {
                   )}
 
                   {/* Photo gallery */}
-                  {article.gallery && article.gallery.length > 0 && (
+                  {galleryImages.length > 0 && (
                     <div className="mt-8 pt-8" style={{ borderTop: '2px solid var(--green-light)' }}>
                       <h3 className="font-extrabold text-sm mb-1" style={{ color: 'var(--dark)' }}>📷 Photo Gallery</h3>
                       <p className="text-xs mb-3" style={{ color: 'var(--muted)' }}>Use arrows to browse · Click to view full size</p>
-                      <GalleryLightbox images={article.gallery} />
+                      <GalleryLightbox images={galleryImages} />
                     </div>
                   )}
 
