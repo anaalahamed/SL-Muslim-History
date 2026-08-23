@@ -90,17 +90,18 @@ export default function Header() {
         }}
       >
         {/* Logo + site name — shrinks on narrow screens */}
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flexShrink: 1 }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flexShrink: 1 }}>
           <Image
             src="/logo.png"
             alt="SL Muslim History"
             width={82}
             height={82}
             className="object-contain flex-shrink-0"
-            // position:relative + left pulls it into the padding space on
-            // the left without shifting anything else — everything else in
-            // the row (the title, the buttons) stays exactly where it was.
-            style={{ height: '65px', width: 'auto', position: 'relative', left: '-10px' }}
+            // Negative margin (not relative positioning) so the shift is a
+            // real part of the layout — the gap to the title on the right
+            // stays exactly the declared 6px instead of stacking on top of
+            // an extra offset, matching the 6px of space now on the left.
+            style={{ height: '65px', width: 'auto', marginLeft: '-10px' }}
             priority
           />
           <div style={{ minWidth: 0 }}>
